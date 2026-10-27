@@ -26,7 +26,7 @@ curl -s -X POST https://37laxodpza.execute-api.ap-south-1.amazonaws.com/ask \
 <details>
 <summary><b>🔍 Click to view sample JSON response with source citations & telemetry</b></summary>
 
-*(Sample response below captured in deterministic pipeline mock mode; live AWS production Lambda synthesizes generative answers via Amazon Bedrock Nova Micro).*
+*(Sample response below captured in deterministic local pipeline mock mode with pre-allocated contiguous matrix lookup; live AWS production Lambda synthesizes generative answers via Amazon Bedrock Nova Micro).*
 
 ```json
 {
@@ -44,9 +44,9 @@ curl -s -X POST https://37laxodpza.execute-api.ap-south-1.amazonaws.com/ask \
     }
   ],
   "metrics": {
-    "latency_ms": 103.6,
-    "retrieval_latency_ms": 103.3,
-    "generation_latency_ms": 0.1,
+    "latency_ms": 0.74,
+    "retrieval_latency_ms": 0.64,
+    "generation_latency_ms": 0.10,
     "input_tokens": 236,
     "output_tokens": 15,
     "estimated_cost_usd": 0.0
@@ -111,17 +111,17 @@ flowchart TD
 
 We evaluated InfraRAG across two independent datasets:
 1. **Primary Golden Benchmark** ([evaluation/golden_dataset.json](evaluation/golden_dataset.json)): 25 questions (20 in-domain incident troubleshooting + 5 out-of-domain negative queries).
-2. **Frozen Held-Out Validation** ([evaluation/held_out_dataset.json](evaluation/held_out_dataset.json)): 10 unseen operational queries (8 in-domain incidents + 2 out-of-domain negative queries) designed to test pipeline generalization without test-set leakage.
+2. **Frozen Held-Out Validation** ([evaluation/held_out_dataset.json](evaluation/held_out_dataset.json)): 25 unseen operational queries (20 in-domain incidents + 5 out-of-domain negative queries) covering Kubernetes, Istio, GitLab, Docker, and AWS NLB. Frozen via git tag `v1.0.0-eval-frozen` without test-set tuning or label tampering.
 
 All queries evaluate with parameters `top_k = 5` and `min_relevance_threshold = 0.25`.
 
 > [!NOTE]
 > **Evaluation Mode Transparency & Metric Definitions**:
 > - **Zero-Cost Local Execution**: Benchmarks run deterministically offline (`USE_MOCK_BEDROCK=true`) in GitHub Actions CI with **$0.00 cloud spend**.
-> - **Top-1 vs. Top-5 vs. MRR**: We report **Top-1 Hit Rate**, **Top-5 Hit Rate**, and **Mean Reciprocal Rank (MRR = 1/rank)** to rigorously measure ranking precision, not just top-5 presence.
-> - **In-Domain Extractive Groundedness**: Computed strictly with the in-domain count as denominator (excluding refusals). Tests whether extracted sentences contain verifiable diagnostic keywords with valid chunk citations.
+> - **Top-1 vs. Top-5 vs. MRR**: We report **Top-1 Hit Rate**, **Top-5 Hit Rate**, and **Mean Reciprocal Rank (MRR = 1/rank)** to rigorously measure ranking density, not just top-5 presence.
+> - **In-Domain Keyword Recall (Extractive Mock Baseline)**: Computed strictly with the in-domain count as denominator (excluding refusals). Tests whether extracted sentences contain verifiable diagnostic keywords with valid chunk citations.
 > - **Out-of-Domain Refusal**: Evaluates strict fallback to *"I don't know based on the provided runbooks."* when queries fall outside the runbook corpus.
-> - **Sub-Millisecond In-RAM Retrieval**: With pre-allocated contiguous float matrices, vector search over 7,207 chunks completes in **~0.7ms**, well within sub-5ms SLA.
+> - **Sub-Millisecond In-RAM Retrieval**: With pre-allocated contiguous float matrices, vector search over 7,207 chunks completes in **~0.64ms**, well within sub-5ms SLA.
 
 ### 1. Primary Golden Benchmark (25 Incident Queries)
 
@@ -130,22 +130,56 @@ All queries evaluate with parameters `top_k = 5` and `min_relevance_threshold = 
 | **Retrieval Top-1 Hit-Rate** | **80.0% (16/20)** | >= 80.0% | **PASS** | Top retrieved chunk contains exact ground truth runbook |
 | **Retrieval Top-5 Hit-Rate** | **100.0% (20/20)** | >= 90.0% | **PASS** | 100% recall of relevant runbooks within top 5 candidates |
 | **Mean Reciprocal Rank (MRR)** | **0.883** | >= 0.850 | **PASS** | High ranking density near rank 1 |
-| **In-Domain Extractive Groundedness** | **50.0% (10/20)** | >= 50.0% | **PASS** | Honest non-tautological mock baseline (in-domain denominator) |
-| **Out-of-Domain Refusal Accuracy** | **100.0% (5/5)** | 100.0% | **PASS** | Strict refusal on non-SRE topics (cake, FIFA, tennis) |
-| **Average Total Query Latency** | **0.85 ms** | < 2500 ms | **PASS** | In-RAM vector search (0.73ms) + sentence overlap ranking (0.12ms) |
+| **In-Domain Keyword Recall** | **50.0% (10/20)** | >= 50.0% | **PASS** | Honest non-tautological mock baseline (in-domain denominator) |
+| **Out-of-Domain Refusal Accuracy** | **100.0% (5/5)** | 100.0% | **PASS** | Strict refusal on non-SRE topics (cake, FIFA, tennis, stocks) |
+| **Average Total Query Latency** | **0.73 ms** | < 2500 ms | **PASS** | In-RAM vector search (0.64ms) + sentence overlap ranking (0.09ms) |
 
-### 2. Frozen Held-Out Validation (10 Unseen Incident Scenarios)
+### 2. Frozen Held-Out Validation (25 Unseen Incident Scenarios)
 
 | Metric Dimension | Score / Count | Industry Target | Status | Operational Notes |
 | :--- | :---: | :---: | :---: | :--- |
-| **Retrieval Top-1 Hit-Rate** | **100.0% (8/8)** | >= 80.0% | **PASS** | Perfect rank 1 retrieval across all unseen in-domain queries |
-| **Retrieval Top-5 Hit-Rate** | **100.0% (8/8)** | >= 90.0% | **PASS** | Zero misses across Kubernetes, Istio, GitLab, Docker, and NLB |
-| **Mean Reciprocal Rank (MRR)** | **1.000** | >= 0.850 | **PASS** | Perfect MRR (1.000) on held-out dataset |
-| **In-Domain Extractive Groundedness** | **62.5% (5/8)** | >= 50.0% | **PASS** | Multi-sentence extraction with verified citations |
-| **Out-of-Domain Refusal Accuracy** | **100.0% (2/2)** | 100.0% | **PASS** | 100% refusal preserved on unseen negative queries |
-| **Average Total Query Latency** | **0.75 ms** | < 2500 ms | **PASS** | In-RAM retrieval: 0.66ms |
+| **Retrieval Top-1 Hit-Rate** | **65.0% (13/20)** | >= 80.0% | **REVIEW** | Realistic zero-shot generalization across 7,207 unseen chunks |
+| **Retrieval Top-5 Hit-Rate** | **75.0% (15/20)** | >= 90.0% | **BASELINE** | 75% recall of relevant runbooks within top 5 candidates |
+| **Mean Reciprocal Rank (MRR)** | **0.683** | >= 0.850 | **BASELINE** | Authentic MRR without test-set prompt engineering |
+| **In-Domain Keyword Recall** | **50.0% (10/20)** | >= 50.0% | **PASS** | Multi-sentence extraction with verified citations |
+| **Out-of-Domain Refusal Accuracy** | **100.0% (5/5)** | 100.0% | **PASS** | 100% refusal preserved on unseen negative queries |
+| **Average Total Query Latency** | **0.71 ms** | < 2500 ms | **PASS** | In-RAM retrieval: 0.62ms |
 
 *(Full benchmark report generated automatically by [evaluation/evaluate.py](evaluation/evaluate.py) to [evaluation/eval_report.json](evaluation/eval_report.json)).*
+
+---
+
+### 🛡️ Production Safety Guard: Index Model & Dimension Verification
+
+To prevent silent index corruption when switching between local mock embeddings and live AWS Bedrock Titan Embeddings (both 1,024-dimensional), `FAISSVectorStore` serializes an `index_metadata.json` contract alongside the vector binaries:
+
+```json
+{
+  "embedding_model_id": "amazon.titan-embed-text-v2:0",
+  "dimension": 1024,
+  "total_chunks": 7207,
+  "timestamp": "2026-10-27T11:08:52Z"
+}
+```
+
+When loading the index in Lambda (`load_local` or `load_from_s3`), InfraRAG verifies that `stored_model == expected_model_id` and `stored_dimension == expected_dimension`. If an index created with mock embeddings is loaded under live Bedrock mode, the loader immediately raises a descriptive `ValueError` and fails closed, completely preventing degraded, nonsensical vector search.
+
+---
+
+### 🚀 Offline Live Indexing & Threshold Calibration
+
+1. **Concurrent Titan Index Builder** ([scripts/build_live_index.py](scripts/build_live_index.py)):
+   Because Lambda has a 60s execution limit, embedding 7,207 chunks must run offline. This tool leverages `ThreadPoolExecutor` (6-8 workers) with adaptive retries to build the complete index and push directly to `s3://<bucket>/faiss_index/`.
+   ```bash
+   # Build index locally using live Amazon Bedrock Titan v2 and upload to S3:
+   python scripts/build_live_index.py --upload-s3 --bucket infrarag-storage-XXXXXX --region ap-south-1
+   ```
+
+2. **Relevance Threshold Calibration** ([scripts/calibrate_threshold.py](scripts/calibrate_threshold.py)):
+   Empirically calibrates `MIN_RELEVANCE_THRESHOLD` by analyzing top-1 cosine similarity distributions across in-domain technical questions versus out-of-domain negative queries.
+   ```bash
+   python scripts/calibrate_threshold.py
+   ```
 
 
 
@@ -278,11 +312,12 @@ terraform apply
 > **Answer:** We use Lambda container execution environment reuse. Global variables defined outside the Lambda handler persist across warm invocations. On cold start, the vector index is fetched from S3 and cached in `/tmp`. On warm invocations, the handler immediately accesses the in-memory index, reducing cold-start download overhead and performing in-RAM vector search in ~1ms (NumPy) to ~160ms (pure Python fallback).
 
 ### 8. What metrics do you track to evaluate RAG system quality?
-> **Answer:** We track two primary quality metrics across our 25-question evaluation suite:
-> 1. **Retrieval Hit-Rate**: Percentage of times the top-k retrieved chunks contain the ground-truth document. Our benchmark achieves **100.0% (20/20)** on in-domain questions (`top_k = 5`).
-> 2. **Extractive Mock Groundedness**: An honest, non-tautological baseline of **64.0% (16/25)** where candidate sentences extracted from retrieved chunks must contain verified diagnostic keywords and valid chunk citations without generative hallucination.
-> 3. **Refusal Accuracy**: Ensuring queries outside the runbook domain (e.g. baking recipes, sports trivia) trigger strict "I don't know" refusals (**100% (5/5)**).
-> Operationally, we also track p50/p95 latency, token counts, and cost per query in CloudWatch structured JSON logs.
+> **Answer:** We evaluate quality across both our 25-question Golden Benchmark and a frozen 25-question Held-Out Validation suite:
+> 1. **Retrieval Top-1 & Top-5 Hit-Rate**: Percentage of times the top retrieved chunks contain the ground-truth runbook (Golden: **80.0% Top-1, 100.0% Top-5**; Held-Out: **65.0% Top-1, 75.0% Top-5**).
+> 2. **Mean Reciprocal Rank (MRR)**: Measures ranking density where rank 1 gets 1.0 and rank 5 gets 0.2 (Golden: **0.883**, Held-Out: **0.683**).
+> 3. **In-Domain Keyword Recall (Extractive Mock Baseline)**: Measures whether extracted sentences contain required diagnostic terms with valid chunk citations, calculated strictly over in-domain queries (**50.0%**).
+> 4. **Out-of-Domain Refusal Accuracy**: Ensures queries outside the DevOps runbook corpus (baking, trivia, stocks) trigger strict "I don't know" refusals (**100.0% (5/5)**).
+> 5. **Sub-Millisecond In-RAM Latency**: Query vector search against 7,207 chunks completes in **0.64ms** via pre-allocated contiguous matrices.
 
 ### 9. How does Terraform enforce security in this deployment?
 > **Answer:** Our Terraform code enforces:

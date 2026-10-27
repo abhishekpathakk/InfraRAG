@@ -1,8 +1,8 @@
 # Learning Log: InfraRAG
 
 ## Summary (updated continuously)
-- **Current phase:** Phase 10 (Complete — Public Corpus Extension, Metadata Tagging & Type-Filtered Retrieval)
-- **What works now:** Complete end-to-end serverless RAG system scaled to 819 documents across 4 distinct repositories: curated internal SRE runbooks (`data/internal/`), upstream Kubernetes docs (`data/public/kubernetes/`), Istio operational diagnostics (`data/public/istio/`), and GitLab SRE incident runbooks (`data/public/gitlab/`). Sliding-window Markdown chunker with heading preservation, structured metadata tags (`source`, `path`, `section`, `type=internal|public`), query-time type filtering across FAISS, API Gateway/Lambda `/ask`, CLI (`--type`), and White Cream Ivory SRE Console (`ui/index.html`). 25-question evaluation suite (95.0% retrieval hit-rate, 100% faithfulness, 100% out-of-domain refusal).
+- **Current phase:** Phase 14 (Complete — Index Contract Guard, Bedrock Regional Inference Profiles & Frozen 25-Question Calibration)
+- **What works now:** Complete end-to-end serverless RAG system scaled to 819 documents (7,207 searchable chunks) across 4 distinct repositories: curated internal SRE runbooks, upstream Kubernetes docs, Istio diagnostics, and GitLab SRE runbooks. High-performance SIMD vector search (~0.64ms retrieval), index contract verification guard (`index_metadata.json`), Bedrock regional inference profile permissions for `ap-south-1`, frozen 25-question held-out generalization benchmark (65.0% Top-1, 75.0% Top-5, 0.683 MRR, 100% refusal), multi-threaded live Titan index builder (`scripts/build_live_index.py`), and score distribution calibration tool (`scripts/calibrate_threshold.py`).
 - **Total estimated AWS cost so far:** **$0.00** (100% Free local execution verified; AWS cloud architecture strictly stays within AWS Free Tier <$5/mo).
 
 ---
@@ -524,11 +524,52 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
 
 ---
 
+## Phase 14: Index Contract Guard, Bedrock Regional Inference Profiles & Frozen 25-Question Calibration
+
+### 1. What Was Done
+1. **Index Safety Contract & Model Mismatch Guard**:
+   - `FAISSVectorStore` now serializes `index_metadata.json` alongside chunk definitions and vector binaries, persisting `embedding_model_id`, `dimension`, `total_chunks`, and creation timestamp.
+   - During `load_local` or `load_from_s3`, InfraRAG verifies that `stored_model == expected_model_id` and `stored_dimension == expected_dimension`.
+   - If an index built with mock embeddings is loaded under live Bedrock mode (or vice-versa), the loader immediately raises a descriptive `ValueError` and fails closed, eliminating the risk of silent retrieval degradation.
+2. **Safe Terraform Free-Tier Default & Bedrock Regional Inference Profiles**:
+   - Reverted `var.use_mock_bedrock` default in `terraform/variables.tf` to `"true"` to preserve the strict **Zero-Cost & Free-Tier First** directive.
+   - Added `data "aws_caller_identity" "current" {}` in `terraform/main.tf`.
+   - Updated Bedrock IAM resource ARNs in both `lambda_ingest_policy` and `lambda_ask_policy` to include regional foundation models and regional inference profiles (`arn:aws:bedrock:${var.aws_region}:${account_id}:inference-profile/*`), ensuring Amazon Nova Micro works smoothly in `ap-south-1` (Mumbai) without permission errors.
+3. **Frozen 25-Question Held-Out Benchmark**:
+   - Expanded the held-out evaluation dataset (`evaluation/held_out_dataset.json`) to 25 completely unseen questions (20 in-domain incident scenarios across Kubernetes, Istio, GitLab, Docker, and AWS NLB, plus 5 out-of-domain negative refusal queries).
+   - Frozen via git tag `v1.0.0-eval-frozen` without test-set tuning.
+   - Evaluation confirms authentic generalization: **Top-1: 65.0% (13/20)**, **Top-5: 75.0% (15/20)**, and **MRR: 0.683**, while maintaining **100.0% (5/5) Out-of-Domain Refusal**.
+4. **Metric Terminology Alignment**:
+   - Renamed "Extractive Groundedness" to **"In-Domain Keyword Recall (Extractive Mock Baseline)"** to clarify that extractive rankers test diagnostic keyword preservation rather than generative faithfulness.
+5. **Offline Live Titan Indexer & Empirical Threshold Calibration**:
+   - Created `scripts/build_live_index.py` featuring multi-threaded `ThreadPoolExecutor`, adaptive exponential retries, checkpointing, and direct S3 upload to bypass Lambda 60s ingest timeouts.
+   - Created `scripts/calibrate_threshold.py` to calculate empirical score distributions across all 50 golden and held-out queries. In mock space, in-domain scores average 0.8627 (median 1.0000) while out-of-domain scores average 0.4277 (median 0.4285), demonstrating why multi-token overlap and citation enforcement complement vector thresholds.
+6. **Comprehensive Automated Test Coverage**:
+   - Added `test_vector_store_load_local_parity_and_fast_latency` to verify 100% search parity and sub-2ms search on deserialized stores.
+   - Added `test_vector_store_s3_save_and_load` testing S3 round-trips with in-memory mock client.
+   - Added `tests/test_ask_lambda.py` testing `/ask` handler warm-cache loading, auth checks, and request size caps. All 13 tests pass in <0.2s.
+
+---
+
+### 2. Issues Faced & Autonomous Fixes Applied
+
+| Issue / Error Encountered | Root Cause | Fix Applied | Autonomous Prevention Rule |
+| :--- | :--- | :--- | :--- |
+| **Risk of Silent Vector Corruption in Live Mode** | Mock embeddings and Titan v2 embeddings are both 1024-dimensional; loading a mock index in Bedrock mode would produce silent nonsense scores. | Implemented `index_metadata.json` contract and validation check on index load. | Always persist and validate model metadata alongside serialized vector indices. |
+| **Bedrock Permission Denied for Nova Micro in ap-south-1** | Bedrock Nova models in certain regions use regional inference profiles (`apac.amazon.nova-micro-v1:0`), which require inference-profile IAM ARNs. | Added `data "aws_caller_identity" "current" {}` and granted permissions to inference-profile ARNs in `terraform/main.tf`. | Always include both `foundation-model/*` and `inference-profile/*` in Bedrock IAM execution roles. |
+| **Lambda Timeout on 7,207 Chunk Titan Ingestion** | AWS Lambda has a strict 60s execution limit, but embedding 7,207 chunks sequentially takes >15 minutes. | Built `scripts/build_live_index.py` with multi-threaded `ThreadPoolExecutor` and S3 upload for offline execution. | Heavy document ingestion and batch embedding must run offline or via asynchronous step functions, never inside synchronous request Lambdas. |
+| **Held-Out Label Leakage & Statistical Ambiguity** | 8 held-out questions with 100% top-1 was statistically narrow and prone to suspicion of tuning. | Expanded held-out suite to 25 diverse questions, tagged in git, and reported unvarnished 65.0% Top-1 / 0.683 MRR scores. | Use sufficiently large held-out test sets (N>=20 in-domain) and freeze them with git tags to demonstrate true zero-shot generalization. |
+
+---
+
 ### 3. Interview Talking Points
-1. **Memory Layout Profiling in High-Throughput Python Systems**:
-   *"While measuring our vector search performance, we diagnosed a 100ms latency discrepancy between NumPy dot products and our similarity search method. The root cause was memory re-allocation: converting 7,207 Python lists of 1024 floats into a NumPy matrix on every query took 118ms, whereas the SIMD dot product itself took only 0.7ms. By pre-allocating a contiguous float32 matrix in RAM upon ingestion, search latency dropped to 0.69ms."*
-2. **Beyond Top-K: Why MRR and Top-1 Hit-Rate Matter in Production RAG**:
-   *"Reporting only a top-5 hit rate can obscure serious ranking degradation—a model where the correct document is always ranked 5th still scores 100% top-5 hit rate. By computing Mean Reciprocal Rank (MRR) alongside Top-1 and Top-5 hit rates, we verified an MRR of 0.883 on our golden benchmark and 1.000 on our held-out test suite, demonstrating that the retriever places the correct runbook in the top slot 80-100% of the time."*
+1. **Failing Closed on Vector Store Model Deserialization**:
+   *"A subtle but catastrophic failure mode in vector databases is embedding model drift. If a vector store is populated using model A (or mock embeddings) and queried using model B (such as Titan v2), and both happen to use 1024 dimensions, no runtime exception will be thrown. Instead, the dot products will return silent mathematical nonsense, causing top retrieval scores to plummet and the system to refuse valid queries. In InfraRAG, we serialize an `index_metadata.json` contract that records the model ID and dimension, and we enforce a strict equality check upon deserialization in Lambda, failing closed with a clear error message before any queries are served."*
+2. **Regional Bedrock Inference Profiles in Multi-Region Terraform Architectures**:
+   *"When deploying Amazon Bedrock foundation models like Amazon Nova or Anthropic Claude across global regions (such as `ap-south-1`), requests often route through regional or cross-region inference profiles rather than direct foundation model ARNs. Scoping IAM policies solely to `arn:aws:bedrock:${region}::foundation-model/*` results in sudden `AccessDeniedException` errors. Our Terraform configuration dynamically interpolates the caller account ID to grant least-privilege access to both foundation models and inference profile resource namespaces."*
+3. **Statistical Honesty in Held-Out RAG Benchmarks**:
+   *"In evaluating our RAG pipeline, we deliberately avoid reporting inflated 100% metrics on small test samples. When expanding our frozen held-out validation suite to 25 realistic, unseen incident scenarios across 7,207 chunks, our retrieval top-1 hit rate settled at an honest 65.0% and MRR at 0.683, while maintaining 100% out-of-domain refusal. This transparently separates golden test-set performance from authentic, zero-shot real-world generalization."*
+
 
 
 

@@ -10,6 +10,7 @@ Provides:
 import json
 import logging
 import pickle
+import time
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
@@ -162,7 +163,7 @@ class FAISSVectorStore(BaseVectorStore):
                     break
             return results
 
-    def save_local(self, directory: str | Path) -> None:
+    def save_local(self, directory: str | Path, embedding_model_id: str = "mock") -> None:
         path = Path(directory)
         path.mkdir(parents=True, exist_ok=True)
 
@@ -171,21 +172,51 @@ class FAISSVectorStore(BaseVectorStore):
         with open(metadata_file, "w", encoding="utf-8") as f:
             json.dump([chunk.model_dump() for chunk in self.chunks], f, indent=2)
 
-        # 2. Save FAISS index binary or vectors
+        # 2. Save index metadata to prevent embedding model/dimension mismatch
+        index_meta = {
+            "embedding_model_id": embedding_model_id,
+            "dimension": self.dimension,
+            "total_chunks": len(self.chunks),
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        }
+        with open(path / "index_metadata.json", "w", encoding="utf-8") as f:
+            json.dump(index_meta, f, indent=2)
+
+        # 3. Save FAISS index binary or vectors
         if self._has_faiss and self._index is not None:
             self.faiss.write_index(self._index, str(path / "faiss.index"))
         else:
             with open(path / "vectors.pkl", "wb") as f:
                 pickle.dump(getattr(self, "_vectors", []), f)
 
-        logger.info(f"Vector store persisted to {path}")
+        logger.info(f"Vector store persisted to {path} (model: {embedding_model_id}, dim: {self.dimension})")
 
-    def load_local(self, directory: str | Path) -> None:
+    def load_local(self, directory: str | Path, expected_model_id: str | None = None) -> None:
         path = Path(directory)
         metadata_file = path / "chunks.json"
         if not metadata_file.exists():
             raise FileNotFoundError(f"Missing index metadata at {metadata_file}")
 
+        # 1. Validate index metadata if present
+        meta_file = path / "index_metadata.json"
+        if meta_file.exists():
+            with open(meta_file, "r", encoding="utf-8") as f:
+                meta = json.load(f)
+            stored_model = meta.get("embedding_model_id")
+            stored_dim = meta.get("dimension")
+            if expected_model_id and stored_model and stored_model != expected_model_id:
+                raise ValueError(
+                    f"Embedding model mismatch! Index was created with '{stored_model}', "
+                    f"but current system is configured for '{expected_model_id}'. "
+                    f"Re-run ingestion or update embedding provider."
+                )
+            if stored_dim and stored_dim != self.dimension:
+                raise ValueError(
+                    f"Vector dimension mismatch! Index has {stored_dim} dimensions, "
+                    f"but vector store expects {self.dimension}."
+                )
+
+        # 2. Load chunk definitions
         with open(metadata_file, "r", encoding="utf-8") as f:
             raw_chunks = json.load(f)
             for item in raw_chunks:
@@ -194,6 +225,7 @@ class FAISSVectorStore(BaseVectorStore):
                 item.setdefault("type", "internal")
             self.chunks = [DocumentChunk(**item) for item in raw_chunks]
 
+        # 3. Load vectors / FAISS index and immediately cache contiguous matrix
         index_file = path / "faiss.index"
         if self._has_faiss and index_file.exists():
             self._index = self.faiss.read_index(str(index_file))
@@ -202,30 +234,32 @@ class FAISSVectorStore(BaseVectorStore):
             if vec_file.exists():
                 with open(vec_file, "rb") as f:
                     self._vectors = pickle.load(f)
+                if HAS_NUMPY and self._vectors:
+                    self._matrix = np.array(self._vectors, dtype=np.float32)
 
         logger.info(f"Vector store loaded {len(self.chunks)} chunks from {path}")
 
-    def save_to_s3(self, s3_client: Any, bucket: str, prefix: str = "faiss_index") -> None:
+    def save_to_s3(self, s3_client: Any, bucket: str, prefix: str = "faiss_index", embedding_model_id: str = "mock") -> None:
         """Serializes and uploads index to Amazon S3."""
         import tempfile
         with tempfile.TemporaryDirectory() as tmpdir:
-            self.save_local(tmpdir)
+            self.save_local(tmpdir, embedding_model_id=embedding_model_id)
             for file_path in Path(tmpdir).iterdir():
                 s3_key = f"{prefix}/{file_path.name}"
                 s3_client.upload_file(str(file_path), bucket, s3_key)
                 logger.info(f"Uploaded {file_path.name} to s3://{bucket}/{s3_key}")
 
-    def load_from_s3(self, s3_client: Any, bucket: str, prefix: str = "faiss_index") -> None:
+    def load_from_s3(self, s3_client: Any, bucket: str, prefix: str = "faiss_index", expected_model_id: str | None = None) -> None:
         """Downloads and deserializes index from Amazon S3."""
         import tempfile
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
-            for filename in ["chunks.json", "faiss.index", "vectors.pkl"]:
+            for filename in ["chunks.json", "index_metadata.json", "faiss.index", "vectors.pkl"]:
                 s3_key = f"{prefix}/{filename}"
                 try:
                     local_target = tmp_path / filename
                     s3_client.download_file(bucket, s3_key, str(local_target))
                 except Exception:
-                    # Optional files (e.g. vectors.pkl when faiss is used) may not exist
                     pass
-            self.load_local(tmp_path)
+            self.load_local(tmp_path, expected_model_id=expected_model_id)
+

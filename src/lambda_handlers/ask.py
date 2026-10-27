@@ -34,18 +34,25 @@ def get_cached_chain() -> RAGChain:
     tmp_path = Path("/tmp/faiss_index")
     bucket_name = os.environ.get("S3_BUCKET_NAME", settings.S3_BUCKET_NAME)
 
+    expected_model = settings.BEDROCK_EMBEDDING_MODEL_ID if not settings.USE_MOCK_BEDROCK else "mock"
+
     # If warm cache in /tmp exists, load it
     if (tmp_path / "chunks.json").exists():
-        chain.vector_store.load_local(tmp_path)
+        chain.vector_store.load_local(tmp_path, expected_model_id=expected_model)
     elif not settings.USE_MOCK_BEDROCK and bucket_name:
         # Download from S3 into /tmp
         import boto3
         s3 = boto3.client("s3", region_name=settings.AWS_REGION)
-        chain.vector_store.load_from_s3(s3_client=s3, bucket=bucket_name, prefix="faiss_index")
+        chain.vector_store.load_from_s3(
+            s3_client=s3,
+            bucket=bucket_name,
+            prefix="faiss_index",
+            expected_model_id=expected_model,
+        )
     else:
         # Ingest local runbooks on cold start
         chain.ingest_directory(settings.DATA_DIR)
-        chain.vector_store.save_local(tmp_path)
+        chain.vector_store.save_local(tmp_path, embedding_model_id=expected_model)
 
     _CACHED_CHAIN = chain
     return _CACHED_CHAIN

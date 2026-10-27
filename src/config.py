@@ -57,7 +57,7 @@ except ImportError:
             self.BEDROCK_EMBEDDING_MODEL_ID = os.getenv("BEDROCK_EMBEDDING_MODEL_ID", "amazon.titan-embed-text-v2:0")
             self.EMBEDDING_DIMENSION = 1024
             self.BEDROCK_LLM_MODEL_ID = os.getenv("BEDROCK_LLM_MODEL_ID", "amazon.nova-micro-v1:0")
-            self.USE_MOCK_BEDROCK = os.getenv("USE_MOCK_BEDROCK", "false").lower() in ("true", "1", "yes")
+            self.USE_MOCK_BEDROCK = os.getenv("USE_MOCK_BEDROCK", "true").lower() in ("true", "1", "yes")
             self.CHUNK_SIZE = 500
             self.CHUNK_OVERLAP = 100
             self.TOP_K = 3

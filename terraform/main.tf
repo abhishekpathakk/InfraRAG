@@ -1,3 +1,6 @@
+# Retrieve AWS Caller Identity for account ID interpolation
+data "aws_caller_identity" "current" {}
+
 # Generate random suffix for unique S3 bucket name
 resource "random_string" "suffix" {
   length  = 6
@@ -98,7 +101,9 @@ resource "aws_iam_policy" "lambda_ingest_policy" {
         Effect = "Allow"
         Action = ["bedrock:InvokeModel"]
         Resource = [
-          "arn:aws:bedrock:${var.aws_region}::foundation-model/${var.embedding_model_id}"
+          "arn:aws:bedrock:${var.aws_region}::foundation-model/${var.embedding_model_id}",
+          "arn:aws:bedrock:${var.aws_region}:${data.aws_caller_identity.current.account_id}:inference-profile/*",
+          "arn:aws:bedrock:*:*:inference-profile/*"
         ]
       },
       {
@@ -167,7 +172,9 @@ resource "aws_iam_policy" "lambda_ask_policy" {
         Action = ["bedrock:InvokeModel"]
         Resource = [
           "arn:aws:bedrock:${var.aws_region}::foundation-model/${var.embedding_model_id}",
-          "arn:aws:bedrock:${var.aws_region}::foundation-model/${var.llm_model_id}"
+          "arn:aws:bedrock:${var.aws_region}::foundation-model/${var.llm_model_id}",
+          "arn:aws:bedrock:${var.aws_region}:${data.aws_caller_identity.current.account_id}:inference-profile/*",
+          "arn:aws:bedrock:*:*:inference-profile/*"
         ]
       },
       {

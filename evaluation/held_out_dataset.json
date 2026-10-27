@@ -1,70 +1,175 @@
 [
   {
     "id": "heldout-01",
-    "query": "How does PodDisruptionBudget prevent voluntary disruptions during node drain?",
+    "query": "How does PodDisruptionBudget protect high availability workloads during voluntary node drains?",
     "target_source_file": "kubernetes",
-    "expected_answer_keywords": ["disruption", "budget", "drain", "eviction"],
+    "expected_answer_keywords": ["pdb", "disruption", "budget", "eviction", "drain"],
     "is_in_domain": true
   },
   {
     "id": "heldout-02",
-    "query": "What are the default hard eviction thresholds for Node DiskPressure in kubelet?",
-    "target_source_file": "kubernetes_node_disk_pressure.md",
-    "expected_answer_keywords": ["eviction", "diskpressure", "kubelet", "threshold"],
+    "query": "What causes MountVolume.SetUp failed for PersistentVolumeClaim in Kubernetes pods?",
+    "target_source_file": "kubernetes",
+    "expected_answer_keywords": ["volume", "mount", "pvc", "persistentvolume", "failed"],
     "is_in_domain": true
   },
   {
     "id": "heldout-03",
-    "query": "How do you verify mutual TLS certificate expiration between Istio sidecars?",
-    "target_source_file": "istio_mtls_strict_failures.md",
-    "expected_answer_keywords": ["istioctl", "proxy-status", "mtls", "certificate"],
+    "query": "How do you diagnose CoreDNS query timeout and SERVFAIL responses in a Kubernetes cluster?",
+    "target_source_file": "kubernetes",
+    "expected_answer_keywords": ["coredns", "dns", "resolv", "servfail", "cluster"],
     "is_in_domain": true
   },
   {
     "id": "heldout-04",
-    "query": "What causes upstream cluster 504 gateway timeout in Istio virtual service?",
-    "target_source_file": "kubernetes_ingress_504_gateway_timeout.md",
-    "expected_answer_keywords": ["timeout", "virtualservice", "504", "upstream"],
+    "query": "What kubelet settings govern hard disk eviction when node storage exceeds thresholds?",
+    "target_source_file": "kubernetes_node_disk_pressure.md",
+    "expected_answer_keywords": ["eviction", "evictionhard", "nodefs", "imagefs", "diskpressure"],
     "is_in_domain": true
   },
   {
     "id": "heldout-05",
-    "query": "What remediation actions should be taken for Patroni PostgreSQL replication lag in GitLab?",
-    "target_source_file": "gitlab",
-    "expected_answer_keywords": ["patroni", "lag", "replication", "cluster"],
+    "query": "Why does a HorizontalPodAutoscaler fail to scale when custom metric metrics-server is unavailable?",
+    "target_source_file": "kubernetes",
+    "expected_answer_keywords": ["hpa", "autoscaler", "metrics", "target", "scaling"],
     "is_in_domain": true
   },
   {
     "id": "heldout-06",
-    "query": "How do you mitigate Sidekiq high queue latency alerts in GitLab production?",
-    "target_source_file": "gitlab",
-    "expected_answer_keywords": ["sidekiq", "queue", "latency", "workers"],
+    "query": "What causes Envoy proxy to return 503 NR (No Route) in Istio service mesh?",
+    "target_source_file": "istio",
+    "expected_answer_keywords": ["503", "nr", "no route", "envoy", "virtualservice"],
     "is_in_domain": true
   },
   {
     "id": "heldout-07",
-    "query": "How do you free docker overlay2 storage when disk reaches 100% full?",
-    "target_source_file": "docker_daemon_out_of_space.md",
-    "expected_answer_keywords": ["docker", "system", "prune", "overlay2"],
+    "query": "How do you resolve upstream connection termination 503 UC errors between Istio proxies?",
+    "target_source_file": "istio_503_service_unavailable.md",
+    "expected_answer_keywords": ["503", "uc", "upstream", "connection", "envoy"],
     "is_in_domain": true
   },
   {
     "id": "heldout-08",
-    "query": "Why are AWS Network Load Balancer target group health checks failing across zones?",
-    "target_source_file": "aws_network_load_balancer_unhealthy_hosts.md",
-    "expected_answer_keywords": ["nlb", "health", "target", "cross-zone"],
+    "query": "How do you configure PeerAuthentication to enforce STRICT mutual TLS across all mesh workloads?",
+    "target_source_file": "istio_mtls_strict_failures.md",
+    "expected_answer_keywords": ["peerauthentication", "strict", "mtls", "tls"],
     "is_in_domain": true
   },
   {
     "id": "heldout-09",
-    "query": "What is the traditional recipe for a molten chocolate lava cake?",
+    "query": "How do you verify proxy synchronization status using istioctl proxy-status command?",
+    "target_source_file": "istio",
+    "expected_answer_keywords": ["istioctl", "proxy-status", "sync", "cds", "eds"],
+    "is_in_domain": true
+  },
+  {
+    "id": "heldout-10",
+    "query": "What parameters in Istio DestinationRule configure outlier detection for circuit breaking?",
+    "target_source_file": "istio",
+    "expected_answer_keywords": ["destinationrule", "outlierdetection", "circuit", "breaker", "consecutive5xx"],
+    "is_in_domain": true
+  },
+  {
+    "id": "heldout-11",
+    "query": "What steps must an on-call SRE follow when Patroni PostgreSQL cluster initiates automatic failover?",
+    "target_source_file": "gitlab",
+    "expected_answer_keywords": ["patroni", "failover", "postgresql", "cluster", "leader"],
+    "is_in_domain": true
+  },
+  {
+    "id": "heldout-12",
+    "query": "How do you triage high queue execution latency for Sidekiq background jobs in GitLab production?",
+    "target_source_file": "gitlab",
+    "expected_answer_keywords": ["sidekiq", "queue", "latency", "workers", "jobs"],
+    "is_in_domain": true
+  },
+  {
+    "id": "heldout-13",
+    "query": "What actions should be taken when Redis memory usage reaches maxmemory-policy eviction limits?",
+    "target_source_file": "gitlab",
+    "expected_answer_keywords": ["redis", "memory", "maxmemory", "eviction", "saturation"],
+    "is_in_domain": true
+  },
+  {
+    "id": "heldout-14",
+    "query": "How do you troubleshoot Gitaly cgroup cpu throttle and thread contention alerts in GitLab?",
+    "target_source_file": "gitlab",
+    "expected_answer_keywords": ["gitaly", "cgroup", "throttle", "cpu", "concurrency"],
+    "is_in_domain": true
+  },
+  {
+    "id": "heldout-15",
+    "query": "What remediation steps apply when Alertmanager fails to dispatch PagerDuty incident notifications?",
+    "target_source_file": "gitlab",
+    "expected_answer_keywords": ["alertmanager", "pagerduty", "notification", "dispatch", "alerts"],
+    "is_in_domain": true
+  },
+  {
+    "id": "heldout-16",
+    "query": "What triggers container Exit Code 137 in Kubernetes and how does memory limit configuration mitigate it?",
+    "target_source_file": "kubernetes_oom_killed.md",
+    "expected_answer_keywords": ["oomkilled", "exit code 137", "memory", "limits", "cgroup"],
+    "is_in_domain": true
+  },
+  {
+    "id": "heldout-17",
+    "query": "What diagnostic command displays previous container logs when a pod crashes in CrashLoopBackOff?",
+    "target_source_file": "kubernetes_crashloopbackoff.md",
+    "expected_answer_keywords": ["kubectl", "logs", "--previous", "crashloopbackoff", "terminated"],
+    "is_in_domain": true
+  },
+  {
+    "id": "heldout-18",
+    "query": "How do you increase proxy-read-timeout in ingress-nginx to resolve 504 Gateway Timeout errors?",
+    "target_source_file": "kubernetes_ingress_504_gateway_timeout.md",
+    "expected_answer_keywords": ["504", "gateway timeout", "proxy-read-timeout", "ingress", "timeout"],
+    "is_in_domain": true
+  },
+  {
+    "id": "heldout-19",
+    "query": "What docker command prunes unused build cache, stopped containers, and dangling layers to recover disk?",
+    "target_source_file": "docker_daemon_out_of_space.md",
+    "expected_answer_keywords": ["docker", "system", "prune", "overlay2", "disk"],
+    "is_in_domain": true
+  },
+  {
+    "id": "heldout-20",
+    "query": "Why do AWS Network Load Balancer target groups mark backend EC2 instances as unhealthy?",
+    "target_source_file": "aws_network_load_balancer_unhealthy_hosts.md",
+    "expected_answer_keywords": ["nlb", "health check", "target group", "unhealthy", "security group"],
+    "is_in_domain": true
+  },
+  {
+    "id": "heldout-21",
+    "query": "How do you bake a triple chocolate fudge brownie cake with vanilla frosting?",
     "target_source_file": null,
     "expected_answer_keywords": ["don't know", "provided runbooks"],
     "is_in_domain": false
   },
   {
-    "id": "heldout-10",
-    "query": "Who scored the winning goal in the 2022 FIFA World Cup final in Qatar?",
+    "id": "heldout-22",
+    "query": "What was the final match score in the 2022 FIFA World Cup final in Qatar?",
+    "target_source_file": null,
+    "expected_answer_keywords": ["don't know", "provided runbooks"],
+    "is_in_domain": false
+  },
+  {
+    "id": "heldout-23",
+    "query": "What is the current stock market ticker and market capitalization of Apple Inc?",
+    "target_source_file": null,
+    "expected_answer_keywords": ["don't know", "provided runbooks"],
+    "is_in_domain": false
+  },
+  {
+    "id": "heldout-24",
+    "query": "What are the tiebreaker and deuce rules in a professional tennis tournament match?",
+    "target_source_file": null,
+    "expected_answer_keywords": ["don't know", "provided runbooks"],
+    "is_in_domain": false
+  },
+  {
+    "id": "heldout-25",
+    "query": "What is the capital city and official currency of Australia?",
     "target_source_file": null,
     "expected_answer_keywords": ["don't know", "provided runbooks"],
     "is_in_domain": false
