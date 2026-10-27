@@ -65,7 +65,7 @@ A common question is: *"If AWS Bedrock is our target LLM provider, why aren't we
    - [.gitignore](.gitignore) (ignoring `.env`, FAISS indices, virtual environments, terraform cache)
    - [requirements.txt](requirements.txt) & [requirements-dev.txt](requirements-dev.txt) (pinned for Python 3.12: `boto3`, `faiss-cpu`, `numpy`, `pydantic`, `pytest`, `ruff`)
    - [src/config.py](src/config.py) with `USE_MOCK_BEDROCK=True` toggle to ensure 100% free local development.
-   - Initial [learn.md](learn.md) to record all technical learnings, trade-offs, and interview notes.
+   - Initial [learn.md](learn.md) to record all technical learnings, trade-offs, and architectural review notes.
 5. Implemented the **Autonomous Loop Engineer**:
    - [AGENTS.md](AGENTS.md): Project agent directive enforcing zero-cost guardrails, automated test loops, and continuous logging.
    - [scripts/loop_engineer.py](scripts/loop_engineer.py): Automated CLI loop runner for self-checks, cost verification, and automated testing.
@@ -98,7 +98,7 @@ A common question is: *"If AWS Bedrock is our target LLM provider, why aren't we
 - Designed a 100% free local development flow and a zero-idle-cost AWS architecture (<$5/month, $0 idle).
 - Created the autonomous loop engineer runner ([scripts/loop_engineer.py](scripts/loop_engineer.py)) and GitHub Actions CI.
 
-### Interview talking points
+### Architectural Decisions & Engineering Rationale
 - *"As a DevOps engineer, cost and operational simplicity are primary constraints. Instead of paying $70-$150/month for an always-on vector database like OpenSearch Serverless or Pinecone, I engineered InfraRAG using FAISS serialized to S3 and served via AWS Lambda. For an internal DevOps runbook library (<50,000 chunks), this yields sub-second retrieval at essentially $0 idle cost."*
 - *"We chose Bedrock Titan Text Embeddings v2 with 1024 dimensions over v1 because v2 supports normalized embeddings (allowing fast inner-product cosine similarity) and significantly better semantic recall on technical DevOps jargon."*
 - *"I built an autonomous loop engineer agent into the repository to enforce linting, unit testing, and retrieval evaluation on every change, ensuring zero regressions without manual toil."*
@@ -233,7 +233,7 @@ A common question is: *"If AWS Bedrock is our target LLM provider, why aren't we
 
 ---
 
-## Phase 8: Polish & Final Interview Summary (2026-10-27)
+## Phase 8: Polish & Production Architecture Summary (2026-10-27)
 
 ### Final System Metrics
 - **Idle Monthly AWS Cost:** **$0.00**
@@ -271,7 +271,7 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
   - *Analogy:* Calling `filebase64sha256()` on a file that doesn't exist yet is like asking a chef to weigh a cake before they've even baked the ingredients.
   - *DevOps Lesson:* Static analysis and validation in CI should never depend on generated build artifacts unless the pipeline explicitly stages them first.
 
-### 3. Interview Talking Points
+### 3. Architectural Deep-Dive & Technical Rationale
 1. **Handling Ephemeral Build Artifacts in Terraform IaC**:
    *"In serverless CI pipelines, Lambda deployment packages are typically git-ignored to prevent bloating repo history. If Terraform's `source_code_hash` uses `filebase64sha256()`, `terraform validate` will crash on clean checkouts. We solved this by using a `fileexists()` ternary guard in Terraform and staging a pre-validation zip build step in GitHub Actions."*
 ---
@@ -297,7 +297,7 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
   - *Analogy:* Moving from 4 to 8 runbooks is like expanding an on-call engineer's quick-reference field manual from a 4-page cheat sheet to an indexed, 8-chapter incident playbook where every paragraph has an instant index tab.
   - *DevOps Lesson:* More runbooks increase domain coverage, but without sliding-window overlap and metadata preservation, multi-page runbooks risk chunk truncation.
 
-### 3. Interview Talking Points
+### 3. Architectural Deep-Dive & Technical Rationale
 1. **Multi-Domain SRE Knowledge Ingestion**:
    *"We scaled InfraRAG across Kubernetes node-level failures, Ingress timeouts, service mesh mTLS misconfigurations, and AWS Load Balancer health check failures. By unit-normalizing 1024-dimensional embeddings into FAISS IndexFlatIP, query latency remains sub-5ms across 76 chunks with 100% citation grounding."*
 
@@ -485,7 +485,7 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
 
 ---
 
-### 3. Interview Talking Points
+### 3. Architectural Deep-Dive & Technical Rationale
 1. **Constant-Time Secret Verification in Serverless Endpoints**:
    *"Comparing shared API keys with standard Python string equality (`==`) evaluates character-by-character, introducing subtle timing side-channels that attackers can exploit. By leveraging `hmac.compare_digest`, we ensure the comparison runs in constant time regardless of where a mismatch occurs, mitigating timing attacks on serverless APIs."*
 2. **Defensive Error Handling and Request Correlation**:
@@ -562,7 +562,7 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
 
 ---
 
-### 3. Interview Talking Points
+### 3. Architectural Deep-Dive & Technical Rationale
 1. **Failing Closed on Vector Store Model Deserialization**:
    *"A subtle but catastrophic failure mode in vector databases is embedding model drift. If a vector store is populated using model A (or mock embeddings) and queried using model B (such as Titan v2), and both happen to use 1024 dimensions, no runtime exception will be thrown. Instead, the dot products will return silent mathematical nonsense, causing top retrieval scores to plummet and the system to refuse valid queries. In InfraRAG, we serialize an `index_metadata.json` contract that records the model ID and dimension, and we enforce a strict equality check upon deserialization in Lambda, failing closed with a clear error message before any queries are served."*
 2. **Regional Bedrock Inference Profiles in Multi-Region Terraform Architectures**:

@@ -303,7 +303,7 @@ terraform apply
 
 ---
 
-## 🎯 10 Likely Interview Questions & Answers
+## 🎯 Architecture Deep-Dive & Technical FAQ
 
 ### 1. What is RAG, and why use it instead of fine-tuning an LLM on your DevOps runbooks?
 > **Answer:** Fine-tuning modifies neural network weights to teach domain vocabulary, but it does NOT reliably teach exact facts, is expensive, takes hours to retrain when documentation changes, and frequently hallucinates. RAG treats LLMs as an "open-book" reasoner: we retrieve the exact up-to-date runbook paragraphs at query time and inject them into the prompt. When an SRE updates a runbook in Git, the new instructions take effect immediately without retraining.

@@ -19,7 +19,7 @@ You are operating as the **InfraRAG Loop Engineer** in pair-programming mode wit
      - Plain-language concepts & one-line analogies
      - Issues faced and fixes applied
      - Measurable achievements (hit-rate, latency, cost = $0.00)
-     - 2-3 interview talking points
+     - 2-3 architectural decisions & engineering trade-offs
 
 3. **DevOps Engineering Standards**:
    - Clean, readable Python 3.12 with type hints and Pydantic models.
