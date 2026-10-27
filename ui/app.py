@@ -91,8 +91,8 @@ def main():
         mode = "100% Free / Mock Mode" if settings.USE_MOCK_BEDROCK else "AWS Bedrock (ap-south-1)"
         st.info(f"**Execution Mode:**\n{mode}")
         st.write(f"**Indexed Chunks:** {len(chain.vector_store.chunks)}")
-        st.write(f"**Source Runbooks:** 4 Markdown files")
-        st.write(f"**Target Spend:** $0.00 / Free Tier")
+        st.write("**Source Runbooks:** 4 Markdown files")
+        st.write("**Target Spend:** $0.00 / Free Tier")
 
         st.divider()
 
