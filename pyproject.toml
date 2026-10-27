@@ -23,3 +23,17 @@ addopts = "-v"
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+exclude = [
+    ".git",
+    ".venv",
+    "venv",
+    "build",
+    "terraform",
+]
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = [
+    "E402",  # Module level import not at top of file (used for sys.path setup)
+    "E501",  # Line too long (prompt strings, runbook references)
+]
