@@ -27,3 +27,10 @@ variable "llm_model_id" {
   type        = string
   default     = "amazon.nova-micro-v1:0"
 }
+
+variable "infrarag_api_key" {
+  description = "Optional API key for /ask endpoint (enforces x-api-key authentication when non-empty)"
+  type        = string
+  default     = ""
+  sensitive   = true
+}

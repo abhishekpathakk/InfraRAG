@@ -1,0 +1,72 @@
+[
+  {
+    "id": "heldout-01",
+    "query": "How does PodDisruptionBudget prevent voluntary disruptions during node drain?",
+    "target_source_file": "kubernetes",
+    "expected_answer_keywords": ["disruption", "budget", "drain", "eviction"],
+    "is_in_domain": true
+  },
+  {
+    "id": "heldout-02",
+    "query": "What are the default hard eviction thresholds for Node DiskPressure in kubelet?",
+    "target_source_file": "kubernetes_node_disk_pressure.md",
+    "expected_answer_keywords": ["eviction", "diskpressure", "kubelet", "threshold"],
+    "is_in_domain": true
+  },
+  {
+    "id": "heldout-03",
+    "query": "How do you verify mutual TLS certificate expiration between Istio sidecars?",
+    "target_source_file": "istio_mtls_strict_failures.md",
+    "expected_answer_keywords": ["istioctl", "proxy-status", "mtls", "certificate"],
+    "is_in_domain": true
+  },
+  {
+    "id": "heldout-04",
+    "query": "What causes upstream cluster 504 gateway timeout in Istio virtual service?",
+    "target_source_file": "504_gateway_timeout.md",
+    "expected_answer_keywords": ["timeout", "virtualservice", "504", "upstream"],
+    "is_in_domain": true
+  },
+  {
+    "id": "heldout-05",
+    "query": "What remediation actions should be taken for Patroni PostgreSQL replication lag in GitLab?",
+    "target_source_file": "gitlab",
+    "expected_answer_keywords": ["patroni", "lag", "replication", "cluster"],
+    "is_in_domain": true
+  },
+  {
+    "id": "heldout-06",
+    "query": "How do you mitigate Sidekiq high queue latency alerts in GitLab production?",
+    "target_source_file": "gitlab",
+    "expected_answer_keywords": ["sidekiq", "queue", "latency", "workers"],
+    "is_in_domain": true
+  },
+  {
+    "id": "heldout-07",
+    "query": "How do you free docker overlay2 storage when disk reaches 100% full?",
+    "target_source_file": "docker_daemon_out_of_space.md",
+    "expected_answer_keywords": ["docker", "system", "prune", "overlay2"],
+    "is_in_domain": true
+  },
+  {
+    "id": "heldout-08",
+    "query": "Why are AWS Network Load Balancer target group health checks failing across zones?",
+    "target_source_file": "aws_nlb_unhealthy_hosts.md",
+    "expected_answer_keywords": ["nlb", "health", "target", "cross-zone"],
+    "is_in_domain": true
+  },
+  {
+    "id": "heldout-09",
+    "query": "What is the traditional recipe for a molten chocolate lava cake?",
+    "target_source_file": null,
+    "expected_answer_keywords": ["don't know", "provided runbooks"],
+    "is_in_domain": false
+  },
+  {
+    "id": "heldout-10",
+    "query": "Who scored the winning goal in the 2022 FIFA World Cup final in Qatar?",
+    "target_source_file": null,
+    "expected_answer_keywords": ["don't know", "provided runbooks"],
+    "is_in_domain": false
+  }
+]

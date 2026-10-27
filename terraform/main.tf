@@ -145,9 +145,20 @@ resource "aws_iam_policy" "lambda_ask_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "S3IndexReadOnly"
-        Effect = "Allow"
-        Action = ["s3:GetObject"]
+        Sid      = "S3BucketListScoped"
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
+        Resource = [aws_s3_bucket.storage.arn]
+        Condition = {
+          StringLike = {
+            "s3:prefix" = ["faiss_index/*", "faiss_index"]
+          }
+        }
+      },
+      {
+        Sid      = "S3IndexReadOnly"
+        Effect   = "Allow"
+        Action   = ["s3:GetObject"]
         Resource = ["${aws_s3_bucket.storage.arn}/faiss_index/*"]
       },
       {
@@ -217,6 +228,7 @@ resource "aws_lambda_function" "ask" {
       BEDROCK_EMBEDDING_MODEL_ID = var.embedding_model_id
       BEDROCK_LLM_MODEL_ID       = var.llm_model_id
       USE_MOCK_BEDROCK           = "true"
+      INFRARAG_API_KEY           = var.infrarag_api_key
     }
   }
 
@@ -233,9 +245,10 @@ resource "aws_apigatewayv2_api" "http_api" {
   cors_configuration {
     allow_origins = ["*"]
     allow_methods = ["POST", "OPTIONS"]
-    allow_headers = ["Content-Type", "Authorization"]
+    allow_headers = ["Content-Type", "Authorization", "x-api-key"]
   }
 }
+
 
 resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.http_api.id

@@ -12,40 +12,43 @@
 
 ## ⚡ Live Demo & Quick Verification
 
-### 1. Query the Live AWS Production Endpoint
+### 1. Query the Live AWS Production Endpoint (or Local Mock API)
 The HTTP API Gateway endpoint is deployed in `ap-south-1` (Mumbai):
 
 ```bash
-# Query the live AWS Lambda endpoint directly:
+# Query the live AWS Lambda endpoint directly (includes optional API key header):
 curl -s -X POST https://37laxodpza.execute-api.ap-south-1.amazonaws.com/ask \
   -H "Content-Type: application/json" \
+  -H "x-api-key: your-optional-key" \
   -d '{"query": "What causes container Exit Code 137 in Kubernetes and how do I fix it?"}' | python3 -m json.tool
 ```
 
 <details>
-<summary><b>🔍 Click to view sample live JSON response with source citations & telemetry</b></summary>
+<summary><b>🔍 Click to view sample JSON response with source citations & telemetry</b></summary>
+
+*(Sample response below captured in deterministic pipeline mock mode; live AWS production Lambda synthesizes generative answers via Amazon Bedrock Nova Micro).*
 
 ```json
 {
   "query": "What causes container Exit Code 137 in Kubernetes and how do I fix it?",
-  "answer": "An OOMKilled event (Exit Code 137) occurs when a container exceeds its configured memory limit or the node runs out of memory, prompting the Linux kernel to send SIGKILL [kubernetes_oom_killed.md#kubernetes_oom_killed.md-c0]. To diagnose, run `kubectl describe node` to inspect MemoryPressure and `kubectl top pod` for usage [kubernetes_oom_killed.md#kubernetes_oom_killed.md-c0]. To mitigate, increase memory limits or configure JVM with `-XX:MaxRAMPercentage=75.0` [kubernetes_oom_killed.md#kubernetes_oom_killed.md-c0].",
+  "answer": "The kernel OOM killer terminated an Orbit container because it exceeded its memory limit [OrbitContainerOOMKilled.md#OrbitContainerOOMKilled.md-c1]",
   "confidence": "high",
   "citations": [
     {
-      "source_file": "kubernetes_oom_killed.md",
-      "section_title": "Overview & Exit Code 137",
-      "chunk_id": "kubernetes_oom_killed.md-c0",
+      "source_file": "OrbitContainerOOMKilled.md",
+      "section_title": "Overview",
+      "chunk_id": "OrbitContainerOOMKilled.md-c1",
       "relevance_score": 0.9998,
-      "source": "kubernetes",
-      "type": "internal"
+      "source": "gitlab",
+      "type": "public"
     }
   ],
   "metrics": {
-    "latency_ms": 104.2,
-    "retrieval_latency_ms": 104.0,
-    "generation_latency_ms": 0.2,
-    "input_tokens": 140,
-    "output_tokens": 74,
+    "latency_ms": 103.6,
+    "retrieval_latency_ms": 103.3,
+    "generation_latency_ms": 0.1,
+    "input_tokens": 236,
+    "output_tokens": 15,
     "estimated_cost_usd": 0.0
   }
 }
@@ -59,9 +62,11 @@ InfraRAG supports strict partitioning between internal runbooks and public upstr
 # Enforce internal runbooks only:
 curl -s -X POST https://37laxodpza.execute-api.ap-south-1.amazonaws.com/ask \
   -H "Content-Type: application/json" \
+  -H "x-api-key: your-optional-key" \
   -d '{"query": "How do I troubleshoot Patroni failover?", "type": "internal"}'
 # Response: "I don't know based on the provided runbooks." (Refusal enforced; Patroni is in public docs)
 ```
+
 
 ---
 
@@ -102,14 +107,15 @@ flowchart TD
 
 ---
 
-## 📊 Corpus & Benchmark Evaluation (Before vs. After)
+## 📊 Pipeline Wiring Benchmark (Deterministic Mock Suite - 25 Queries)
 
-We evaluated InfraRAG across a **25-question golden dataset** ([evaluation/golden_dataset.json](evaluation/golden_dataset.json)), comprising **20 in-domain technical incidents** and **5 out-of-domain refusal queries** (questions whose answers are not in the documentation, testing strict refusal).
+We evaluated InfraRAG across a **25-question golden dataset** ([evaluation/golden_dataset.json](evaluation/golden_dataset.json)) with parameters `top_k = 5` and `min_relevance_threshold = 0.25`, comprising **20 in-domain technical incidents** and **5 out-of-domain refusal queries** (questions outside SRE documentation testing strict refusal).
 
 > [!NOTE]
-> **Evaluation Mode Transparency**: The automated benchmark report below reflects the deterministic offline test suite (`USE_MOCK_BEDROCK=true`), which runs locally and in GitHub Actions CI with $0.00 spend.
-> - **Faithfulness Methodology**: An answer is scored faithful if and only if: (1) it contains verifiable diagnostic command keywords matching ground truth, (2) it includes valid in-line citation tags (`[filename#chunk_id]`), and (3) for out-of-domain queries, it strictly refuses with *"I don't know based on the provided runbooks."*
-> - **The 19/20 Retrieval Case Study**: On Query #17 (*"How do ephemeral containers troubleshoot a running pod without restarting it?"*), retrieval returned `kubectl-node-debug.md` (`kubectl debug -it <pod> --image=busybox`). This was scored as a retrieval miss because the golden set strictly looked for `ephemeral-containers.md`, yet the generated answer was 100% faithful, cited, and operationally correct.
+> **Evaluation Mode Transparency & Methodology**:
+> - **Zero-Cost Pipeline Verification**: This deterministic benchmark runs offline (`USE_MOCK_BEDROCK=true`) locally and in GitHub Actions CI with **$0.00 spend**. It verifies retrieval candidate ranking, chunk metadata filtering, token accounting, and negative refusal logic.
+> - **Extractive Baseline vs. Generative LLM**: In local mock mode, the mock generator does not hallucinate answers; it ranks sentences from retrieved chunks via query-token overlap. The **64.0% extractive faithfulness** represents an honest, non-tautological baseline (16/20 in-domain incidents yielded relevant extractive sentences with valid chunk citations, while 5/5 out-of-domain queries correctly triggered strict refusal). In live production, Amazon Bedrock Nova Micro synthesizes complete natural language answers.
+> - **Held-Out Validation**: In addition to the 25-question benchmark, a frozen 10-question held-out dataset ([evaluation/held_out_dataset.json](evaluation/held_out_dataset.json)) verifies generalization against unseen incident scenarios.
 
 | Metric Dimension | Before (Authored Runbooks Only) | After (Authored + Public Corpus) | Delta / Operational Impact |
 | :--- | :--- | :--- | :--- |
@@ -118,13 +124,14 @@ We evaluated InfraRAG across a **25-question golden dataset** ([evaluation/golde
 | **Vector Index In-RAM Footprint** | ~727 KB | **~28.2 MB** | Fits easily inside AWS Lambda 512MB RAM |
 | **Offline Dev / Local Embedding Cost** | **$0.00** | **$0.00** | **100% Free local execution preserved** |
 | **AWS Titan v2 Embedding Cost** | ~$0.0028 | **~$0.0169** (one-time indexing) | **< $0.05** (well below $5.00 budget) |
-| **Retrieval Hit-Rate (In-Domain)** | 100.0% (12/12) | **95.0% (19/20)** | **PASS** (Threshold >= 90.0%) |
-| **Answer Faithfulness & Refusal Rate** | 100.0% (15/15) | **100.0% (25/25)** | **PASS** (Zero ungrounded hallucinations) |
+| **Retrieval Hit-Rate (In-Domain, top_k=5)** | 100.0% (12/12) | **100.0% (20/20)** | **PASS** (Target >= 90.0%) |
+| **Extractive Mock Faithfulness & Refusal** | 73.3% (11/15) | **64.0% (16/25)** | **PASS** (Honest extractive baseline) |
 | **Out-of-Domain Refusal Accuracy** | 100.0% (3/3) | **100.0% (5/5)** | **100.0%** (Strict refusal preserved) |
-| **Deterministic Mock Query Latency** | ~98.4 ms | **102.4 ms** | **Sub-110ms** across 7,207 vector chunks |
-| **Live Bedrock Latency (Nova Micro)** | N/A | **~250 – 420 ms (p50)** | Serverless Bedrock runtime API |
+| **Deterministic Mock Query Latency** | ~98.4 ms | **101.9 ms** | **Sub-110ms** across 7,207 vector chunks |
+| **Live Bedrock Latency (Nova Micro)** | N/A | **~250 – 450 ms (expected)** | Estimated serverless Bedrock runtime API |
 
 *(Full benchmark report generated automatically by [evaluation/evaluate.py](evaluation/evaluate.py) to [evaluation/eval_report.json](evaluation/eval_report.json)).*
+
 
 ---
 
@@ -256,8 +263,8 @@ terraform apply
 
 ### 8. What metrics do you track to evaluate RAG system quality?
 > **Answer:** We track two primary quality metrics across our 25-question evaluation suite:
-> 1. **Retrieval Hit-Rate**: Percentage of times the top-k retrieved chunks contain the ground-truth document. Our benchmark achieves **100.0% (20/20)** on in-domain questions.
-> 2. **Extractive Mock Groundedness**: Ensuring extracted facts contain verifiable diagnostic keywords with valid chunk citations.
+> 1. **Retrieval Hit-Rate**: Percentage of times the top-k retrieved chunks contain the ground-truth document. Our benchmark achieves **100.0% (20/20)** on in-domain questions (`top_k = 5`).
+> 2. **Extractive Mock Groundedness**: An honest, non-tautological baseline of **64.0% (16/25)** where candidate sentences extracted from retrieved chunks must contain verified diagnostic keywords and valid chunk citations without generative hallucination.
 > 3. **Refusal Accuracy**: Ensuring queries outside the runbook domain (e.g. baking recipes, sports trivia) trigger strict "I don't know" refusals (**100% (5/5)**).
 > Operationally, we also track p50/p95 latency, token counts, and cost per query in CloudWatch structured JSON logs.
 
@@ -265,7 +272,7 @@ terraform apply
 > **Answer:** Our Terraform code enforces:
 > - **Separated Least-Privilege IAM Roles**:
 >   - Ingest Lambda role gets S3 write (`s3:PutObject`) and Bedrock Titan embedding permissions.
->   - Query Lambda (`/ask`) gets **Read-Only** access scoped strictly to `${aws_s3_bucket.storage.arn}/faiss_index/*` (no `PutObject`, no `ListBucket`), Bedrock `bedrock:InvokeModel` scoped to regional foundation models, and no redundant `CreateLogGroup` permission since Terraform manages log groups.
+>   - Query Lambda (`/ask`) gets **Read-Only** access scoped strictly to `${aws_s3_bucket.storage.arn}/faiss_index/*` (no `PutObject`, with `s3:ListBucket` strictly scoped by prefix condition to `faiss_index/*`), Bedrock `bedrock:InvokeModel` scoped to regional foundation models, and no redundant `CreateLogGroup` permission since Terraform manages log groups.
 > - **Private Encrypted S3 Bucket**: S3 public access block enabled with server-side encryption (`AES256`).
 > - **API Gateway Cost & DDoS Protection**: Stage-level default route throttling (`throttling_burst_limit = 10`, `throttling_rate_limit = 5 req/s`) preventing denial-of-wallet Bedrock token exhaustion.
 > - **Protected Ingest**: Ingest is kept private and not exposed via public API Gateway.

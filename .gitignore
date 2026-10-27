@@ -9,6 +9,7 @@ venv/
 ENV/
 env/
 *.egg-info/
+uv.lock
 
 # Environment variables & secrets
 .env

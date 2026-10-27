@@ -2,7 +2,7 @@
   "total_queries": 25,
   "hit_rate_pct": 100.0,
   "faithfulness_pct": 64.0,
-  "avg_latency_ms": 106.57,
+  "avg_latency_ms": 101.89,
   "total_cost_usd": 0.0,
   "results": [
     {
@@ -12,7 +12,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 110.34,
+      "latency_ms": 112.72,
       "citations": [
         {
           "source_file": "kubernetes_crashloopbackoff.md",
@@ -42,7 +42,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 101.46,
+      "latency_ms": 101.0,
       "citations": [
         {
           "source_file": "OrbitContainerOOMKilled.md",
@@ -63,7 +63,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 100.77,
+      "latency_ms": 101.8,
       "citations": [
         {
           "source_file": "istio_503_service_unavailable.md",
@@ -93,7 +93,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 100.92,
+      "latency_ms": 102.21,
       "citations": [
         {
           "source_file": "istio_mtls_strict_failures.md",
@@ -123,7 +123,7 @@
       "retrieval_hit": true,
       "answer_faithful": false,
       "confidence": "high",
-      "latency_ms": 100.9,
+      "latency_ms": 101.45,
       "citations": [
         {
           "source_file": "kubernetes_oom_killed.md",
@@ -144,7 +144,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 100.9,
+      "latency_ms": 101.28,
       "citations": [
         {
           "source_file": "istio_503_service_unavailable.md",
@@ -174,7 +174,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 101.01,
+      "latency_ms": 101.69,
       "citations": [
         {
           "source_file": "kubernetes_crashloopbackoff.md",
@@ -204,7 +204,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 100.81,
+      "latency_ms": 101.43,
       "citations": [
         {
           "source_file": "istio_mtls_strict_failures.md",
@@ -234,7 +234,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 227.0,
+      "latency_ms": 101.41,
       "citations": [
         {
           "source_file": "kubernetes_crashloopbackoff.md",
@@ -255,7 +255,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 103.81,
+      "latency_ms": 101.51,
       "citations": [
         {
           "source_file": "kubernetes_oom_killed.md",
@@ -285,7 +285,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 102.99,
+      "latency_ms": 101.4,
       "citations": [
         {
           "source_file": "istio_503_service_unavailable.md",
@@ -315,7 +315,7 @@
       "retrieval_hit": true,
       "answer_faithful": false,
       "confidence": "high",
-      "latency_ms": 101.13,
+      "latency_ms": 101.39,
       "citations": [
         {
           "source_file": "istio_mtls_strict_failures.md",
@@ -354,7 +354,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 100.82,
+      "latency_ms": 101.52,
       "citations": [
         {
           "source_file": "kubernetes_node_disk_pressure.md",
@@ -375,7 +375,7 @@
       "retrieval_hit": true,
       "answer_faithful": false,
       "confidence": "high",
-      "latency_ms": 100.89,
+      "latency_ms": 101.28,
       "citations": [
         {
           "source_file": "kubernetes_ingress_504_gateway_timeout.md",
@@ -405,7 +405,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 100.88,
+      "latency_ms": 102.13,
       "citations": [
         {
           "source_file": "docker_daemon_out_of_space.md",
@@ -435,7 +435,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 100.88,
+      "latency_ms": 100.8,
       "citations": [
         {
           "source_file": "aws_network_load_balancer_unhealthy_hosts.md",
@@ -465,7 +465,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 100.96,
+      "latency_ms": 101.43,
       "citations": [
         {
           "source_file": "kubectl-node-debug.md",
@@ -495,7 +495,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 100.71,
+      "latency_ms": 101.4,
       "citations": [
         {
           "source_file": "crictl.md",
@@ -516,7 +516,7 @@
       "retrieval_hit": true,
       "answer_faithful": false,
       "confidence": "high",
-      "latency_ms": 100.7,
+      "latency_ms": 101.66,
       "citations": [
         {
           "source_file": "advanced-pod-config.md",
@@ -546,7 +546,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 100.7,
+      "latency_ms": 101.13,
       "citations": [
         {
           "source_file": "deleted-project-restore.md",
@@ -585,7 +585,7 @@
       "retrieval_hit": false,
       "answer_faithful": false,
       "confidence": "high",
-      "latency_ms": 100.61,
+      "latency_ms": 100.77,
       "citations": [
         {
           "source_file": "init-containers.md",
@@ -606,7 +606,7 @@
       "retrieval_hit": false,
       "answer_faithful": false,
       "confidence": "high",
-      "latency_ms": 101.06,
+      "latency_ms": 101.22,
       "citations": [
         {
           "source_file": "provisioning.md",
@@ -627,7 +627,7 @@
       "retrieval_hit": false,
       "answer_faithful": false,
       "confidence": "high",
-      "latency_ms": 100.82,
+      "latency_ms": 100.93,
       "citations": [
         {
           "source_file": "VaultRaftSnapshot.md",
@@ -648,7 +648,7 @@
       "retrieval_hit": false,
       "answer_faithful": false,
       "confidence": "high",
-      "latency_ms": 101.83,
+      "latency_ms": 101.77,
       "citations": [
         {
           "source_file": "auditing-metrics.md",
@@ -678,7 +678,7 @@
       "retrieval_hit": false,
       "answer_faithful": false,
       "confidence": "high",
-      "latency_ms": 101.46,
+      "latency_ms": 101.84,
       "citations": [
         {
           "source_file": "downward-api.md",

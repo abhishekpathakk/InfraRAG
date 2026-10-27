@@ -4,17 +4,22 @@ Receives questions via API Gateway HTTP API POST /ask,
 performs similarity search against cached FAISS index, and generates answers.
 """
 
+import hmac
 import json
 import logging
 import os
 from pathlib import Path
 from typing import Any
+import uuid
 
 from src.chain import RAGChain
 from src.config import settings
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
+MAX_QUESTION_LENGTH = 1000
+ALLOWED_TYPES = {"internal", "public"}
 
 # Global warm cache for FAISS index across Lambda invocations
 _CACHED_CHAIN: RAGChain | None = None
@@ -50,12 +55,12 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     logger.info(f"Received query event: {event.get('rawPath', '')}")
 
     try:
-        # Optional shared-secret API key protection
+        # 1. API Key Authentication (fail-closed if expected key is configured)
         expected_key = os.environ.get("INFRARAG_API_KEY")
         if expected_key:
             headers = event.get("headers") or {}
-            client_key = headers.get("x-api-key") or headers.get("X-API-KEY")
-            if client_key != expected_key:
+            client_key = headers.get("x-api-key") or headers.get("X-API-KEY") or ""
+            if not hmac.compare_digest(client_key, expected_key):
                 return {
                     "statusCode": 401,
                     "headers": {"Content-Type": "application/json"},
@@ -69,21 +74,39 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
             body_json = body
 
         question = body_json.get("question") or body_json.get("query")
-        type_filter = body_json.get("type_filter") or body_json.get("type")
-        if type_filter and type_filter.lower() in ("all", "*", ""):
-            type_filter = None
-        elif type_filter:
-            type_filter = type_filter.lower()
-
-        if not question or not question.strip():
+        if not question or not str(question).strip():
             return {
                 "statusCode": 400,
                 "headers": {"Content-Type": "application/json"},
                 "body": json.dumps({"error": "Missing 'question' in request body."}),
             }
 
+        question_str = str(question).strip()
+        if len(question_str) > MAX_QUESTION_LENGTH:
+            return {
+                "statusCode": 400,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({
+                    "error": f"Question exceeds maximum length of {MAX_QUESTION_LENGTH} characters."
+                }),
+            }
+
+        type_filter = body_json.get("type_filter") or body_json.get("type")
+        if type_filter and str(type_filter).lower() in ("all", "*", ""):
+            type_filter = None
+        elif type_filter:
+            type_filter = str(type_filter).lower().strip()
+            if type_filter not in ALLOWED_TYPES:
+                return {
+                    "statusCode": 400,
+                    "headers": {"Content-Type": "application/json"},
+                    "body": json.dumps({
+                        "error": f"Invalid 'type_filter'. Allowed values: {sorted(list(ALLOWED_TYPES))}, or omit for all."
+                    }),
+                }
+
         chain = get_cached_chain()
-        response = chain.answer_question(question.strip(), type_filter=type_filter)
+        response = chain.answer_question(question_str, type_filter=type_filter)
 
         return {
             "statusCode": 200,
@@ -105,9 +128,14 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
         }
 
     except Exception as e:
-        logger.error(f"Ask handler failed: {e}", exc_info=True)
+        request_id = str(uuid.uuid4())[:8]
+        logger.error(f"Ask handler failed [request_id={request_id}]: {e}", exc_info=True)
         return {
             "statusCode": 500,
             "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"error": str(e)}),
+            "body": json.dumps({
+                "error": "Internal server error during question processing.",
+                "request_id": request_id,
+            }),
         }
+

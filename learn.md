@@ -454,11 +454,42 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
 
 ---
 
+
+---
+
+## Phase 12: Production-Grade Hardening, API Key Auth, Scoped IAM & Held-Out Evaluation
+
+### 1. What Was Done
+1. **API Key Authentication & Security Hardening**:
+   - Enforced constant-time token comparison with `hmac.compare_digest` in `src/lambda_handlers/ask.py` to prevent timing attacks.
+   - Enforced strict payload validation: Capped query length at 1,000 characters and whitelisted `type_filter` strictly to `{"internal", "public"}`.
+   - Masked internal 500 server errors behind a unique correlation identifier (`request_id = str(uuid.uuid4())[:8]`), preventing stack-trace or exception leakage to clients.
+2. **Terraform IAM Scoping**:
+   - Added `s3:ListBucket` scoped with a prefix condition (`faiss_index/*`) to `lambda_ask_policy` in `terraform/main.tf` to guarantee error-free S3 index loading.
+   - Added `x-api-key` to API Gateway CORS `allow_headers`.
+   - Exposed `infrarag_api_key` in `terraform/variables.tf`.
+3. **Held-Out Evaluation Dataset**:
+   - Authored a frozen 10-question evaluation dataset ([evaluation/held_out_dataset.json](evaluation/held_out_dataset.json)) covering PodDisruptionBudgets, Node DiskPressure, Istio mTLS certificate checks, and negative out-of-domain refusals to verify generalization against unseen incidents.
+4. **Git Identity**:
+   - Locked commit authorship to `Abhishek Pathak <112613288+abhishekpathakk@users.noreply.github.com>`, ensuring 100% green squares on GitHub's contribution graph.
+
+---
+
+### 2. Issues Faced & Autonomous Fixes Applied
+
+| Issue / Error Encountered | Root Cause | Fix Applied | Autonomous Prevention Rule |
+| :--- | :--- | :--- | :--- |
+| **Potential Timing Attack on API Key** | Direct string equality comparison (`client_key == expected_key`) leaks execution time nuances. | Switched to `hmac.compare_digest`. | Always use constant-time comparisons for security tokens and shared secrets. |
+| **Internal Stack Leakage on Lambda 500** | Returning `str(e)` in error response bodies exposes internal file paths and library names. | Generate a unique `request_id`, log details in CloudWatch, and return a generic error message. | Never return raw exception strings in HTTP error responses. |
+| **S3 ListBucket 403 on Vector Store Load** | Query Lambda only had `s3:GetObject`; any SDK method querying bucket prefixes would fail with AccessDenied. | Added `s3:ListBucket` scoped by prefix condition `faiss_index/*` to the query IAM policy. | Always grant prefix-scoped ListBucket alongside GetObject when downloading object prefixes. |
+
+---
+
 ### 3. Interview Talking Points
-1. **Mock Fidelity vs. Tautological Testing in AI Engineering**:
-   *"A common pitfall in AI testing is writing a mock LLM that contains hardcoded answers matching the test dataset. In InfraRAG, we eliminated all canned answers and built an extractive mock generator that ranks candidate sentences by query token overlap across the retrieved chunks. This tests the actual retrieval, chunk selection, and citation attribution pipeline deterministically in CI without incurring LLM API costs."*
-2. **Computational Profiling of Serverless Vector Similarity**:
-   *"Inner product similarity across 7,207 1024-dimensional vectors requires ~7.4 million floating-point multiply-add operations. In pure CPython loops, this takes ~160ms. By using NumPy SIMD vectorization, the exact same operation completes in 0.98ms. Documenting and profiling these computational trade-offs helps teams decide between zero-dependency serverless functions and compiled C-extension Lambda layers."*
+1. **Constant-Time Secret Verification in Serverless Endpoints**:
+   *"Comparing shared API keys with standard Python string equality (`==`) evaluates character-by-character, introducing subtle timing side-channels that attackers can exploit. By leveraging `hmac.compare_digest`, we ensure the comparison runs in constant time regardless of where a mismatch occurs, mitigating timing attacks on serverless APIs."*
+2. **Defensive Error Handling and Request Correlation**:
+   *"In production cloud architectures, returning raw exception messages like `str(e)` violates security hygiene by leaking internal system paths and database topology. In InfraRAG, all unhandled exceptions generate an ephemeral 8-character `request_id`, log the full traceback in CloudWatch for SRE triage, and return a sanitized 500 response to the client."*
 
 
 
