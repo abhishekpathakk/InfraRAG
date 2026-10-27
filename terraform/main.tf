@@ -109,19 +109,6 @@ resource "aws_iam_role_policy_attachment" "lambda_policy_attach" {
 }
 
 # ---------------------------------------------------------------------------
-# Lambda Artifact Packaging
-# ---------------------------------------------------------------------------
-data "archive_file" "lambda_placeholder" {
-  type        = "zip"
-  output_path = "${path.module}/build/lambda_payload.zip"
-
-  source {
-    content  = "def handler(event, context): return {'statusCode': 200, 'body': 'ready'}"
-    filename = "index.py"
-  }
-}
-
-# ---------------------------------------------------------------------------
 # CloudWatch Log Groups (7-Day Retention for Cost Containment)
 # ---------------------------------------------------------------------------
 resource "aws_cloudwatch_log_group" "ingest_logs" {
@@ -142,17 +129,16 @@ resource "aws_lambda_function" "ingest" {
   role             = aws_iam_role.lambda_exec.arn
   handler          = "src.lambda_handlers.ingest.handler"
   runtime          = "python3.12"
-  filename         = data.archive_file.lambda_placeholder.output_path
-  source_code_hash = data.archive_file.lambda_placeholder.output_base64sha256
+  filename         = "${path.module}/build/lambda_payload.zip"
+  source_code_hash = filebase64sha256("${path.module}/build/lambda_payload.zip")
   timeout          = 60
   memory_size      = 1024
 
   environment {
     variables = {
       S3_BUCKET_NAME             = local.bucket_name
-      AWS_REGION                 = var.aws_region
       BEDROCK_EMBEDDING_MODEL_ID = var.embedding_model_id
-      USE_MOCK_BEDROCK           = "false"
+      USE_MOCK_BEDROCK           = "true"
     }
   }
 
@@ -164,18 +150,17 @@ resource "aws_lambda_function" "ask" {
   role             = aws_iam_role.lambda_exec.arn
   handler          = "src.lambda_handlers.ask.handler"
   runtime          = "python3.12"
-  filename         = data.archive_file.lambda_placeholder.output_path
-  source_code_hash = data.archive_file.lambda_placeholder.output_base64sha256
+  filename         = "${path.module}/build/lambda_payload.zip"
+  source_code_hash = filebase64sha256("${path.module}/build/lambda_payload.zip")
   timeout          = 30
   memory_size      = 1024
 
   environment {
     variables = {
       S3_BUCKET_NAME             = local.bucket_name
-      AWS_REGION                 = var.aws_region
       BEDROCK_EMBEDDING_MODEL_ID = var.embedding_model_id
       BEDROCK_LLM_MODEL_ID       = var.llm_model_id
-      USE_MOCK_BEDROCK           = "false"
+      USE_MOCK_BEDROCK           = "true"
     }
   }
 

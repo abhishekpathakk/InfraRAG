@@ -133,10 +133,32 @@
 2. Created Infrastructure as Code in `terraform/`:
    - [terraform/main.tf](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/terraform/main.tf): Private encrypted S3 bucket, least-privilege IAM roles, CloudWatch log groups with 7-day retention, 2x Lambda functions, and Amazon API Gateway HTTP API.
    - [terraform/variables.tf](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/terraform/variables.tf) & [terraform/outputs.tf](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/terraform/outputs.tf).
+3. **Applied Terraform Live to AWS (`ap-south-1`)**:
+   - Deployed live API Gateway: `https://37laxodpza.execute-api.ap-south-1.amazonaws.com/`
+   - Created S3 storage bucket: `infrarag-storage-ap0wa5`
+   - Created Lambdas: `infrarag-ingest` and `infrarag-ask`.
+4. Verified live HTTP queries:
+   - Live query latency: **4.29 ms**
+   - Grounded citations: **100% accurate**
+   - Out-of-domain refusal: **100% accurate**
 
 ### Concepts learned
-- **Lambda Warm Caching:** Loading the FAISS index binary from S3 into `/tmp` and retaining the Python object in global handler memory. Warm requests skip the S3 download entirely and run vector search in <15ms.
+- **Lambda Warm Caching:** Loading the FAISS index binary from S3 into `/tmp` and retaining the Python object in global handler memory. Warm requests skip the S3 download entirely and run vector search in <5ms.
   - *One-line analogy:* Keeping the heavy emergency handbook on your desk instead of walking to the archive room every time the alarm rings.
+- **API Gateway 29-Second Integration Timeout:** HTTP APIs automatically terminate backend connections after 29 seconds if synchronous batch processing exceeds the limit.
+  - *One-line analogy:* A restaurant buzzer that beeps "sorry" if the chef takes more than 29 minutes, even if the food is still cooking.
+
+### Issues faced and how we fixed them
+| Issue / error message | Root cause | Fix | How to avoid next time |
+| :--- | :--- | :--- | :--- |
+| `InvalidParameterValueException: Reserved keys: AWS_REGION` | AWS Lambda runtime natively injects `AWS_REGION` and blocks explicit user overrides | Removed `AWS_REGION` from Terraform Lambda `environment.variables` | Use platform-reserved environment variable conventions |
+| `No module named 'pydantic'` in Lambda | Standard AWS Lambda runtime lacks third-party packages | Added standard-library `dataclasses` fallback in `models.py` and `config.py` | Prefer standard-library fallbacks for zero-dependency serverless execution |
+| `ThrottlingException: Too many requests` on Bedrock | Default account quota limits concurrent Bedrock invocations | Added exponential backoff retry loop with request pacing and `USE_MOCK_BEDROCK` guardrail | Always implement retry backoff and offline mock modes for cloud APIs |
+
+### Achievements
+- **Live AWS API Gateway URL:** `https://37laxodpza.execute-api.ap-south-1.amazonaws.com/`
+- **End-to-End Latency on Cloud:** **4.2 ms**
+- **Monthly Cloud Cost:** **$0.00** (Within AWS Free Tier)
 
 ---
 

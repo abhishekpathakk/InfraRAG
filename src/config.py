@@ -1,49 +1,60 @@
 """
 InfraRAG Global Configuration.
 Manages environment variables, AWS Bedrock settings, and local/free test modes.
+Supports pydantic-settings when available, with standard library os.environ fallback for Lambda.
 """
 
+import os
 from pathlib import Path
-from pydantic_settings import BaseSettings, SettingsConfigDict
 
+try:
+    from pydantic_settings import BaseSettings, SettingsConfigDict
 
-class Settings(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        extra="ignore",
-    )
+    class Settings(BaseSettings):
+        model_config = SettingsConfigDict(
+            env_file=".env",
+            env_file_encoding="utf-8",
+            extra="ignore",
+        )
 
-    # Project metadata
-    PROJECT_NAME: str = "InfraRAG"
-    APP_ENV: str = "development"
+        PROJECT_NAME: str = "InfraRAG"
+        APP_ENV: str = "development"
+        AWS_REGION: str = os.getenv("AWS_REGION", "ap-south-1")
+        AWS_FALLBACK_REGION: str = "us-east-1"
+        S3_BUCKET_NAME: str = os.getenv("S3_BUCKET_NAME", "infrarag-storage-runbooks")
 
-    # AWS Configuration
-    AWS_REGION: str = "ap-south-1"  # Mumbai default
-    AWS_FALLBACK_REGION: str = "us-east-1"  # N. Virginia fallback for Bedrock models if needed
-    S3_BUCKET_NAME: str = "infrarag-storage-runbooks"
+        BEDROCK_EMBEDDING_MODEL_ID: str = os.getenv("BEDROCK_EMBEDDING_MODEL_ID", "amazon.titan-embed-text-v2:0")
+        EMBEDDING_DIMENSION: int = 1024
+        BEDROCK_LLM_MODEL_ID: str = os.getenv("BEDROCK_LLM_MODEL_ID", "amazon.nova-micro-v1:0")
 
-    # Amazon Bedrock Models
-    # Titan Embeddings v2: 1024 dimensions, normalized
-    BEDROCK_EMBEDDING_MODEL_ID: str = "amazon.titan-embed-text-v2:0"
-    EMBEDDING_DIMENSION: int = 1024
+        USE_MOCK_BEDROCK: bool = os.getenv("USE_MOCK_BEDROCK", "true").lower() in ("true", "1", "yes")
+        CHUNK_SIZE: int = 500
+        CHUNK_OVERLAP: int = 100
+        TOP_K: int = 3
 
-    # Bedrock Generation Model: Amazon Nova Micro / Claude 3 Haiku for low-cost/free tier
-    BEDROCK_LLM_MODEL_ID: str = "amazon.nova-micro-v1:0"
+        BASE_DIR: Path = Path(__file__).resolve().parent.parent
+        DATA_DIR: Path = BASE_DIR / "data" / "runbooks"
+        CACHE_DIR: Path = BASE_DIR / "index_cache"
 
-    # 100% Free / Local Development Mode
-    # When True, uses local deterministic embeddings & mock generator without making external paid AWS API calls
-    USE_MOCK_BEDROCK: bool = True
+    settings = Settings()
 
-    # RAG Chunking & Retrieval Parameters
-    CHUNK_SIZE: int = 500  # Words / tokens per chunk
-    CHUNK_OVERLAP: int = 100  # Overlap between consecutive chunks
-    TOP_K: int = 3  # Number of relevant chunks retrieved for generation
+except ImportError:
+    class StandaloneSettings:
+        def __init__(self):
+            self.PROJECT_NAME = "InfraRAG"
+            self.APP_ENV = "production"
+            self.AWS_REGION = os.getenv("AWS_REGION", "ap-south-1")
+            self.AWS_FALLBACK_REGION = "us-east-1"
+            self.S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "infrarag-storage-runbooks")
+            self.BEDROCK_EMBEDDING_MODEL_ID = os.getenv("BEDROCK_EMBEDDING_MODEL_ID", "amazon.titan-embed-text-v2:0")
+            self.EMBEDDING_DIMENSION = 1024
+            self.BEDROCK_LLM_MODEL_ID = os.getenv("BEDROCK_LLM_MODEL_ID", "amazon.nova-micro-v1:0")
+            self.USE_MOCK_BEDROCK = os.getenv("USE_MOCK_BEDROCK", "false").lower() in ("true", "1", "yes")
+            self.CHUNK_SIZE = 500
+            self.CHUNK_OVERLAP = 100
+            self.TOP_K = 3
+            self.BASE_DIR = Path("/tmp")
+            self.DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "runbooks"
+            self.CACHE_DIR = Path("/tmp/faiss_index")
 
-    # Local Paths
-    BASE_DIR: Path = Path(__file__).resolve().parent.parent
-    DATA_DIR: Path = BASE_DIR / "data" / "runbooks"
-    CACHE_DIR: Path = BASE_DIR / "index_cache"
-
-
-settings = Settings()
+    settings = StandaloneSettings()

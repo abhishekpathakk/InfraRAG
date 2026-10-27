@@ -35,6 +35,8 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 .terraform.lock.hcl
+terraform/build/
+build/
 
 # Testing & Linting
 .pytest_cache/

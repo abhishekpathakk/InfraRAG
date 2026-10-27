@@ -9,6 +9,7 @@ Supports:
 import hashlib
 import json
 import logging
+import time
 from abc import ABC, abstractmethod
 from typing import Any
 try:
@@ -141,22 +142,37 @@ class BedrockTitanEmbeddingProvider(BaseEmbeddingProvider):
             "normalize": True,
         })
 
-        try:
-            response = client.invoke_model(
-                modelId=self._model_id,
-                contentType="application/json",
-                accept="application/json",
-                body=body,
-            )
-            response_body = json.loads(response["body"].read().decode("utf-8"))
-            return response_body["embedding"]
-        except Exception as e:
-            logger.error(f"Failed to invoke Bedrock Titan Embeddings: {e}")
-            raise
+        # Exponential backoff retry loop for AWS Bedrock rate limits
+        max_attempts = 5
+        for attempt in range(max_attempts):
+            try:
+                response = client.invoke_model(
+                    modelId=self._model_id,
+                    contentType="application/json",
+                    accept="application/json",
+                    body=body,
+                )
+                response_body = json.loads(response["body"].read().decode("utf-8"))
+                return response_body["embedding"]
+            except Exception as e:
+                err_msg = str(e)
+                if "ThrottlingException" in err_msg or "Too many requests" in err_msg:
+                    sleep_time = 1.0 * (2**attempt)
+                    logger.warning(f"Bedrock throttled; backing off for {sleep_time:.1f}s (attempt {attempt+1}/{max_attempts})")
+                    time.sleep(sleep_time)
+                else:
+                    logger.error(f"Failed to invoke Bedrock Titan Embeddings: {e}")
+                    raise
+
+        raise RuntimeError("Bedrock Titan Embedding failed after maximum retry attempts due to throttling.")
 
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
-        # Bedrock Titan v2 invokes per item or in chunks
-        return [self.embed_text(t) for t in texts]
+        # Add small spacing between consecutive embeddings to prevent burst throttling
+        results = []
+        for t in texts:
+            results.append(self.embed_text(t))
+            time.sleep(0.15)
+        return results
 
 
 def get_embedding_provider() -> BaseEmbeddingProvider:
