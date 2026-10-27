@@ -146,8 +146,10 @@ def main():
     else:
         console.print(
             "[bold yellow]OVERLAPPING SCORES DETECTED in mock/vector space.[/bold yellow] "
-            "In mock mode, lexical stopword filtering + LLM prompt-grounding enforces refusal. "
-            "For live Titan embeddings, cosine similarity separation typically centers around [bold cyan]0.35 - 0.45[/bold cyan].\n"
+            f"Because in-domain min ({in_min:.4f}) is below out-of-domain max ({out_max:.4f}), "
+            "a static retrieval threshold alone cannot separate queries in mock hash space. "
+            "In offline mock mode, lexical stopword filtering, token overlap rules, and citation verification enforce refusal. "
+            "For live Bedrock Titan embeddings, threshold calibration must be measured empirically against live distributions during deployment.\n"
         )
 
 

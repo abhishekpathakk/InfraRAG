@@ -26,7 +26,7 @@ curl -s -X POST https://37laxodpza.execute-api.ap-south-1.amazonaws.com/ask \
 <details>
 <summary><b>🔍 Click to view sample JSON response with source citations & telemetry</b></summary>
 
-*(Sample response below captured in deterministic local pipeline mock mode with pre-allocated contiguous matrix lookup; live AWS production Lambda synthesizes generative answers via Amazon Bedrock Nova Micro).*
+*(Sample response below captured in local mock pipeline with pre-allocated contiguous matrix lookup; deployed AWS Lambda currently executes in zero-cost mock mode; live Bedrock Nova Micro integration is fully implemented with live verification pending).*
 
 ```json
 {
@@ -111,7 +111,7 @@ flowchart TD
 
 We evaluated InfraRAG across two independent datasets:
 1. **Primary Golden Benchmark** ([evaluation/golden_dataset.json](evaluation/golden_dataset.json)): 25 questions (20 in-domain incident troubleshooting + 5 out-of-domain negative queries).
-2. **Frozen Held-Out Validation** ([evaluation/held_out_dataset.json](evaluation/held_out_dataset.json)): 25 unseen operational queries (20 in-domain incidents + 5 out-of-domain negative queries) covering Kubernetes, Istio, GitLab, Docker, and AWS NLB. Frozen via git tag `v1.0.0-eval-frozen` without test-set tuning or label tampering.
+2. **Frozen Held-Out Validation** ([evaluation/held_out_dataset.json](evaluation/held_out_dataset.json)): 25 unseen operational queries (20 in-domain incidents + 5 out-of-domain negative queries) covering Kubernetes, Istio, GitLab, Docker, and AWS NLB. Frozen at git tag `v1.0.0-eval-frozen`; first-run results reported as-is without post-hoc tuning or label modifications.
 
 All queries evaluate with parameters `top_k = 5` and `min_relevance_threshold = 0.25`.
 
@@ -125,27 +125,41 @@ All queries evaluate with parameters `top_k = 5` and `min_relevance_threshold = 
 
 ### 1. Primary Golden Benchmark (25 Incident Queries)
 
-| Metric Dimension | Score / Count | Industry Target | Status | Operational Notes |
+| Metric Dimension | Score / Count | Internal Target | Status | Operational Notes |
 | :--- | :---: | :---: | :---: | :--- |
 | **Retrieval Top-1 Hit-Rate** | **80.0% (16/20)** | >= 80.0% | **PASS** | Top retrieved chunk contains exact ground truth runbook |
 | **Retrieval Top-5 Hit-Rate** | **100.0% (20/20)** | >= 90.0% | **PASS** | 100% recall of relevant runbooks within top 5 candidates |
 | **Mean Reciprocal Rank (MRR)** | **0.883** | >= 0.850 | **PASS** | High ranking density near rank 1 |
-| **In-Domain Keyword Recall** | **50.0% (10/20)** | >= 50.0% | **PASS** | Honest non-tautological mock baseline (in-domain denominator) |
+| **In-Domain Keyword Recall** | **50.0% (10/20)** | >= 60.0% (Prod Target) | **BASELINE (Mock)** | Honest non-tautological mock baseline (in-domain denominator) |
 | **Out-of-Domain Refusal Accuracy** | **100.0% (5/5)** | 100.0% | **PASS** | Strict refusal on non-SRE topics (cake, FIFA, tennis, stocks) |
 | **Average Total Query Latency** | **0.73 ms** | < 2500 ms | **PASS** | In-RAM vector search (0.64ms) + sentence overlap ranking (0.09ms) |
 
 ### 2. Frozen Held-Out Validation (25 Unseen Incident Scenarios)
 
-| Metric Dimension | Score / Count | Industry Target | Status | Operational Notes |
+| Metric Dimension | Score / Count | Internal Target | Status | Operational Notes |
 | :--- | :---: | :---: | :---: | :--- |
 | **Retrieval Top-1 Hit-Rate** | **65.0% (13/20)** | >= 80.0% | **REVIEW** | Realistic zero-shot generalization across 7,207 unseen chunks |
 | **Retrieval Top-5 Hit-Rate** | **75.0% (15/20)** | >= 90.0% | **BASELINE** | 75% recall of relevant runbooks within top 5 candidates |
 | **Mean Reciprocal Rank (MRR)** | **0.683** | >= 0.850 | **BASELINE** | Authentic MRR without test-set prompt engineering |
-| **In-Domain Keyword Recall** | **50.0% (10/20)** | >= 50.0% | **PASS** | Multi-sentence extraction with verified citations |
+| **In-Domain Keyword Recall** | **50.0% (10/20)** | >= 60.0% (Prod Target) | **BASELINE (Mock)** | Multi-sentence extraction with verified citations |
 | **Out-of-Domain Refusal Accuracy** | **100.0% (5/5)** | 100.0% | **PASS** | 100% refusal preserved on unseen negative queries |
 | **Average Total Query Latency** | **0.71 ms** | < 2500 ms | **PASS** | In-RAM retrieval: 0.62ms |
 
 *(Full benchmark report generated automatically by [evaluation/evaluate.py](evaluation/evaluate.py) to [evaluation/eval_report.json](evaluation/eval_report.json)).*
+
+---
+
+### 🔍 Error Analysis: 5 Held-Out Retrieval Misses
+
+A critical requirement for production RAG systems is diagnosing why queries miss the top-5 candidates. Below is an exhaustive post-mortem of the 5 misses on our held-out dataset:
+
+| Query ID & Question | Expected Target | Top-1 Retrieved Candidate | Root Cause Diagnosis | Engineering Remediation |
+| :--- | :--- | :--- | :--- | :--- |
+| **`heldout-01`**<br>How does PodDisruptionBudget protect high availability workloads during voluntary node drains? | `kubernetes`<br>(Upstream PDB docs) | `gitlab/access-requests.md`<br>(Score: 0.2708) | **Vocabulary Hash Collision**: `PodDisruptionBudget` is a compound technical acronym. In mock hash space, token hashing diluted across 1024 dimensions, allowing high-frequency administrative words in GitLab docs to match weakly. | **BM25 Hybrid Search (RRF)**: Exact keyword matching on `PodDisruptionBudget` guarantees rank 1 retrieval regardless of embedding density. |
+| **`heldout-03`**<br>How do you diagnose CoreDNS query timeout and SERVFAIL responses in a Kubernetes cluster? | `kubernetes`<br>(CoreDNS docs) | `gitlab/delete-projects-manually.md`<br>(Score: 0.3563) | **IDF Weighting Absence**: `SERVFAIL` is an extreme high-information diagnostic token, but dense vectors without TF-IDF weighting were overpowered by generic terms ("query", "cluster"). | **BM25 / Keyword Boosting**: Boost tokens with high Inverse Document Frequency (IDF) like `SERVFAIL` and `CoreDNS`. |
+| **`heldout-04`**<br>What kubelet settings govern hard disk eviction when node storage exceeds thresholds? | `kubernetes_node_disk_pressure.md`<br>(Internal runbook) | `gitlab/ban-netblocks-on-haproxy.md`<br>(Score: 0.2100) | **Vocabulary Mismatch**: The internal runbook specifies `imagefs.available` and `nodefs.available`, whereas the query used generic phrasing ("hard disk eviction"). The score (0.2100) fell below the 0.25 retrieval cutoff. | **Internal-Runbook Boosting & HyDE**: Assign higher weight to curated internal runbooks over large public wikis, and apply Hypothetical Document Embeddings (HyDE). |
+| **`heldout-05`**<br>Why does a HorizontalPodAutoscaler fail to scale when custom metric metrics-server is unavailable? | `kubernetes`<br>(HPA documentation) | `gitlab/pgbadger_report.md`<br>(Score: 0.3642) | **Cross-Corpus Topic Collision**: General phrases like "metrics" and "unavailable" matched database performance monitoring runbooks in GitLab rather than Kubernetes scaling primitives. | **Corpus Partitioning / Metadata Routing**: Enforce `type=kubernetes` routing when queries mention Kubernetes-specific API resources. |
+| **`heldout-16`**<br>What triggers container Exit Code 137 in Kubernetes and how does memory limit configuration mitigate it? | `kubernetes_oom_killed.md`<br>(Internal runbook) | `gitlab/gitaly-repos-cgroup.md`<br>(Score: 0.9999) | **High-Density Topical Overlap**: `gitaly-repos-cgroup.md` is a 2,000-word deep dive into Linux `cgroup` memory enforcement. Its intense density on memory limits edged out the specific 137 exit code runbook. | **Cross-Encoder Reranker**: Re-score top-20 candidates using full query-document attention to prioritize exact exit code mentions over background cgroup tuning. |
 
 ---
 
@@ -155,12 +169,13 @@ To prevent silent index corruption when switching between local mock embeddings 
 
 ```json
 {
-  "embedding_model_id": "amazon.titan-embed-text-v2:0",
+  "embedding_model_id": "mock",
   "dimension": 1024,
   "total_chunks": 7207,
   "timestamp": "2026-10-27T11:08:52Z"
 }
 ```
+*(Illustrative contract schema captured from local build; when built for live Amazon Bedrock via `scripts/build_live_index.py`, `embedding_model_id` is set to `"amazon.titan-embed-text-v2:0"`).*
 
 When loading the index in Lambda (`load_local` or `load_from_s3`), InfraRAG verifies that `stored_model == expected_model_id` and `stored_dimension == expected_dimension`. If an index created with mock embeddings is loaded under live Bedrock mode, the loader immediately raises a descriptive `ValueError` and fails closed, completely preventing degraded, nonsensical vector search.
 
@@ -169,14 +184,17 @@ When loading the index in Lambda (`load_local` or `load_from_s3`), InfraRAG veri
 ### 🚀 Offline Live Indexing & Threshold Calibration
 
 1. **Concurrent Titan Index Builder** ([scripts/build_live_index.py](scripts/build_live_index.py)):
-   Because Lambda has a 60s execution limit, embedding 7,207 chunks must run offline. This tool leverages `ThreadPoolExecutor` (6-8 workers) with adaptive retries to build the complete index and push directly to `s3://<bucket>/faiss_index/`.
+   Because Lambda has a 60s execution limit, embedding 7,207 chunks must run offline. This tool leverages `ThreadPoolExecutor` (default 3 workers to stay within Bedrock quota limits) with **checkpoint/resume support** (`embedding_checkpoint.pkl`) and adaptive exponential retries, building the index and pushing directly to `s3://<bucket>/faiss_index/`.
    ```bash
    # Build index locally using live Amazon Bedrock Titan v2 and upload to S3:
    python scripts/build_live_index.py --upload-s3 --bucket infrarag-storage-XXXXXX --region ap-south-1
    ```
 
 2. **Relevance Threshold Calibration** ([scripts/calibrate_threshold.py](scripts/calibrate_threshold.py)):
-   Empirically calibrates `MIN_RELEVANCE_THRESHOLD` by analyzing top-1 cosine similarity distributions across in-domain technical questions versus out-of-domain negative queries.
+   Empirically analyzes top-1 cosine similarity distributions across in-domain technical questions versus out-of-domain negative queries:
+   - **In-Domain (40 technical queries)**: Min: `0.2100` | Median (p50): `1.0000` | Mean: `0.8627` | Max: `1.0000`
+   - **Out-of-Domain (10 negative refusal queries)**: Min: `0.2882` | Median (p50): `0.4285` | Mean: `0.4277` | Max: `0.5500`
+   - **Empirical Observation**: In mock hash vector space, token collisions create a background baseline (~0.35–0.55), meaning a static vector cutoff alone cannot separate all queries; lexical token overlap and citation verification enforce zero false positives. For live Bedrock Titan embeddings, threshold calibration must be measured empirically against live distributions during deployment.
    ```bash
    python scripts/calibrate_threshold.py
    ```

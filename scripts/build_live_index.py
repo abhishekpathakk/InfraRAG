@@ -39,7 +39,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="InfraRAG Offline Live Index Builder")
     parser.add_argument("--data-dir", type=Path, default=settings.DATA_DIR, help="Path to runbooks directory")
     parser.add_argument("--output-dir", type=Path, default=settings.BASE_DIR / "index_cache", help="Output directory for index")
-    parser.add_argument("--workers", type=int, default=6, help="Parallel worker threads for Bedrock embedding calls")
+    parser.add_argument("--workers", type=int, default=3, help="Parallel worker threads for Bedrock embedding calls (default 3 to avoid AWS rate limits)")
     parser.add_argument("--mock", action="store_true", help="Use MockEmbeddingProvider for offline dry-run test")
     parser.add_argument("--upload-s3", action="store_true", help="Upload built index directly to S3")
     parser.add_argument("--bucket", type=str, default=settings.S3_BUCKET_NAME, help="Destination S3 bucket name")
@@ -67,43 +67,71 @@ def load_and_chunk_documents(data_dir: Path) -> list[DocumentChunk]:
     return all_chunks
 
 
-def embed_chunks_concurrently(
+def embed_chunks_with_checkpoint(
     chunks: list[DocumentChunk],
     provider: Any,
-    max_workers: int = 6,
+    checkpoint_file: Path,
+    max_workers: int = 3,
 ) -> list[list[float]]:
-    """Embeds all document chunks using a thread pool with adaptive rate limiting."""
-    total = len(chunks)
-    embeddings: list[list[float] | None] = [None] * total
+    """
+    Embeds all document chunks with checkpoint and resume support.
+    If a run is interrupted by Bedrock rate limits or network issues,
+    it automatically resumes from the saved checkpoint.
+    """
+    import pickle
+
+    cached_embeddings: dict[str, list[float]] = {}
+    if checkpoint_file.exists():
+        try:
+            with open(checkpoint_file, "rb") as f:
+                cached_embeddings = pickle.load(f)
+            console.print(f"[bold green]Resuming from checkpoint: {len(cached_embeddings)} chunks already embedded.[/bold green]")
+        except Exception as e:
+            console.print(f"[yellow]Warning: Could not read checkpoint ({e}), starting fresh.[/yellow]")
+
+    pending_indices = [i for i, c in enumerate(chunks) if c.chunk_id not in cached_embeddings]
+
+    console.print(f"[bold yellow]Embedding {len(pending_indices)} pending chunks with {max_workers} worker threads...[/bold yellow]")
 
     def embed_single(idx: int, text: str) -> tuple[int, list[float]]:
-        # BedrockTitanEmbeddingProvider internally uses adaptive retry config
         vec = provider.embed_text(text)
         return idx, vec
 
-    console.print(f"[bold yellow]Embedding {total} chunks with {max_workers} worker threads...[/bold yellow]")
+    if pending_indices:
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+            TimeElapsedColumn(),
+            console=console,
+        ) as progress:
+            task = progress.add_task("[cyan]Embedding runbooks...", total=len(pending_indices))
 
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        BarColumn(),
-        TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-        TimeElapsedColumn(),
-        console=console,
-    ) as progress:
-        task = progress.add_task("[cyan]Embedding runbooks...", total=total)
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                future_to_idx = {
+                    executor.submit(embed_single, i, chunks[i].content): i
+                    for i in pending_indices
+                }
 
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            future_to_idx = {
-                executor.submit(embed_single, i, chunks[i].content): i
-                for i in range(total)
-            }
-            for future in as_completed(future_to_idx):
-                idx, vec = future.result()
-                embeddings[idx] = vec
-                progress.advance(task)
+                completed_count = 0
+                for future in as_completed(future_to_idx):
+                    idx, vec = future.result()
+                    cached_embeddings[chunks[idx].chunk_id] = vec
+                    progress.advance(task)
+                    completed_count += 1
 
-    return [v for v in embeddings if v is not None]
+                    # Save checkpoint every 100 chunks
+                    if completed_count % 100 == 0:
+                        with open(checkpoint_file, "wb") as f:
+                            pickle.dump(cached_embeddings, f)
+
+        # Final checkpoint save for pending batch
+        with open(checkpoint_file, "wb") as f:
+            pickle.dump(cached_embeddings, f)
+
+    # Return vectors in exact original chunk order
+    return [cached_embeddings[c.chunk_id] for c in chunks]
 
 
 def main():
@@ -139,8 +167,14 @@ def main():
         console.print("[red]No chunks found to index. Aborting.[/red]")
         return
 
-    # 3. Embed chunks concurrently
-    embeddings = embed_chunks_concurrently(chunks, provider, max_workers=args.workers)
+    # 3. Embed chunks with checkpoint support
+    checkpoint_file = args.output_dir / "embedding_checkpoint.pkl"
+    embeddings = embed_chunks_with_checkpoint(
+        chunks=chunks,
+        provider=provider,
+        checkpoint_file=checkpoint_file,
+        max_workers=args.workers,
+    )
     vector_store.add_documents(chunks, embeddings)
 
     elapsed = time.time() - start_time

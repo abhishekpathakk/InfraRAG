@@ -10,7 +10,7 @@
     "mrr": 0.883,
     "in_domain_grounded_pct": 50.0,
     "out_domain_refusal_pct": 100.0,
-    "avg_latency_ms": 0.73,
+    "avg_latency_ms": 0.74,
     "avg_retrieval_ms": 0.64,
     "results": [
       {
@@ -30,7 +30,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 1.39
+        "latency_ms": 1.68
       },
       {
         "id": 2,
@@ -39,7 +39,7 @@
         "retrieval_rank": 3,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 0.74
+        "latency_ms": 0.75
       },
       {
         "id": 3,
@@ -67,7 +67,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 0.72
+        "latency_ms": 0.73
       },
       {
         "id": 4,
@@ -95,7 +95,7 @@
             "type": "public"
           }
         ],
-        "latency_ms": 0.71
+        "latency_ms": 0.88
       },
       {
         "id": 5,
@@ -104,7 +104,7 @@
         "retrieval_rank": 1,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 0.66
+        "latency_ms": 0.65
       },
       {
         "id": 6,
@@ -132,7 +132,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 0.69
+        "latency_ms": 0.71
       },
       {
         "id": 7,
@@ -160,7 +160,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 0.66
+        "latency_ms": 0.68
       },
       {
         "id": 8,
@@ -235,7 +235,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 0.65
+        "latency_ms": 0.6
       },
       {
         "id": 11,
@@ -254,7 +254,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 0.7
+        "latency_ms": 0.63
       },
       {
         "id": 12,
@@ -282,7 +282,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 0.72
+        "latency_ms": 0.63
       },
       {
         "id": 13,
@@ -291,7 +291,7 @@
         "retrieval_rank": 1,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 0.76
+        "latency_ms": 0.74
       },
       {
         "id": 14,
@@ -319,7 +319,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 0.82
+        "latency_ms": 0.79
       },
       {
         "id": 15,
@@ -366,7 +366,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 0.7
+        "latency_ms": 0.67
       },
       {
         "id": 17,
@@ -385,7 +385,7 @@
             "type": "public"
           }
         ],
-        "latency_ms": 0.73
+        "latency_ms": 0.71
       },
       {
         "id": 18,
@@ -423,7 +423,7 @@
             "type": "public"
           }
         ],
-        "latency_ms": 0.66
+        "latency_ms": 0.69
       },
       {
         "id": 20,
@@ -442,7 +442,7 @@
             "type": "public"
           }
         ],
-        "latency_ms": 0.63
+        "latency_ms": 0.64
       },
       {
         "id": 21,
@@ -451,7 +451,7 @@
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 0.67
+        "latency_ms": 0.68
       },
       {
         "id": 22,
@@ -478,7 +478,7 @@
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 0.82
+        "latency_ms": 0.84
       },
       {
         "id": 25,
@@ -487,7 +487,7 @@
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 0.83
+        "latency_ms": 0.79
       }
     ]
   },
@@ -511,7 +511,7 @@
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 0.7
+        "latency_ms": 0.69
       },
       {
         "id": "heldout-02",
@@ -520,7 +520,7 @@
         "retrieval_rank": 1,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 0.72
+        "latency_ms": 0.7
       },
       {
         "id": "heldout-03",
@@ -529,7 +529,7 @@
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 0.71
+        "latency_ms": 0.69
       },
       {
         "id": "heldout-04",
@@ -538,7 +538,7 @@
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 0.62
+        "latency_ms": 0.65
       },
       {
         "id": "heldout-05",
@@ -547,7 +547,7 @@
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 0.73
+        "latency_ms": 0.71
       },
       {
         "id": "heldout-06",
@@ -575,7 +575,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 0.74
+        "latency_ms": 0.69
       },
       {
         "id": "heldout-07",
@@ -631,7 +631,7 @@
             "type": "public"
           }
         ],
-        "latency_ms": 0.67
+        "latency_ms": 0.72
       },
       {
         "id": "heldout-09",
@@ -650,7 +650,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 0.68
+        "latency_ms": 0.65
       },
       {
         "id": "heldout-10",
@@ -669,7 +669,7 @@
             "type": "public"
           }
         ],
-        "latency_ms": 0.79
+        "latency_ms": 0.8
       },
       {
         "id": "heldout-11",
@@ -678,7 +678,7 @@
         "retrieval_rank": 1,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 0.66
+        "latency_ms": 0.65
       },
       {
         "id": "heldout-12",
@@ -697,7 +697,7 @@
             "type": "public"
           }
         ],
-        "latency_ms": 0.7
+        "latency_ms": 0.73
       },
       {
         "id": "heldout-13",
@@ -706,7 +706,7 @@
         "retrieval_rank": 3,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 0.64
+        "latency_ms": 0.63
       },
       {
         "id": "heldout-14",
@@ -715,7 +715,7 @@
         "retrieval_rank": 3,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 0.64
+        "latency_ms": 0.63
       },
       {
         "id": "heldout-15",
@@ -724,7 +724,7 @@
         "retrieval_rank": 1,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 0.75
+        "latency_ms": 0.74
       },
       {
         "id": "heldout-16",
@@ -743,7 +743,7 @@
             "type": "public"
           }
         ],
-        "latency_ms": 0.67
+        "latency_ms": 0.73
       },
       {
         "id": "heldout-17",
@@ -836,7 +836,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 0.83
+        "latency_ms": 0.64
       },
       {
         "id": "heldout-20",
@@ -864,7 +864,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 0.71
+        "latency_ms": 0.66
       },
       {
         "id": "heldout-21",
@@ -873,7 +873,7 @@
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 0.7
+        "latency_ms": 0.82
       },
       {
         "id": "heldout-22",
@@ -882,7 +882,7 @@
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 0.67
+        "latency_ms": 0.72
       },
       {
         "id": "heldout-23",
@@ -891,7 +891,7 @@
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 0.76
+        "latency_ms": 0.79
       },
       {
         "id": "heldout-24",

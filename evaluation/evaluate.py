@@ -120,7 +120,7 @@ def evaluate_dataset(chain: RAGChain, dataset_path: Path, title: str) -> dict[st
     table = Table(title=title, show_header=True, header_style="bold green")
     table.add_column("Metric Dimension", style="cyan")
     table.add_column("Score / Count", justify="center", style="bold yellow")
-    table.add_column("Industry Target", justify="center", style="dim")
+    table.add_column("Internal Target", justify="center", style="dim")
     table.add_column("Status", justify="center")
 
     table.add_row(
@@ -144,8 +144,8 @@ def evaluate_dataset(chain: RAGChain, dataset_path: Path, title: str) -> dict[st
     table.add_row(
         "In-Domain Keyword Recall (Extractive Mock)",
         f"{grounded_rate:.1f}% ({in_domain_grounded}/{in_domain_total})",
-        ">= 50.0% (Mock Baseline)",
-        "[green]PASS[/green]" if grounded_rate >= 50.0 else "[red]FAIL[/red]",
+        ">= 60.0% (Production Target)",
+        "[green]PASS[/green]" if grounded_rate >= 60.0 else "[yellow]BASELINE (Mock)[/yellow]",
     )
     table.add_row(
         "Out-of-Domain Refusal Accuracy",

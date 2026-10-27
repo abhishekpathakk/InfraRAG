@@ -173,6 +173,10 @@ resource "aws_iam_policy" "lambda_ask_policy" {
         Resource = [
           "arn:aws:bedrock:${var.aws_region}::foundation-model/${var.embedding_model_id}",
           "arn:aws:bedrock:${var.aws_region}::foundation-model/${var.llm_model_id}",
+          "arn:aws:bedrock:us-east-1::foundation-model/*",
+          "arn:aws:bedrock:us-west-2::foundation-model/*",
+          "arn:aws:bedrock:ap-southeast-1::foundation-model/*",
+          "arn:aws:bedrock:ap-northeast-1::foundation-model/*",
           "arn:aws:bedrock:${var.aws_region}:${data.aws_caller_identity.current.account_id}:inference-profile/*",
           "arn:aws:bedrock:*:*:inference-profile/*"
         ]
