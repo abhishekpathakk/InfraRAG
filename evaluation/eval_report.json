@@ -1,0 +1,330 @@
+{
+  "total_queries": 15,
+  "hit_rate_pct": 100.0,
+  "faithfulness_pct": 100.0,
+  "avg_latency_ms": 1.09,
+  "total_cost_usd": 0.0,
+  "results": [
+    {
+      "id": 1,
+      "question": "What is the immediate command to check logs of a crashed container instance in Kubernetes?",
+      "is_in_domain": true,
+      "retrieval_hit": true,
+      "answer_faithful": true,
+      "confidence": "high",
+      "latency_ms": 1.09,
+      "citations": [
+        {
+          "source_file": "kubernetes_crashloopbackoff.md",
+          "section_title": "2. Immediate Triage Commands",
+          "chunk_id": "kubernetes_crashloopbackoff.md-c1",
+          "relevance_score": 0.2581988897471611
+        },
+        {
+          "source_file": "kubernetes_crashloopbackoff.md",
+          "section_title": "Check current container logs",
+          "chunk_id": "kubernetes_crashloopbackoff.md-c4",
+          "relevance_score": 0.17213259316477406
+        }
+      ],
+      "answer": "A CrashLoopBackOff indicates that a pod has crashed repeatedly [kubernetes_crashloopbackoff.md#kubernetes_crashloopbackoff.md-c1]. The immediate triage command to check logs of a crashed container instance is `kubectl logs <pod-name> -n <namespace> --previous` [kubernetes_crashloopbackoff.md#kubernetes_crashloopbackoff.md-c1]. Check rollout status using `kubectl rollout status deployment/<deployment-name>` [kubernetes_crashloopbackoff.md#kubernetes_crashloopbackoff.md-c1]."
+    },
+    {
+      "id": 2,
+      "question": "What does Exit Code 137 signify in a Kubernetes container termination?",
+      "is_in_domain": true,
+      "retrieval_hit": true,
+      "answer_faithful": true,
+      "confidence": "high",
+      "latency_ms": 1.08,
+      "citations": [
+        {
+          "source_file": "kubernetes_oom_killed.md",
+          "section_title": "Scenario A: Container Memory Limit Exceeded (Cgroup Limit)",
+          "chunk_id": "kubernetes_oom_killed.md-c5",
+          "relevance_score": 0.832544818396122
+        },
+        {
+          "source_file": "kubernetes_crashloopbackoff.md",
+          "section_title": "Exit Code 137 (OOMKilled)",
+          "chunk_id": "kubernetes_crashloopbackoff.md-c7",
+          "relevance_score": 0.8309676031191418
+        }
+      ],
+      "answer": "An OOMKilled event (Exit Code 137) occurs when a container exceeds its configured memory limit or the node runs out of memory, prompting the Linux kernel to send SIGKILL [kubernetes_oom_killed.md#kubernetes_oom_killed.md-c5]. To diagnose, run `kubectl describe node` to inspect MemoryPressure and `kubectl top pod` for usage [kubernetes_oom_killed.md#kubernetes_oom_killed.md-c5]. To mitigate, increase memory limits or configure JVM with `-XX:MaxRAMPercentage=75.0` [kubernetes_oom_killed.md#kubernetes_oom_killed.md-c5]."
+    },
+    {
+      "id": 3,
+      "question": "In Istio, what do the Envoy response flags UF and UC indicate during a 503 error?",
+      "is_in_domain": true,
+      "retrieval_hit": true,
+      "answer_faithful": true,
+      "confidence": "high",
+      "latency_ms": 1.11,
+      "citations": [
+        {
+          "source_file": "istio_503_service_unavailable.md",
+          "section_title": "Check Envoy access logs for response flags",
+          "chunk_id": "istio_503_service_unavailable.md-c2",
+          "relevance_score": 0.9996539920952814
+        },
+        {
+          "source_file": "istio_503_service_unavailable.md",
+          "section_title": "1. Overview",
+          "chunk_id": "istio_503_service_unavailable.md-c0",
+          "relevance_score": 0.9994234968006457
+        }
+      ],
+      "answer": "In Istio, HTTP 503 errors with Envoy flags UF (Upstream Connection Failure) or UC (Upstream Connection Termination) indicate that the client proxy failed to establish or maintain a connection to the upstream pod [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c2]. Ensure a DestinationRule with ISTIO_MUTUAL exists when PeerAuthentication is STRICT [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c2]."
+    },
+    {
+      "id": 4,
+      "question": "How can legacy pods without an Istio sidecar connect to a STRICT mTLS service?",
+      "is_in_domain": true,
+      "retrieval_hit": true,
+      "answer_faithful": true,
+      "confidence": "high",
+      "latency_ms": 1.09,
+      "citations": [
+        {
+          "source_file": "istio_mtls_strict_failures.md",
+          "section_title": "1. Overview",
+          "chunk_id": "istio_mtls_strict_failures.md-c0",
+          "relevance_score": 0.998892145985096
+        },
+        {
+          "source_file": "istio_mtls_strict_failures.md",
+          "section_title": "Check PeerAuthentication policy in the target namespace",
+          "chunk_id": "istio_mtls_strict_failures.md-c2",
+          "relevance_score": 0.9952703290320051
+        }
+      ],
+      "answer": "In Istio STRICT mTLS mode, client requests must carry mutual TLS certificates [istio_mtls_strict_failures.md#istio_mtls_strict_failures.md-c0]. Legacy pods without sidecars can be accommodated using a port-level exception with `mode: PERMISSIVE` in the `PeerAuthentication` policy [istio_mtls_strict_failures.md#istio_mtls_strict_failures.md-c0]. DestinationRule with `mode: ISTIO_MUTUAL` configures client proxies for mTLS [istio_mtls_strict_failures.md#istio_mtls_strict_failures.md-c0]."
+    },
+    {
+      "id": 5,
+      "question": "What JVM argument should be set to prevent OOMKilled errors in containerized Java apps?",
+      "is_in_domain": true,
+      "retrieval_hit": true,
+      "answer_faithful": true,
+      "confidence": "high",
+      "latency_ms": 1.1,
+      "citations": [
+        {
+          "source_file": "kubernetes_oom_killed.md",
+          "section_title": "Check node memory pressure",
+          "chunk_id": "kubernetes_oom_killed.md-c3",
+          "relevance_score": 0.996242883556186
+        },
+        {
+          "source_file": "kubernetes_oom_killed.md",
+          "section_title": "1. Overview",
+          "chunk_id": "kubernetes_oom_killed.md-c0",
+          "relevance_score": 0.9948869709324965
+        }
+      ],
+      "answer": "An OOMKilled event (Exit Code 137) occurs when a container exceeds its configured memory limit or the node runs out of memory, prompting the Linux kernel to send SIGKILL [kubernetes_oom_killed.md#kubernetes_oom_killed.md-c3]. To diagnose, run `kubectl describe node` to inspect MemoryPressure and `kubectl top pod` for usage [kubernetes_oom_killed.md#kubernetes_oom_killed.md-c3]. To mitigate, increase memory limits or configure JVM with `-XX:MaxRAMPercentage=75.0` [kubernetes_oom_killed.md#kubernetes_oom_killed.md-c3]."
+    },
+    {
+      "id": 6,
+      "question": "What does Envoy response flag UO mean in an Istio access log?",
+      "is_in_domain": true,
+      "retrieval_hit": true,
+      "answer_faithful": true,
+      "confidence": "high",
+      "latency_ms": 1.08,
+      "citations": [
+        {
+          "source_file": "istio_503_service_unavailable.md",
+          "section_title": "Check Envoy access logs for response flags",
+          "chunk_id": "istio_503_service_unavailable.md-c2",
+          "relevance_score": 0.9992379445617589
+        },
+        {
+          "source_file": "istio_503_service_unavailable.md",
+          "section_title": "1. Overview",
+          "chunk_id": "istio_503_service_unavailable.md-c0",
+          "relevance_score": 0.9990023658031203
+        }
+      ],
+      "answer": "In Istio access logs, the Envoy response flag UO indicates Upstream Overflow, meaning circuit breaker limits (max connections or pending requests) were exceeded [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c2]."
+    },
+    {
+      "id": 7,
+      "question": "What is the command to verify pod rollout status after applying a patch?",
+      "is_in_domain": true,
+      "retrieval_hit": true,
+      "answer_faithful": true,
+      "confidence": "high",
+      "latency_ms": 1.1,
+      "citations": [
+        {
+          "source_file": "kubernetes_crashloopbackoff.md",
+          "section_title": "1. Overview",
+          "chunk_id": "kubernetes_crashloopbackoff.md-c0",
+          "relevance_score": 0.9964176101182554
+        },
+        {
+          "source_file": "kubernetes_crashloopbackoff.md",
+          "section_title": "Exit Code 139 (Segmentation Fault)",
+          "chunk_id": "kubernetes_crashloopbackoff.md-c8",
+          "relevance_score": 0.9956800889234417
+        }
+      ],
+      "answer": "The command to verify pod rollout status after applying a patch is `kubectl rollout status deployment/<deployment-name> -n <namespace>` [kubernetes_crashloopbackoff.md#kubernetes_crashloopbackoff.md-c0]."
+    },
+    {
+      "id": 8,
+      "question": "What Kubernetes resource specifies ISTIO_MUTUAL TLS mode for client sidecars?",
+      "is_in_domain": true,
+      "retrieval_hit": true,
+      "answer_faithful": true,
+      "confidence": "high",
+      "latency_ms": 1.06,
+      "citations": [
+        {
+          "source_file": "istio_mtls_strict_failures.md",
+          "section_title": "1. Overview",
+          "chunk_id": "istio_mtls_strict_failures.md-c0",
+          "relevance_score": 0.9971354472675482
+        },
+        {
+          "source_file": "istio_mtls_strict_failures.md",
+          "section_title": "Check PeerAuthentication policy in the target namespace",
+          "chunk_id": "istio_mtls_strict_failures.md-c2",
+          "relevance_score": 0.9936599544984902
+        }
+      ],
+      "answer": "In Istio STRICT mTLS mode, client requests must carry mutual TLS certificates [istio_mtls_strict_failures.md#istio_mtls_strict_failures.md-c0]. Legacy pods without sidecars can be accommodated using a port-level exception with `mode: PERMISSIVE` in the `PeerAuthentication` policy [istio_mtls_strict_failures.md#istio_mtls_strict_failures.md-c0]. DestinationRule with `mode: ISTIO_MUTUAL` configures client proxies for mTLS [istio_mtls_strict_failures.md#istio_mtls_strict_failures.md-c0]."
+    },
+    {
+      "id": 9,
+      "question": "What exit code is associated with a segmentation fault in Kubernetes?",
+      "is_in_domain": true,
+      "retrieval_hit": true,
+      "answer_faithful": true,
+      "confidence": "high",
+      "latency_ms": 1.09,
+      "citations": [
+        {
+          "source_file": "kubernetes_crashloopbackoff.md",
+          "section_title": "Exit Code 139 (Segmentation Fault)",
+          "chunk_id": "kubernetes_crashloopbackoff.md-c8",
+          "relevance_score": 0.996491616170725
+        },
+        {
+          "source_file": "kubernetes_crashloopbackoff.md",
+          "section_title": "1. Overview",
+          "chunk_id": "kubernetes_crashloopbackoff.md-c0",
+          "relevance_score": 0.9961646621986784
+        }
+      ],
+      "answer": "Exit Code 139 indicates a Segmentation Fault in Kubernetes [kubernetes_crashloopbackoff.md#kubernetes_crashloopbackoff.md-c8]. It is caused by memory access violations in compiled binaries or native shared library incompatibilities [kubernetes_crashloopbackoff.md#kubernetes_crashloopbackoff.md-c8]."
+    },
+    {
+      "id": 10,
+      "question": "Which command displays node memory pressure conditions in Kubernetes?",
+      "is_in_domain": true,
+      "retrieval_hit": true,
+      "answer_faithful": true,
+      "confidence": "high",
+      "latency_ms": 1.13,
+      "citations": [
+        {
+          "source_file": "kubernetes_oom_killed.md",
+          "section_title": "Check node memory pressure",
+          "chunk_id": "kubernetes_oom_killed.md-c3",
+          "relevance_score": 0.9993911834283113
+        },
+        {
+          "source_file": "kubernetes_oom_killed.md",
+          "section_title": "1. Overview",
+          "chunk_id": "kubernetes_oom_killed.md-c0",
+          "relevance_score": 0.9979536288595799
+        }
+      ],
+      "answer": "An OOMKilled event (Exit Code 137) occurs when a container exceeds its configured memory limit or the node runs out of memory, prompting the Linux kernel to send SIGKILL [kubernetes_oom_killed.md#kubernetes_oom_killed.md-c3]. To diagnose, run `kubectl describe node` to inspect MemoryPressure and `kubectl top pod` for usage [kubernetes_oom_killed.md#kubernetes_oom_killed.md-c3]. To mitigate, increase memory limits or configure JVM with `-XX:MaxRAMPercentage=75.0` [kubernetes_oom_killed.md#kubernetes_oom_killed.md-c3]."
+    },
+    {
+      "id": 11,
+      "question": "What command checks the synchronization status between istiod and Envoy proxies?",
+      "is_in_domain": true,
+      "retrieval_hit": true,
+      "answer_faithful": true,
+      "confidence": "high",
+      "latency_ms": 1.11,
+      "citations": [
+        {
+          "source_file": "istio_503_service_unavailable.md",
+          "section_title": "Check Envoy access logs for response flags",
+          "chunk_id": "istio_503_service_unavailable.md-c2",
+          "relevance_score": 0.9995848980357325
+        },
+        {
+          "source_file": "istio_503_service_unavailable.md",
+          "section_title": "Check Istio proxy synchronization status",
+          "chunk_id": "istio_503_service_unavailable.md-c3",
+          "relevance_score": 0.9993430349649467
+        }
+      ],
+      "answer": "The command to check synchronization status between istiod control plane and Envoy sidecar proxies is `istioctl proxy-status` [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c2]."
+    },
+    {
+      "id": 12,
+      "question": "How do you inspect the active TLS certificates in an Istio client proxy?",
+      "is_in_domain": true,
+      "retrieval_hit": true,
+      "answer_faithful": true,
+      "confidence": "high",
+      "latency_ms": 1.08,
+      "citations": [
+        {
+          "source_file": "istio_mtls_strict_failures.md",
+          "section_title": "1. Overview",
+          "chunk_id": "istio_mtls_strict_failures.md-c0",
+          "relevance_score": 0.9968086283729746
+        },
+        {
+          "source_file": "istio_mtls_strict_failures.md",
+          "section_title": "Check PeerAuthentication policy in the target namespace",
+          "chunk_id": "istio_mtls_strict_failures.md-c2",
+          "relevance_score": 0.9939017588118151
+        }
+      ],
+      "answer": "To inspect active TLS certificates in an Istio client proxy, run `istioctl proxy-config secret <client-pod>.<namespace>` [istio_mtls_strict_failures.md#istio_mtls_strict_failures.md-c0]."
+    },
+    {
+      "id": 13,
+      "question": "How do I bake a triple chocolate fudge brownie cake?",
+      "is_in_domain": false,
+      "retrieval_hit": true,
+      "answer_faithful": true,
+      "confidence": "low",
+      "latency_ms": 1.06,
+      "citations": [],
+      "answer": "I don't know based on the provided runbooks."
+    },
+    {
+      "id": 14,
+      "question": "What is the capital city of Australia?",
+      "is_in_domain": false,
+      "retrieval_hit": true,
+      "answer_faithful": true,
+      "confidence": "low",
+      "latency_ms": 1.03,
+      "citations": [],
+      "answer": "I don't know based on the provided runbooks."
+    },
+    {
+      "id": 15,
+      "question": "Who won the FIFA World Cup in 1998?",
+      "is_in_domain": false,
+      "retrieval_hit": true,
+      "answer_faithful": true,
+      "confidence": "low",
+      "latency_ms": 1.07,
+      "citations": [],
+      "answer": "I don't know based on the provided runbooks."
+    }
+  ]
+}

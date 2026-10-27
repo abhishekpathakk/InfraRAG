@@ -1,0 +1,107 @@
+[
+  {
+    "id": 1,
+    "question": "What is the immediate command to check logs of a crashed container instance in Kubernetes?",
+    "expected_keywords": ["kubectl logs", "--previous"],
+    "expected_source": "kubernetes_crashloopbackoff.md",
+    "is_in_domain": true
+  },
+  {
+    "id": 2,
+    "question": "What does Exit Code 137 signify in a Kubernetes container termination?",
+    "expected_keywords": ["OOMKilled", "SIGKILL", "memory limit"],
+    "expected_source": "kubernetes_oom_killed.md",
+    "is_in_domain": true
+  },
+  {
+    "id": 3,
+    "question": "In Istio, what do the Envoy response flags UF and UC indicate during a 503 error?",
+    "expected_keywords": ["Upstream Connection Failure", "Upstream Connection Termination"],
+    "expected_source": "istio_503_service_unavailable.md",
+    "is_in_domain": true
+  },
+  {
+    "id": 4,
+    "question": "How can legacy pods without an Istio sidecar connect to a STRICT mTLS service?",
+    "expected_keywords": ["PERMISSIVE", "portLevelMtls", "PeerAuthentication"],
+    "expected_source": "istio_mtls_strict_failures.md",
+    "is_in_domain": true
+  },
+  {
+    "id": 5,
+    "question": "What JVM argument should be set to prevent OOMKilled errors in containerized Java apps?",
+    "expected_keywords": ["-XX:MaxRAMPercentage", "heap"],
+    "expected_source": "kubernetes_oom_killed.md",
+    "is_in_domain": true
+  },
+  {
+    "id": 6,
+    "question": "What does Envoy response flag UO mean in an Istio access log?",
+    "expected_keywords": ["Upstream Overflow", "circuit breaker"],
+    "expected_source": "istio_503_service_unavailable.md",
+    "is_in_domain": true
+  },
+  {
+    "id": 7,
+    "question": "What is the command to verify pod rollout status after applying a patch?",
+    "expected_keywords": ["kubectl rollout status"],
+    "expected_source": "kubernetes_crashloopbackoff.md",
+    "is_in_domain": true
+  },
+  {
+    "id": 8,
+    "question": "What Kubernetes resource specifies ISTIO_MUTUAL TLS mode for client sidecars?",
+    "expected_keywords": ["DestinationRule", "trafficPolicy", "ISTIO_MUTUAL"],
+    "expected_source": ["istio_503_service_unavailable.md", "istio_mtls_strict_failures.md"],
+    "is_in_domain": true
+  },
+  {
+    "id": 9,
+    "question": "What exit code is associated with a segmentation fault in Kubernetes?",
+    "expected_keywords": ["Exit Code 139", "Segmentation Fault"],
+    "expected_source": "kubernetes_crashloopbackoff.md",
+    "is_in_domain": true
+  },
+  {
+    "id": 10,
+    "question": "Which command displays node memory pressure conditions in Kubernetes?",
+    "expected_keywords": ["kubectl describe node", "MemoryPressure"],
+    "expected_source": "kubernetes_oom_killed.md",
+    "is_in_domain": true
+  },
+  {
+    "id": 11,
+    "question": "What command checks the synchronization status between istiod and Envoy proxies?",
+    "expected_keywords": ["istioctl proxy-status"],
+    "expected_source": "istio_503_service_unavailable.md",
+    "is_in_domain": true
+  },
+  {
+    "id": 12,
+    "question": "How do you inspect the active TLS certificates in an Istio client proxy?",
+    "expected_keywords": ["istioctl proxy-config secret"],
+    "expected_source": "istio_mtls_strict_failures.md",
+    "is_in_domain": true
+  },
+  {
+    "id": 13,
+    "question": "How do I bake a triple chocolate fudge brownie cake?",
+    "expected_keywords": ["I don't know based on the provided runbooks."],
+    "expected_source": null,
+    "is_in_domain": false
+  },
+  {
+    "id": 14,
+    "question": "What is the capital city of Australia?",
+    "expected_keywords": ["I don't know based on the provided runbooks."],
+    "expected_source": null,
+    "is_in_domain": false
+  },
+  {
+    "id": 15,
+    "question": "Who won the FIFA World Cup in 1998?",
+    "expected_keywords": ["I don't know based on the provided runbooks."],
+    "expected_source": null,
+    "is_in_domain": false
+  }
+]

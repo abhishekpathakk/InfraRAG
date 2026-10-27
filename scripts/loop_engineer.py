@@ -66,10 +66,16 @@ def main():
     for rb in runbooks:
         print(f"   - {rb.name} ({rb.stat().st_size} bytes)")
 
+    # Prefer .venv binaries if available
+    venv_bin = ROOT_DIR / ".venv" / "bin"
+    python_cmd = str(venv_bin / "python") if (venv_bin / "python").exists() else sys.executable
+    ruff_cmd = str(venv_bin / "ruff") if (venv_bin / "ruff").exists() else "ruff"
+    pytest_cmd = str(venv_bin / "pytest") if (venv_bin / "pytest").exists() else "pytest"
+
     # Run linter if ruff is available
     lint_ok = True
     try:
-        lint_ok = run_cmd(["ruff", "check", "."], "Ruff Linter Check")
+        lint_ok = run_cmd([ruff_cmd, "check", "."], "Ruff Linter Check")
     except FileNotFoundError:
         print("⚠️  Ruff not installed in current environment; skipping linter check.")
 
@@ -78,15 +84,25 @@ def main():
     test_dir = ROOT_DIR / "tests"
     if test_dir.exists() and list(test_dir.glob("test_*.py")):
         try:
-            test_ok = run_cmd(["pytest", "-v", "tests/"], "Pytest Test Suite")
+            test_ok = run_cmd([pytest_cmd, "-v", "tests/"], "Pytest Test Suite")
         except FileNotFoundError:
             print("⚠️  Pytest not installed in current environment; skipping test execution.")
     else:
         print("ℹ️  No test files created yet. Tests will be added in Phase 2.")
 
+    # Run evaluation benchmark if requested
+    eval_ok = True
+    eval_script = ROOT_DIR / "evaluation" / "evaluate.py"
+    if eval_script.exists():
+        try:
+            eval_ok = run_cmd([python_cmd, str(eval_script)], "Evaluation Benchmark (Hit-rate & Faithfulness)")
+        except Exception as e:
+            print(f"⚠️  Evaluation failed to run: {e}")
+            eval_ok = False
+
     print_banner("Loop Engineer Run Summary")
-    if lint_ok and test_ok:
-        print("🎉 ALL CHECKS PASSED! Ready for the next phase.")
+    if lint_ok and test_ok and eval_ok:
+        print("🎉 ALL CHECKS PASSED! Ready for deployment / showcase.")
         sys.exit(0)
     else:
         print("⚠️ Some checks failed. Review the output above to fix.")

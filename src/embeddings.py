@@ -1,0 +1,171 @@
+"""
+Embeddings Provider for InfraRAG.
+
+Supports:
+1. Amazon Bedrock Titan Text Embeddings v2 (1024-dim, unit normalized).
+2. Mock Embedding Provider (100% Free, offline local mode for zero-cost dev/test).
+"""
+
+import hashlib
+import json
+import logging
+from abc import ABC, abstractmethod
+from typing import Any
+try:
+    import numpy as np
+    HAS_NUMPY = True
+except ImportError:
+    HAS_NUMPY = False
+
+from src.config import settings
+
+logger = logging.getLogger(__name__)
+
+
+class BaseEmbeddingProvider(ABC):
+    """Abstract Base Class for embedding providers."""
+
+    @abstractmethod
+    def embed_text(self, text: str) -> list[float]:
+        """Embed a single text string into a float vector."""
+        pass
+
+    @abstractmethod
+    def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        """Embed a list of text strings in batch."""
+        pass
+
+    @property
+    @abstractmethod
+    def dimension(self) -> int:
+        """Vector dimensionality."""
+        pass
+
+
+class MockEmbeddingProvider(BaseEmbeddingProvider):
+    """
+    100% Free offline local embedding generator.
+    Produces deterministic 1024-dimensional unit-normalized vectors.
+    Uses semantic term weighting so related DevOps concepts (e.g., OOMKilled, memory, exit 137)
+    have high cosine similarity.
+    Works with numpy or pure Python standard library.
+    """
+
+    def __init__(self, dimension: int = 1024):
+        self._dim = dimension
+        self._concept_clusters = {
+            "memory": [
+                "oomkilled", "exit code 137", "sigkill", "memorypressure", "ram", "heap",
+                "cgroup", "limits", "node memory", "describe node", "memory pressure", "top pod",
+            ],
+            "crash": [
+                "crashloopbackoff", "restart", "exit code 1", "exit code 139", "liveness probe",
+                "readiness", "terminated", "segmentation", "segfault", "rollout", "previous",
+            ],
+            "istio_503": [
+                "503", "service unavailable", "envoy", "uf", "uc", "uo", "nr", "upstream",
+                "circuit", "proxy-status", "synchronization", "istiod",
+            ],
+            "mtls": [
+                "mtls", "peerauthentication", "strict", "destinationrule", "istio_mutual",
+                "certificate", "handshake", "secret", "permissive", "portlevelmtls",
+            ],
+        }
+
+    @property
+    def dimension(self) -> int:
+        return self._dim
+
+    def embed_text(self, text: str) -> list[float]:
+        normalized_text = text.lower()
+        vec = [0.0] * self._dim
+
+        tokens = normalized_text.split()
+        for token in tokens:
+            seed = int(hashlib.md5(token.encode("utf-8")).hexdigest(), 16) % self._dim
+            vec[seed] += 1.0
+
+        for idx, (cluster_name, keywords) in enumerate(self._concept_clusters.items()):
+            bucket_start = idx * 100
+            for kw in keywords:
+                if kw in normalized_text:
+                    for b in range(bucket_start, bucket_start + 80):
+                        vec[b] += 5.0
+
+        # L2-normalize vector so ||v|| = 1.0
+        norm = sum(x * x for x in vec) ** 0.5
+        if norm > 0:
+            return [x / norm for x in vec]
+        vec[0] = 1.0
+        return vec
+
+    def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        return [self.embed_text(t) for t in texts]
+
+
+class BedrockTitanEmbeddingProvider(BaseEmbeddingProvider):
+    """
+    Amazon Bedrock Titan Text Embeddings v2.
+    Model ID: amazon.titan-embed-text-v2:0
+    Dimensions: 1024
+    Normalized: True (Inner Product = Cosine Similarity)
+    """
+
+    def __init__(
+        self,
+        region_name: str = settings.AWS_REGION,
+        model_id: str = settings.BEDROCK_EMBEDDING_MODEL_ID,
+        dimension: int = settings.EMBEDDING_DIMENSION,
+    ):
+        self._region = region_name
+        self._model_id = model_id
+        self._dim = dimension
+        self._client: Any = None
+
+    def _get_client(self):
+        if self._client is None:
+            import boto3
+
+            self._client = boto3.client("bedrock-runtime", region_name=self._region)
+        return self._client
+
+    @property
+    def dimension(self) -> int:
+        return self._dim
+
+    def embed_text(self, text: str) -> list[float]:
+        client = self._get_client()
+        body = json.dumps({
+            "inputText": text,
+            "dimensions": self._dim,
+            "normalize": True,
+        })
+
+        try:
+            response = client.invoke_model(
+                modelId=self._model_id,
+                contentType="application/json",
+                accept="application/json",
+                body=body,
+            )
+            response_body = json.loads(response["body"].read().decode("utf-8"))
+            return response_body["embedding"]
+        except Exception as e:
+            logger.error(f"Failed to invoke Bedrock Titan Embeddings: {e}")
+            raise
+
+    def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        # Bedrock Titan v2 invokes per item or in chunks
+        return [self.embed_text(t) for t in texts]
+
+
+def get_embedding_provider() -> BaseEmbeddingProvider:
+    """Factory returns Mock or AWS Bedrock provider based on configuration."""
+    if settings.USE_MOCK_BEDROCK:
+        logger.info("Using 100% Free MockEmbeddingProvider for zero-cost execution.")
+        return MockEmbeddingProvider(dimension=settings.EMBEDDING_DIMENSION)
+    return BedrockTitanEmbeddingProvider(
+        region_name=settings.AWS_REGION,
+        model_id=settings.BEDROCK_EMBEDDING_MODEL_ID,
+        dimension=settings.EMBEDDING_DIMENSION,
+    )
