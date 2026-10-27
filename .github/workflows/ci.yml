@@ -52,13 +52,16 @@ jobs:
 
       - name: Terraform Format Check
         run: |
-          terraform -chdir=terraform fmt -check || echo "Skipping fmt until terraform files are populated"
+          terraform -chdir=terraform fmt -check
+
+      - name: Package Lambda Payload
+        run: |
+          mkdir -p terraform/build
+          zip -r terraform/build/lambda_payload.zip src data -x "*.pyc" -x "*__pycache__*"
 
       - name: Terraform Init & Validate
         run: |
           if [ -f terraform/main.tf ]; then
             terraform -chdir=terraform init -backend=false
             terraform -chdir=terraform validate
-          else
-            echo "Terraform files will be initialized in Phase 5"
           fi

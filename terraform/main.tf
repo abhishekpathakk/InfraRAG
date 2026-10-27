@@ -130,7 +130,7 @@ resource "aws_lambda_function" "ingest" {
   handler          = "src.lambda_handlers.ingest.handler"
   runtime          = "python3.12"
   filename         = "${path.module}/build/lambda_payload.zip"
-  source_code_hash = filebase64sha256("${path.module}/build/lambda_payload.zip")
+  source_code_hash = fileexists("${path.module}/build/lambda_payload.zip") ? filebase64sha256("${path.module}/build/lambda_payload.zip") : null
   timeout          = 60
   memory_size      = 1024
 
@@ -151,7 +151,7 @@ resource "aws_lambda_function" "ask" {
   handler          = "src.lambda_handlers.ask.handler"
   runtime          = "python3.12"
   filename         = "${path.module}/build/lambda_payload.zip"
-  source_code_hash = filebase64sha256("${path.module}/build/lambda_payload.zip")
+  source_code_hash = fileexists("${path.module}/build/lambda_payload.zip") ? filebase64sha256("${path.module}/build/lambda_payload.zip") : null
   timeout          = 30
   memory_size      = 1024
 

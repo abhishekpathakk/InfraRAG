@@ -194,4 +194,22 @@
 - **Faithfulness Score:** **100%**
 - **Total Test Suite:** All unit tests passing.
 
+---
+
+## Autonomous Incident Log: CI Run 40473494328 Post-Mortem
+
+### 1. Root Cause Analysis
+GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/actions/runs/40473494328) encountered two independent failures across both parallel matrix jobs:
+
+1. **`Terraform Validate & Lint` Job Failure (`terraform validate`)**:
+   - **Root Cause**: `terraform/main.tf` used `source_code_hash = filebase64sha256("${path.module}/build/lambda_payload.zip")`. On a clean GitHub Actions runner checkout (`actions/checkout@v4`), git ignores the `terraform/build/` directory via `.gitignore`. Because the zip did not exist on disk, `filebase64sha256()` threw a fatal function call error during validation.
+   - **Fix**: 
+     - Added a conditional guard: `source_code_hash = fileexists("${path.module}/build/lambda_payload.zip") ? filebase64sha256(...) : null`.
+     - Added a pre-validation packaging step in `.github/workflows/ci.yml` that bundles `src/` and `data/` into `terraform/build/lambda_payload.zip`.
+
+2. **`Lint, Test & Validate` Job Failure (`ruff check .`)**:
+   - **Root Cause**: Ruff enforces strict `F401` (unused imports) and `E402` (module-level imports after sys.path manipulation). Files including `scripts/deploy_index_to_s3.py`, `cli.py`, `ui/app.py`, `evaluation/evaluate.py`, `src/observability.py`, and `src/generator.py` contained unused imports (`time`, `os`, `json`, `Path`, `np`).
+   - **Fix**: Removed all dead imports and marked runtime path hacks with `# noqa: E402`. AST verification confirmed 0 remaining lint or import violations.
+
+
 

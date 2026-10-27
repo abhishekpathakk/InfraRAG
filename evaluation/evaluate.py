@@ -12,7 +12,6 @@ Measures:
 import json
 import logging
 import sys
-import time
 from pathlib import Path
 
 # Add project root to path
@@ -20,11 +19,11 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from rich.console import Console
-from rich.table import Table
+from rich.console import Console  # noqa: E402
+from rich.table import Table  # noqa: E402
 
-from src.chain import RAGChain
-from src.config import settings
+from src.chain import RAGChain  # noqa: E402
+from src.config import settings  # noqa: E402
 
 console = Console()
 logger = logging.getLogger("evaluation")

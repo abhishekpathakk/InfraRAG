@@ -2,7 +2,7 @@
   "total_queries": 15,
   "hit_rate_pct": 100.0,
   "faithfulness_pct": 100.0,
-  "avg_latency_ms": 0.61,
+  "avg_latency_ms": 0.63,
   "total_cost_usd": 0.0,
   "results": [
     {
@@ -12,7 +12,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 1.0,
+      "latency_ms": 1.44,
       "citations": [
         {
           "source_file": "kubernetes_crashloopbackoff.md",
@@ -36,7 +36,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 0.57,
+      "latency_ms": 0.55,
       "citations": [
         {
           "source_file": "kubernetes_oom_killed.md",
@@ -60,7 +60,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 0.58,
+      "latency_ms": 0.55,
       "citations": [
         {
           "source_file": "istio_503_service_unavailable.md",
@@ -84,7 +84,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 0.61,
+      "latency_ms": 0.55,
       "citations": [
         {
           "source_file": "istio_mtls_strict_failures.md",
@@ -108,7 +108,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 0.58,
+      "latency_ms": 0.56,
       "citations": [
         {
           "source_file": "kubernetes_oom_killed.md",
@@ -132,7 +132,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 0.59,
+      "latency_ms": 0.6,
       "citations": [
         {
           "source_file": "istio_503_service_unavailable.md",
@@ -180,7 +180,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 0.59,
+      "latency_ms": 0.58,
       "citations": [
         {
           "source_file": "istio_mtls_strict_failures.md",
@@ -204,7 +204,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 0.63,
+      "latency_ms": 0.57,
       "citations": [
         {
           "source_file": "kubernetes_crashloopbackoff.md",
@@ -228,7 +228,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 0.58,
+      "latency_ms": 0.57,
       "citations": [
         {
           "source_file": "kubernetes_oom_killed.md",
@@ -276,7 +276,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 0.59,
+      "latency_ms": 0.58,
       "citations": [
         {
           "source_file": "istio_mtls_strict_failures.md",
@@ -311,7 +311,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "low",
-      "latency_ms": 0.56,
+      "latency_ms": 0.58,
       "citations": [],
       "answer": "I don't know based on the provided runbooks."
     },
@@ -322,7 +322,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "low",
-      "latency_ms": 0.56,
+      "latency_ms": 0.58,
       "citations": [],
       "answer": "I don't know based on the provided runbooks."
     }

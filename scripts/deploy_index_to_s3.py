@@ -4,17 +4,16 @@ Uploads runbooks and pre-computed Bedrock Titan FAISS index directly to AWS S3.
 """
 
 import sys
-import time
 from pathlib import Path
 
 # Add project root to path
 ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT_DIR))
 
-import boto3
-from src.chain import RAGChain
-from src.embeddings import BedrockTitanEmbeddingProvider
-from src.vector_store import FAISSVectorStore
+import boto3  # noqa: E402
+from src.chain import RAGChain  # noqa: E402
+from src.embeddings import BedrockTitanEmbeddingProvider  # noqa: E402
+from src.vector_store import FAISSVectorStore  # noqa: E402
 
 S3_BUCKET = "infrarag-storage-ap0wa5"
 REGION = "ap-south-1"

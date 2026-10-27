@@ -4,7 +4,6 @@ InfraRAG Streamlit Web UI.
 A modern, low-overhead SRE & DevOps runbook assistant interface.
 """
 
-import os
 import sys
 from pathlib import Path
 
@@ -12,9 +11,9 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT_DIR))
 
-import streamlit as st
-from src.chain import RAGChain
-from src.config import settings
+import streamlit as st  # noqa: E402
+from src.chain import RAGChain  # noqa: E402
+from src.config import settings  # noqa: E402
 
 # Page configuration
 st.set_page_config(
