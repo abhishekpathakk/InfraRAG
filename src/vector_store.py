@@ -34,9 +34,12 @@ class BaseVectorStore(ABC):
 
     @abstractmethod
     def similarity_search(
-        self, query_embedding: list[float], top_k: int = 3
+        self,
+        query_embedding: list[float],
+        top_k: int = 3,
+        type_filter: str | None = None,
     ) -> list[tuple[DocumentChunk, float]]:
-        """Search top-k most similar document chunks and return (chunk, score) pairs."""
+        """Search top-k most similar document chunks and return (chunk, score) pairs, optionally filtered by type."""
         pass
 
     @abstractmethod
@@ -88,31 +91,44 @@ class FAISSVectorStore(BaseVectorStore):
         self.chunks.extend(chunks)
 
     def similarity_search(
-        self, query_embedding: list[float], top_k: int = 3
+        self,
+        query_embedding: list[float],
+        top_k: int = 3,
+        type_filter: str | None = None,
     ) -> list[tuple[DocumentChunk, float]]:
         if not self.chunks:
             return []
 
-        actual_k = min(top_k, len(self.chunks))
+        search_k = min(len(self.chunks), max(top_k * 6, len(self.chunks)) if type_filter else top_k)
 
         if self._has_faiss and HAS_NUMPY:
             q_vec = np.array([query_embedding], dtype=np.float32)
-            distances, indices = self._index.search(q_vec, actual_k)
+            distances, indices = self._index.search(q_vec, search_k)
             results = []
             for score, idx in zip(distances[0], indices[0]):
                 if idx != -1 and idx < len(self.chunks):
+                    chunk = self.chunks[idx]
+                    if type_filter and getattr(chunk, "type", "internal") != type_filter:
+                        continue
                     clean_score = max(0.0, min(1.0, float(score)))
-                    results.append((self.chunks[idx], clean_score))
+                    results.append((chunk, clean_score))
+                    if len(results) >= top_k:
+                        break
             return results
         elif HAS_NUMPY and self._vectors:
             q_vec = np.array(query_embedding, dtype=np.float32)
             mat = np.array(self._vectors, dtype=np.float32)
             scores = np.dot(mat, q_vec)
-            top_indices = np.argsort(scores)[::-1][:actual_k]
+            top_indices = np.argsort(scores)[::-1]
             results = []
             for idx in top_indices:
+                chunk = self.chunks[idx]
+                if type_filter and getattr(chunk, "type", "internal") != type_filter:
+                    continue
                 clean_score = max(0.0, min(1.0, float(scores[idx])))
-                results.append((self.chunks[idx], clean_score))
+                results.append((chunk, clean_score))
+                if len(results) >= top_k:
+                    break
             return results
         else:
             # Pure Python inner product calculation
@@ -122,9 +138,14 @@ class FAISSVectorStore(BaseVectorStore):
                 scored.append((idx, dot))
             scored.sort(key=lambda x: x[1], reverse=True)
             results = []
-            for idx, score in scored[:actual_k]:
+            for idx, score in scored:
+                chunk = self.chunks[idx]
+                if type_filter and getattr(chunk, "type", "internal") != type_filter:
+                    continue
                 clean_score = max(0.0, min(1.0, float(score)))
-                results.append((self.chunks[idx], clean_score))
+                results.append((chunk, clean_score))
+                if len(results) >= top_k:
+                    break
             return results
 
     def save_local(self, directory: str | Path) -> None:
@@ -153,6 +174,10 @@ class FAISSVectorStore(BaseVectorStore):
 
         with open(metadata_file, "r", encoding="utf-8") as f:
             raw_chunks = json.load(f)
+            for item in raw_chunks:
+                item.setdefault("source", "internal")
+                item.setdefault("path", "")
+                item.setdefault("type", "internal")
             self.chunks = [DocumentChunk(**item) for item in raw_chunks]
 
         index_file = path / "faiss.index"

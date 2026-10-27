@@ -57,6 +57,12 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
             body_json = body
 
         question = body_json.get("question") or body_json.get("query")
+        type_filter = body_json.get("type_filter") or body_json.get("type")
+        if type_filter and type_filter.lower() in ("all", "*", ""):
+            type_filter = None
+        elif type_filter:
+            type_filter = type_filter.lower()
+
         if not question or not question.strip():
             return {
                 "statusCode": 400,
@@ -65,7 +71,7 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
             }
 
         chain = get_cached_chain()
-        response = chain.answer_question(question.strip())
+        response = chain.answer_question(question.strip(), type_filter=type_filter)
 
         return {
             "statusCode": 200,

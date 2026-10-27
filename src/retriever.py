@@ -31,9 +31,14 @@ class Retriever:
         self.top_k = top_k
         self.min_relevance_threshold = min_relevance_threshold
 
-    def retrieve(self, query: str, top_k: int | None = None) -> tuple[list[tuple[DocumentChunk, float]], float]:
+    def retrieve(
+        self,
+        query: str,
+        top_k: int | None = None,
+        type_filter: str | None = None,
+    ) -> tuple[list[tuple[DocumentChunk, float]], float]:
         """
-        Retrieves top-k relevant chunks for a user query.
+        Retrieves top-k relevant chunks for a user query, optionally filtered by type.
 
         Returns:
             (results, latency_ms) where results is a list of (DocumentChunk, score)
@@ -44,10 +49,14 @@ class Retriever:
         # 1. Embed query
         query_vector = self.embedding_provider.embed_text(query)
 
-        # 2. Similarity search in vector store
-        matches = self.vector_store.similarity_search(query_embedding=query_vector, top_k=k)
+        # 2. Similarity search in vector store with type filter
+        matches = self.vector_store.similarity_search(
+            query_embedding=query_vector,
+            top_k=k,
+            type_filter=type_filter,
+        )
 
         latency_ms = (time.perf_counter() - start_time) * 1000.0
-        logger.info(f"Retrieved {len(matches)} chunks in {latency_ms:.2f}ms for query: '{query}'")
+        logger.info(f"Retrieved {len(matches)} chunks in {latency_ms:.2f}ms for query: '{query}' (filter: {type_filter})")
 
         return matches, latency_ms

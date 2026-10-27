@@ -38,21 +38,53 @@ class MarkdownChunker:
         words = text.split()
         return max(1, int(len(words) * 1.3))
 
-    def chunk_markdown_file(self, file_path: Path) -> list[DocumentChunk]:
-        """Reads a Markdown file and produces chunks with section metadata."""
+    def chunk_markdown_file(
+        self,
+        file_path: Path | str,
+        source: str | None = None,
+        doc_type: str | None = None,
+    ) -> list[DocumentChunk]:
+        """Reads a Markdown file and produces chunks with section and source metadata."""
         path = Path(file_path)
         if not path.exists():
             raise FileNotFoundError(f"Runbook file not found: {file_path}")
 
-        content = path.read_text(encoding="utf-8")
-        return self.chunk_text(content=content, source_file=path.name)
+        path_str = str(path)
+        if doc_type is None:
+            doc_type = "public" if "public" in path_str else "internal"
 
-    def chunk_text(self, content: str, source_file: str) -> list[DocumentChunk]:
+        if source is None:
+            if "kubernetes" in path_str:
+                source = "kubernetes"
+            elif "istio" in path_str:
+                source = "istio"
+            elif "gitlab" in path_str:
+                source = "gitlab"
+            else:
+                source = "internal"
+
+        content = path.read_text(encoding="utf-8")
+        return self.chunk_text(
+            content=content,
+            source_file=path.name,
+            source=source,
+            path=path_str,
+            doc_type=doc_type,
+        )
+
+    def chunk_text(
+        self,
+        content: str,
+        source_file: str,
+        source: str = "internal",
+        path: str = "",
+        doc_type: str = "internal",
+    ) -> list[DocumentChunk]:
         """
-        Splits text content into overlapping chunks.
-        Extracts Markdown headings to provide semantic context tags.
+        Splits text content into overlapping chunks tagged with Markdown heading hierarchy.
+        Stores metadata: source, path, section, type.
         """
-        # Split into sections based on markdown headers (## or ###)
+        # Split into sections based on markdown headers (# to ####)
         section_pattern = re.compile(r"^(#{1,4}\s+.+)$", re.MULTILINE)
         splits = section_pattern.split(content)
 
@@ -60,7 +92,6 @@ class MarkdownChunker:
         current_section = "General Overview"
         chunk_idx = 0
 
-        # When regex splits by capturing group, elements alternate: [prefix, heading, body, heading, body...]
         idx = 0
         while idx < len(splits):
             part = splits[idx].strip()
@@ -73,13 +104,11 @@ class MarkdownChunker:
                 idx += 1
                 continue
 
-            # It's section body text: split into words for sliding window
             words = part.split()
             if not words:
                 idx += 1
                 continue
 
-            # Step size for sliding window
             step = max(1, self.chunk_size - self.chunk_overlap)
             start_word = 0
 
@@ -97,8 +126,15 @@ class MarkdownChunker:
                     source_file=source_file,
                     section_title=current_section,
                     content=enriched_text,
+                    source=source,
+                    path=path,
+                    type=doc_type,
                     token_count=approx_tokens,
                     metadata={
+                        "source": source,
+                        "path": path,
+                        "section": current_section,
+                        "type": doc_type,
                         "word_count": len(chunk_words),
                         "start_word_index": start_word,
                         "end_word_index": end_word,

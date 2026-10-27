@@ -14,6 +14,9 @@ try:
         source_file: str
         section_title: str = "General"
         content: str
+        source: str = "internal"
+        path: str = ""
+        type: str = "internal"  # 'internal' or 'public'
         token_count: int = 0
         metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -22,6 +25,9 @@ try:
         section_title: str
         chunk_id: str
         relevance_score: float = 0.0
+        source: str = "internal"
+        path: str = ""
+        type: str = "internal"
 
     class RAGResponse(BaseModel):
         query: str
@@ -45,6 +51,9 @@ except ImportError:
         source_file: str
         content: str
         section_title: str = "General"
+        source: str = "internal"
+        path: str = ""
+        type: str = "internal"  # 'internal' or 'public'
         token_count: int = 0
         metadata: dict[str, Any] = dataclasses.field(default_factory=dict)
 
@@ -57,6 +66,9 @@ except ImportError:
         section_title: str
         chunk_id: str
         relevance_score: float = 0.0
+        source: str = "internal"
+        path: str = ""
+        type: str = "internal"
 
         def model_dump(self) -> dict[str, Any]:
             return dataclasses.asdict(self)

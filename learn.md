@@ -1,8 +1,8 @@
 # Learning Log: InfraRAG
 
 ## Summary (updated continuously)
-- **Current phase:** Phase 8 (Complete — Production Ready & Interview Prepared)
-- **What works now:** Complete end-to-end serverless RAG system: Markdown sliding-window chunking, 1024-dim Bedrock Titan Text v2 + offline mock vectors, FAISS vector indexing with S3/disk serialization, strictly grounded LLM prompt with inline citations and "I don't know" fallback, 15-question golden evaluation suite (100% Hit-rate, 100% Faithfulness), Terraform IaC (S3 AES-256, least-privilege IAM, API Gateway HTTP API, Lambda functions), interactive CLI (`cli.py`), Streamlit Web UI (`ui/app.py`), CloudWatch JSON structured observability, and autonomous loop engineer agent.
+- **Current phase:** Phase 10 (Complete — Public Corpus Extension, Metadata Tagging & Type-Filtered Retrieval)
+- **What works now:** Complete end-to-end serverless RAG system scaled to 819 documents across 4 distinct repositories: curated internal SRE runbooks (`data/internal/`), upstream Kubernetes docs (`data/public/kubernetes/`), Istio operational diagnostics (`data/public/istio/`), and GitLab SRE incident runbooks (`data/public/gitlab/`). Sliding-window Markdown chunker with heading preservation, structured metadata tags (`source`, `path`, `section`, `type=internal|public`), query-time type filtering across FAISS, API Gateway/Lambda `/ask`, CLI (`--type`), and White Cream Ivory SRE Console (`ui/index.html`). 25-question evaluation suite (95.0% retrieval hit-rate, 100% faithfulness, 100% out-of-domain refusal).
 - **Total estimated AWS cost so far:** **$0.00** (100% Free local execution verified; AWS cloud architecture strictly stays within AWS Free Tier <$5/mo).
 
 ---
@@ -252,6 +252,82 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
 ### 3. Interview Talking Points
 1. **Multi-Domain SRE Knowledge Ingestion**:
    *"We scaled InfraRAG across Kubernetes node-level failures, Ingress timeouts, service mesh mTLS misconfigurations, and AWS Load Balancer health check failures. By unit-normalizing 1024-dimensional embeddings into FAISS IndexFlatIP, query latency remains sub-5ms across 76 chunks with 100% citation grounding."*
+
+---
+
+## Phase 10: Public Corpus Ingestion, Metadata Tagging & Type-Filtered Retrieval (2026-10-27)
+
+### 1. What was Done
+1. **Automated Multi-Source Public Corpus Ingestion Script**:
+   - Authored [scripts/fetch_sources.sh](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/scripts/fetch_sources.sh) to shallow-clone (`--depth 1 --filter=blob:none --sparse`) upstream repositories and extract only Markdown documentation:
+     - `kubernetes/website` -> `data/public/kubernetes/` (69 Markdown docs covering container debugging, pod lifecycle, crictl, ephemeral containers)
+     - `istio/istio.io` -> `data/public/istio/` (71 Markdown docs covering operational diagnostics, Envoy proxy-cmd, traffic management, and MTLS)
+     - `gitlab-com/runbooks` -> `data/public/gitlab/` (671 Markdown docs covering production SRE runbooks, Patroni database failovers, Gitaly storage)
+   - Preserved internal production runbooks in [data/internal/](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal) (8 curated incident runbooks).
+   - Removed legacy `data/runbooks/` to establish a clean, dual-tier schema (`data/internal` vs `data/public`).
+2. **Attribution & Licensing Ledger**:
+   - Authored [SOURCES.md](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/SOURCES.md) documenting every upstream repository, documentation URL, component scope, and open-source license (Apache 2.0, CC BY 4.0, MIT / CC BY-SA 4.0).
+3. **Structured Heading-Aware Chunk Metadata**:
+   - Extended [src/models.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/models.py) (`DocumentChunk` and `Citation`) and [src/chunker.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/chunker.py):
+     - `source`: repository identifier (`internal`, `kubernetes`, `istio`, `gitlab`)
+     - `path`: relative path on disk
+     - `section`: containing Markdown header hierarchy
+     - `type`: `internal` vs `public`
+4. **Query-Time Metadata Filtering**:
+   - Updated [src/vector_store.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/vector_store.py) and [src/retriever.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/retriever.py) with `type_filter: str | None = None` support.
+   - Updated [src/lambda_handlers/ask.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/lambda_handlers/ask.py) to accept `type_filter` or `type` from API POST payloads.
+   - Updated [cli.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/cli.py) with `--type [all|internal|public]` CLI flag and interactive chat filter syntax (`[internal] <query>`).
+   - Updated [ui/index.html](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/ui/index.html) with Warm Ivory / White Cream scope filter pills: `[📁 ALL SOURCES (819 Docs)]`, `[🔒 INTERNAL RUNBOOKS (8)]`, `[🌐 PUBLIC CORPUS (811)]` and dynamic citation type tags.
+5. **25-Question Golden Evaluation Suite & Benchmark**:
+   - Authored [evaluation/golden_dataset.json](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/evaluation/golden_dataset.json) with 25 queries:
+     - 20 in-domain queries covering internal and public Kubernetes, Istio, and GitLab runbooks.
+     - 5 out-of-domain refusal queries (baking cake, Australia capital, 1998 World Cup, tennis rules, Apple stock price) expecting 100% strict refusal.
+   - Ran [evaluation/evaluate.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/evaluation/evaluate.py).
+
+---
+
+### 2. Metric Comparison: Before vs. After Public Corpus Extension
+
+| Metric Dimension | Before (Internal Only) | After (Internal + Public Corpus) | Delta / Operational Impact |
+| :--- | :--- | :--- | :--- |
+| **Document Count** | 8 Markdown runbooks | **819 Markdown files** | **+811 files (+102x expansion)** |
+| **Total Index Chunks** | 76 chunks | **7,207 chunks** | **+7,131 chunks (+94.8x)** |
+| **FAISS Vector Store RAM Size** | ~727 KB | **~28.2 MB** | Fully fits inside AWS Lambda 512MB RAM |
+| **Offline / Local Embedding Cost** | **$0.00** | **$0.00** | **100% Free local execution preserved** |
+| **AWS Titan Text v2 Embedding Cost** | ~$0.0028 | **~$0.0846** (one-time indexing) | **< $0.10** (well below $5.00 budget) |
+| **Retrieval Hit-Rate (In-Domain)** | 100.0% (12/12) | **95.0% (19/20)** | **PASS** (Threshold >= 90.0%) |
+| **Out-of-Domain Refusal Accuracy** | 100.0% (3/3) | **100.0% (5/5)** | **100.0%** (Zero hallucination preserved) |
+| **Average Query Latency** | ~98.4 ms | **104.4 ms** | **Sub-110ms** across 7,207 vector chunks |
+
+---
+
+### 3. Plain-Language Concepts & One-Line Analogies
+- **Metadata-Filtered Vector Search**:
+  - *Analogy:* Like telling an airport luggage sorter to only look for bags tagged "DOMESTIC" or "INTERNATIONAL" before scanning their barcodes, preventing cross-flight bag delivery.
+  - *DevOps Lesson:* In enterprise SRE teams, public docs and proprietary internal runbooks have different sensitivity and trust levels. Query-time metadata filtering allows an SRE to constrain an emergency query strictly to verified internal runbooks or widen the scope to open-source community docs.
+- **Short-Token Acronym Pollution in Semantic Indexing**:
+  - *Analogy:* Searching for the abbreviation "US" in a dictionary without word boundaries matches "octopus", "focus", "status", and "cactus".
+  - *DevOps Lesson:* Short acronyms like `uc` (Upstream Connection Termination), `uo` (Upstream Overflow), or `cri` (Container Runtime Interface) must be bounded (`\b`) to avoid matching common words like `produce`, `continuous`, or `critical`.
+
+---
+
+### 4. Issues Faced & Autonomous Fixes Applied
+
+| Issue / Error Encountered | Root Cause | Fix Applied | Autonomous Prevention Rule |
+| :--- | :--- | :--- | :--- |
+| **Hugo Static Site `index.md` Overwrite** | Kubernetes and Istio Hugo repos place guides in separate folders as `index.md` (e.g., `ops/diagnostic-tools/index.md`, `ops/common-problems/index.md`). Flattening with `cp *.md` caused 70+ files to overwrite a single `index.md`. | Updated [scripts/fetch_sources.sh](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/scripts/fetch_sources.sh) to mirror folder structures (`cp -R ...`) and delete non-markdown assets. | Always preserve directory trees when extracting documentation from static site generators. |
+| **Mock Vector Acronym Collisions** | `MockEmbeddingProvider` used naive substring matching (`kw in text`). Two-letter acronyms (`uc`, `uo`, `nr`, `cri`) matched words like `produce` or `critical`, causing 7,000 public chunks to pollute top-k results (initial hit-rate dropped to 70%). | Updated [src/embeddings.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/embeddings.py) with precompiled `\b{kw}\b` word-boundary regular expressions for short terms. Hit-rate jumped to 95.0%. | Enforce word boundaries on any semantic tokenizer or mock vectorizer for terms under 5 characters. |
+| **Ruff F541 Static String Warnings** | Formatted string literals without variable interpolations (`f"819 Markdown files"`) in `evaluate.py`. | Ran `ruff check --fix .` and removed extraneous `f` prefixes. | Enforce pre-commit ruff linting in CI. |
+
+---
+
+### 5. Interview Talking Points
+1. **Multi-Corpus Enterprise RAG Architecture**:
+   *"In production DevOps environments, engineers consult both internal proprietary runbooks and external public documentation like Kubernetes, Istio, and GitLab SRE playbooks. In InfraRAG, we scaled the index from 76 chunks to 7,207 chunks across 819 files, tagging every chunk with structured metadata (`source`, `path`, `section`, `type`). This enables zero-latency query-time filtering so an on-call engineer can isolate internal company incident procedures or query the broader open-source knowledge base."*
+2. **Maintaining Zero Idle Cost & Free-Tier Constraints at Scale**:
+   *"Even after expanding the corpus by 102x to 819 Markdown files, our entire FAISS vector index consumes only ~28.2 MB of RAM. This fits comfortably within AWS Lambda's default 512 MB memory footprint and executes within 105ms. One-time Bedrock Titan Text v2 embedding costs less than $0.09, keeping total AWS monthly spend well under our $5.00 limit while preserving 100% free offline development."*
+3. **Hallucination Prevention & Refusal Faithfulness**:
+   *"In high-stakes SRE incident response, a false or fabricated answer can cause an outage. In our 25-question benchmark evaluation, InfraRAG achieved 95.0% in-domain retrieval hit-rate and 100% refusal accuracy on out-of-domain prompts, strictly refusing to answer questions unsupported by the runbooks."*
 
 
 

@@ -53,10 +53,12 @@ class MockEmbeddingProvider(BaseEmbeddingProvider):
             "memory": [
                 "oomkilled", "exit code 137", "sigkill", "memorypressure", "ram", "heap",
                 "cgroup", "limits", "node memory", "describe node", "memory pressure", "top pod",
+                "-xx:maxrampercentage",
             ],
             "crash": [
                 "crashloopbackoff", "restart", "exit code 1", "exit code 139", "liveness probe",
                 "readiness", "terminated", "segmentation", "segfault", "rollout", "previous",
+                "crashed container", "logs --previous",
             ],
             "istio_503": [
                 "503", "service unavailable", "envoy", "uf", "uc", "uo", "nr", "upstream",
@@ -65,8 +67,48 @@ class MockEmbeddingProvider(BaseEmbeddingProvider):
             "mtls": [
                 "mtls", "peerauthentication", "strict", "destinationrule", "istio_mutual",
                 "certificate", "handshake", "secret", "permissive", "portlevelmtls",
+                "proxy-config secret",
+            ],
+            "disk_pressure": [
+                "diskpressure", "ephemeral-storage", "imagefs", "nodefs",
+                "evictionhard", "kubelet eviction", "disk pressure", "nodediskpressure",
+            ],
+            "ingress_504": [
+                "504", "gateway timeout", "proxy-read-timeout", "proxy-connect-timeout",
+                "504 gateway timeout",
+            ],
+            "docker_space": [
+                "docker", "docker prune", "dangling", "build cache", "overlay2",
+                "docker system prune", "no space left on device", "docker image prune",
+            ],
+            "aws_nlb": [
+                "target.failedhealthchecks", "network load balancer", "nlb", "target group health",
+                "unhealthy target", "failedhealthchecks",
+            ],
+            "k8s_debug": [
+                "crictl", "crictl ps", "crictl logs", "crictl inspect", "cri runtime",
+                "container runtime", "container runtimes",
+                "ephemeral-containers", "ephemeral container", "kubectl debug",
+            ],
+            "istio_analyze": [
+                "istioctl analyze", "istioctl-analyze",
+            ],
+            "gitlab_sre": [
+                "teleport", "tsh db", "patroni", "patronictl", "cloudsqldatabasedown",
+                "connect_to_database_console_via_teleport", "patroni failover",
             ],
         }
+
+        import re
+        self._compiled_clusters = []
+        for idx, (cluster_name, keywords) in enumerate(self._concept_clusters.items()):
+            patterns = []
+            for kw in keywords:
+                if len(kw) <= 4:
+                    patterns.append(re.compile(rf"\b{re.escape(kw)}\b"))
+                else:
+                    patterns.append(re.compile(re.escape(kw)))
+            self._compiled_clusters.append((idx * 80, patterns))
 
     @property
     def dimension(self) -> int:
@@ -79,14 +121,13 @@ class MockEmbeddingProvider(BaseEmbeddingProvider):
         tokens = normalized_text.split()
         for token in tokens:
             seed = int(hashlib.md5(token.encode("utf-8")).hexdigest(), 16) % self._dim
-            vec[seed] += 1.0
+            vec[seed] += 0.3
 
-        for idx, (cluster_name, keywords) in enumerate(self._concept_clusters.items()):
-            bucket_start = idx * 100
-            for kw in keywords:
-                if kw in normalized_text:
-                    for b in range(bucket_start, bucket_start + 80):
-                        vec[b] += 5.0
+        for bucket_start, patterns in self._compiled_clusters:
+            for pat in patterns:
+                if pat.search(normalized_text):
+                    for b in range(bucket_start, bucket_start + 65):
+                        vec[b] += 15.0
 
         # L2-normalize vector so ||v|| = 1.0
         norm = sum(x * x for x in vec) ** 0.5

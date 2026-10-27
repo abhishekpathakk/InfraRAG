@@ -34,9 +34,11 @@ This is a subsection with remediation steps for crashloop backoff. Run kubectl l
 
 
 def test_chunk_real_runbook(chunker):
-    runbook_path = Path("data/runbooks/kubernetes_oom_killed.md")
+    runbook_path = Path("data/internal/kubernetes_oom_killed.md")
     if runbook_path.exists():
         chunks = chunker.chunk_markdown_file(runbook_path)
         assert len(chunks) > 0
         assert chunks[0].source_file == "kubernetes_oom_killed.md"
         assert any("OOMKilled" in c.content for c in chunks)
+        assert chunks[0].source == "kubernetes"
+        assert chunks[0].type == "internal"

@@ -44,25 +44,40 @@ class RAGChain:
             top_k=top_k,
         )
 
-    def ingest_directory(self, runbook_dir: Path | str) -> int:
+    def ingest_directory(
+        self,
+        runbook_dir: Path | str,
+        recursive: bool = True,
+        source: str | None = None,
+        doc_type: str | None = None,
+    ) -> int:
         """
-        Reads all Markdown files in directory, chunks them, embeds them,
-        and indexes them into the vector store.
+        Reads all Markdown files in directory (optionally recursive), chunks them,
+        embeds them, and indexes them into the vector store.
         Returns total number of chunks indexed.
         """
         start = time.perf_counter()
         dir_path = Path(runbook_dir)
-        md_files = list(dir_path.glob("*.md"))
+        if not dir_path.exists():
+            logger.warning(f"Directory not found: {dir_path}")
+            return 0
+
+        pattern = "**/*.md" if recursive else "*.md"
+        md_files = [f for f in dir_path.glob(pattern) if f.is_file() and not f.name.startswith(".")]
         if not md_files:
             logger.warning(f"No .md files found in {dir_path}")
             return 0
 
         all_chunks: list[DocumentChunk] = []
         for file_path in md_files:
-            chunks = self.chunker.chunk_markdown_file(file_path)
+            chunks = self.chunker.chunk_markdown_file(
+                file_path=file_path,
+                source=source,
+                doc_type=doc_type,
+            )
             all_chunks.extend(chunks)
 
-        logger.info(f"Generated {len(all_chunks)} chunks from {len(md_files)} runbooks.")
+        logger.info(f"Generated {len(all_chunks)} chunks from {len(md_files)} documents in {dir_path}.")
 
         # Batch embed chunks
         contents = [c.content for c in all_chunks]
@@ -75,14 +90,17 @@ class RAGChain:
 
         return len(all_chunks)
 
-    def answer_question(self, query: str) -> RAGResponse:
+    def answer_question(self, query: str, type_filter: str | None = None) -> RAGResponse:
         """
-        Executes end-to-end query answering with grounded citations and observability metrics.
+        Executes end-to-end query answering with grounded citations, optional type filtering, and observability metrics.
         """
         total_start = time.perf_counter()
 
-        # 1. Retrieve relevant chunks
-        matched_chunks, retrieval_latency_ms = self.retriever.retrieve(query)
+        # 1. Retrieve relevant chunks with optional type filter
+        matched_chunks, retrieval_latency_ms = self.retriever.retrieve(
+            query=query,
+            type_filter=type_filter,
+        )
 
         # 2. Determine confidence
         confidence = "high"

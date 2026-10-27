@@ -1,0 +1,102 @@
+# ZoektContainersRestartsDueToOOM
+
+## Overview
+
+A Zoekt container has been OOM-killed and is restarting. This alert predates
+this runbook page — it was already defined in the hand-written
+`mimir-rules/gitlab-{gprd,gstg}/search/zoekt.yml` — and is documented here now
+that those rules have moved into
+[`libsonnet/alerts/zoekt-alerts.libsonnet`](https://gitlab.com/gitlab-com/runbooks/-/blob/master/libsonnet/alerts/zoekt-alerts.libsonnet).
+
+Zoekt is memory-hungry by design: the webserver mmaps its index shards, so
+memory usage sitting above the container's *request* is expected and intended.
+Production configures the webserver with a 128Gi request and a 256Gi limit, and
+the StatefulSet is explicitly excluded from the request-based saturation point
+for this reason
+([gprd values](https://gitlab.com/gitlab-com/gl-infra/k8s-workloads/gitlab-com/-/blob/master/releases/gitlab/values/gprd.yaml.gotmpl)).
+An OOM kill therefore means the *limit* was hit, which is a real problem rather
+than expected behaviour.
+
+## Alert behavior
+
+Built on a recording rule, `gitlab:zoekt_gke_oom_events`, which joins
+"last termination reason was OOMKilled" against "the restart count changed
+recently". Both conditions are required — the join is what stops a historic OOM
+kill on a now-stable container from alerting forever.
+
+The restart-detection window differs by environment: **5m in gprd, 1m in gstg**.
+That difference was inherited from the hand-written rules and preserved
+deliberately during the Jsonnet conversion rather than normalised, since
+widening gstg would make the alert more sensitive there as a side effect of a
+refactor.
+
+Severity **s3**, `user_impacting: yes` — an OOM-killed webserver drops
+in-flight searches.
+
+## First response
+
+1. **Which container?** `{{ $labels.container }}` distinguishes the three
+   workloads, and they fail for different reasons:
+   - `zoekt-webserver` — serves searches, mmaps index shards. Memory scales with
+     index size on that node.
+   - `zoekt-indexer` — builds indexes. Memory scales with repository size and
+     with indexing concurrency (`GOMAXPROCS`, 20 in production).
+   - `zoekt-internal-gateway` / `zoekt-external-gateway` — small NGINX; an OOM
+     here is unusual and suggests a request-volume or config problem.
+
+2. **Check memory map exhaustion**, not just memory bytes. Zoekt has a distinct
+   failure mode where it runs out of *memory maps* rather than memory:
+   `MMAP_USAGE_WARNING_RATIO = 0.80` and `MMAP_USAGE_CRITICAL_RATIO = 0.95` in
+   [`ee/app/models/search/zoekt/node.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/models/search/zoekt/node.rb).
+   The "Memory Map Usage" panel on the
+   [zoekt overview dashboard](https://dashboards.gitlab.net/d/zoekt-main/zoekt3a-overview)
+   draws current usage against the limit.
+
+3. **Check whether it is one node or the fleet.** One node repeatedly OOMing
+   usually holds an unusually large namespace; the whole fleet OOMing after a
+   deploy points at the Zoekt version or a config change. Compare against
+   [gprd.zoekt-versions.yaml](https://gitlab.com/gitlab-com/gl-infra/k8s-workloads/gitlab-com/-/blob/master/releases/gitlab/values/gprd.zoekt-versions.yaml)
+   and recent k8s-workloads pipelines.
+
+4. **Check the restart trend**, not the instantaneous state. The "Pod Restart
+   Count" and "Crashlooping Pods" panels (Kubernetes Pod Health row of the
+   overview dashboard) distinguish a single kill from a crashloop. A crashlooping
+   webserver takes the node out of search rotation and will also trip
+   [ZoektNodeOfflineWarning](./ZoektNodeOfflineWarning.md).
+
+5. **Relieve pressure on the node.** If a specific node keeps OOMing, reducing
+   what it holds is the direct fix — evict namespaces from it, or mark it lost
+   so its data is redistributed. Both are in
+   [the service README](../README.md#evicting-namespaces-from-a-zoekt-node).
+
+6. **If indexing is the driver**, pause it rather than disabling it:
+   `Admin > Settings > Search > Exact code search > Pause indexing`.
+
+## What not to do
+
+**Do not increase the PVC size** — Zoekt nodes are sized with a fixed PVC that
+must stay consistent across the fleet
+([see the README](../README.md#kube_persistent_volume_claim_disk_space)). And do
+not raise the memory limit as a first response; the limit is already 2× the
+request, so hitting it usually means a node is holding more index than it should,
+which is a placement problem.
+
+## Escalation
+
+Escalate to the Global Search team. Raising memory requests/limits or replica
+count is a production change request against
+[k8s-workloads/gitlab-com](https://gitlab.com/gitlab-com/gl-infra/k8s-workloads/gitlab-com).
+
+## Definitions
+
+- [`libsonnet/alerts/zoekt-alerts.libsonnet`](https://gitlab.com/gitlab-com/runbooks/-/blob/master/libsonnet/alerts/zoekt-alerts.libsonnet)
+- Generated rules: [gprd](https://gitlab.com/gitlab-com/runbooks/-/blob/master/mimir-rules/gitlab-gprd/search/autogenerated-gitlab-gprd-search-zoekt-alerts.yml),
+  [gstg](https://gitlab.com/gitlab-com/runbooks/-/blob/master/mimir-rules/gitlab-gstg/search/autogenerated-gitlab-gstg-search-zoekt-alerts.yml)
+- Unit tests, including the historic-OOM-with-no-restarts negative control:
+  [`test/mimir-rules/zoekt-alerts_test.yml`](https://gitlab.com/gitlab-com/runbooks/-/blob/master/test/mimir-rules/zoekt-alerts_test.yml)
+
+## Related links
+
+- [Exact code search service](../README.md)
+- [Zoekt memory usage](../README.md#dashboards) — the Thanos query links
+- [ZoektNodeOfflineWarning](./ZoektNodeOfflineWarning.md)

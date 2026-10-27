@@ -33,7 +33,7 @@ try:
         TOP_K: int = 3
 
         BASE_DIR: Path = Path(__file__).resolve().parent.parent
-        DATA_DIR: Path = BASE_DIR / "data" / "runbooks"
+        DATA_DIR: Path = BASE_DIR / "data"
         CACHE_DIR: Path = BASE_DIR / "index_cache"
 
     settings = Settings()
@@ -54,7 +54,7 @@ except ImportError:
             self.CHUNK_OVERLAP = 100
             self.TOP_K = 3
             self.BASE_DIR = Path("/tmp")
-            self.DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "runbooks"
+            self.DATA_DIR = Path(__file__).resolve().parent.parent / "data"
             self.CACHE_DIR = Path("/tmp/faiss_index")
 
     settings = StandaloneSettings()

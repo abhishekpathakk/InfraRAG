@@ -315,6 +315,44 @@
       border-color: #cbbead;
     }
 
+    /* Corpus Scope Filter Pills */
+    .scope-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .scope-pill {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: var(--font-console);
+      font-weight: 600;
+      color: var(--text-secondary);
+      padding: 4px 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+
+    .scope-pill:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+      border-color: #cbbead;
+    }
+
+    .scope-pill.active {
+      background: var(--text-primary);
+      color: #FAF8F5;
+      border-color: var(--text-primary);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    }
+
     /* Response / Triage Results */
     #triage-results-view {
       display: none;
@@ -702,13 +740,26 @@
           <span style="font-size: 11px; color: var(--text-muted); font-family: var(--font-console);">Press [Enter] to triage</span>
         </div>
 
+        <div class="scope-bar">
+          <span class="preset-label">Corpus Scope:</span>
+          <button class="scope-pill active" id="pill-all" onclick="setScopeFilter(null, this)">
+            📁 ALL SOURCES (819 Docs)
+          </button>
+          <button class="scope-pill" id="pill-internal" onclick="setScopeFilter('internal', this)">
+            🔒 INTERNAL RUNBOOKS (8)
+          </button>
+          <button class="scope-pill" id="pill-public" onclick="setScopeFilter('public', this)">
+            🌐 PUBLIC CORPUS (811)
+          </button>
+        </div>
+
         <div class="input-row">
           <div class="cmd-prompt">
             <span class="cmd-prefix">&gt;</span>
             <input 
               type="text" 
               id="incident-query" 
-              placeholder="Query runbooks (e.g. 'What causes NodeDiskPressure in Kubernetes and how to clean it?')"
+              placeholder="Query internal or public runbooks (e.g. 'How do ephemeral containers help debug crashlooping pods?')"
               autocomplete="off"
               spellcheck="false"
             />
@@ -718,32 +769,32 @@
           </button>
         </div>
 
-        <!-- Real-world Quick Incident Filters across all 8 Runbooks -->
+        <!-- Real-world Quick Incident Filters across Internal + Public Docs -->
         <div class="incident-presets">
           <span class="preset-label">Quick Scenarios:</span>
           <button class="preset-btn" onclick="applyPreset('What causes container Exit Code 137 OOMKilled in Kubernetes and how to fix it?')">
-            k8s: OOMKilled 137
+            [internal] k8s: OOMKilled 137
           </button>
           <button class="preset-btn" onclick="applyPreset('How do I triage NodeDiskPressure and pod evictions on a Kubernetes worker node?')">
-            k8s: NodeDiskPressure
+            [internal] k8s: NodeDiskPressure
           </button>
           <button class="preset-btn" onclick="applyPreset('What causes HTTP 504 Gateway Timeout on Nginx Ingress and ALB in Kubernetes?')">
-            k8s: Ingress 504 Timeout
+            [internal] k8s: Ingress 504 Timeout
           </button>
           <button class="preset-btn" onclick="applyPreset('What causes Istio Envoy 503 UF upstream connection failure and how to inspect proxy status?')">
-            istio: 503 UF Envoy Flag
+            [internal] istio: 503 UF Envoy Flag
           </button>
-          <button class="preset-btn" onclick="applyPreset('How to configure Prometheus scraping bypass when Istio PeerAuthentication is STRICT mTLS?')">
-            istio: STRICT mTLS
+          <button class="preset-btn" onclick="applyPreset('How do ephemeral containers troubleshoot running pods in Kubernetes without restarting?')">
+            [public] k8s: Ephemeral Containers
           </button>
-          <button class="preset-btn" onclick="applyPreset('How do I fix Docker daemon no space left on device and prune dangling images?')">
-            docker: No Space Left
+          <button class="preset-btn" onclick="applyPreset('How do I use istioctl proxy-config to inspect active clusters and TLS settings?')">
+            [public] istio: Proxy Config
           </button>
-          <button class="preset-btn" onclick="applyPreset('Why are AWS Network Load Balancer target hosts marked Unhealthy with Target.FailedHealthChecks?')">
-            aws: NLB Unhealthy Target
+          <button class="preset-btn" onclick="applyPreset('What are the symptoms and mitigation for Patroni PostgreSQL cluster failover in GitLab?')">
+            [public] gitlab: Patroni Failover
           </button>
           <button class="preset-btn" onclick="applyPreset('How do I bake a chocolate cake?')">
-            eval: Out-of-Domain Refusal
+            [eval] Refusal Check
           </button>
         </div>
       </section>
@@ -858,13 +909,17 @@
         </div>
       </section>
 
-      <!-- Indexed Runbook Registry (8 Runbooks, 76 Chunks) -->
+      <!-- Indexed Runbook Registry (Internal + Public Corpus) -->
       <section class="sidebar-section">
         <div class="sidebar-heading">
           <span>Active Runbook Catalog</span>
-          <span style="color: var(--k8s-blue); font-size: 10px; font-weight: 700;">8 Files (76 Chunks)</span>
+          <span style="color: var(--k8s-blue); font-size: 10px; font-weight: 700;">819 Total Docs</span>
         </div>
         <div class="registry-list">
+          <div class="registry-row" style="background: var(--bg-surface); font-weight: 600;">
+            <span class="registry-name">🔒 Internal Runbooks (8)</span>
+            <span class="registry-chunks">76 chunks</span>
+          </div>
           <div class="registry-row">
             <span class="registry-name" title="kubernetes_oom_killed.md">📄 kubernetes_oom_killed.md</span>
             <span class="registry-chunks">8 chunks</span>
@@ -896,6 +951,22 @@
           <div class="registry-row">
             <span class="registry-name" title="aws_network_load_balancer_unhealthy_hosts.md">📄 aws_nlb_unhealthy_hosts.md</span>
             <span class="registry-chunks">11 chunks</span>
+          </div>
+          <div class="registry-row" style="background: var(--bg-surface); font-weight: 600; margin-top: 6px;">
+            <span class="registry-name">🌐 Public Corpora (811)</span>
+            <span class="registry-chunks">811 files</span>
+          </div>
+          <div class="registry-row">
+            <span class="registry-name">📦 kubernetes/website</span>
+            <span class="registry-chunks">69 docs</span>
+          </div>
+          <div class="registry-row">
+            <span class="registry-name">📦 istio/istio.io</span>
+            <span class="registry-chunks">71 docs</span>
+          </div>
+          <div class="registry-row">
+            <span class="registry-name">📦 gitlab-com/runbooks</span>
+            <span class="registry-chunks">671 docs</span>
           </div>
         </div>
       </section>
@@ -934,6 +1005,16 @@
     const costMetric = document.getElementById("telemetry-cost");
     const rawAuditJson = document.getElementById("raw-audit-json");
 
+    let currentScopeFilter = null;
+
+    function setScopeFilter(type, btnElement) {
+      currentScopeFilter = type;
+      document.querySelectorAll(".scope-pill").forEach(p => p.classList.remove("active"));
+      if (btnElement) {
+        btnElement.classList.add("active");
+      }
+    }
+
     queryInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         executeTriage();
@@ -953,10 +1034,16 @@
       btnLabel.innerHTML = '<span class="spin"></span> Triaging...';
 
       try {
+        const payload = { query: query };
+        if (currentScopeFilter) {
+          payload.type_filter = currentScopeFilter;
+          payload.type = currentScopeFilter;
+        }
+
         const res = await fetch(LIVE_API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query: query })
+          body: JSON.stringify(payload)
         });
 
         if (!res.ok) {
@@ -1012,9 +1099,11 @@
         citations.forEach(c => {
           const row = document.createElement("div");
           row.className = "evidence-item";
+          const docTypeBadge = c.type ? `<span style="font-size:10px; font-weight:700; color:var(--aws-amber); text-transform:uppercase; margin-left:4px;">[${escapeHtml(c.type)}]</span>` : '';
+          const sourceBadge = c.source ? `<span style="font-size:10px; color:var(--k8s-blue); font-weight:600; margin-left:4px;">${escapeHtml(c.source)}</span>` : '';
           row.innerHTML = `
             <div>
-              <div class="evidence-file">📄 ${escapeHtml(c.source_file)} &bull; <code>${escapeHtml(c.chunk_id)}</code></div>
+              <div class="evidence-file">📄 ${escapeHtml(c.source_file)}${docTypeBadge}${sourceBadge} &bull; <code>${escapeHtml(c.chunk_id)}</code></div>
               <div class="evidence-section">Section: <strong>${escapeHtml(c.section_title || 'General')}</strong></div>
             </div>
             <div class="evidence-score">${(c.relevance_score * 100).toFixed(1)}% match</div>

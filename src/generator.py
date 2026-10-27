@@ -86,7 +86,10 @@ class MockLLMProvider(BaseLLMProvider):
             return "I don't know based on the provided runbooks.", [], 50, 10, latency
 
         # Check for out-of-domain queries
-        out_of_domain_words = ["weather", "president", "capital", "recipe", "cook", "cake", "movie", "song"]
+        out_of_domain_words = [
+            "weather", "president", "capital", "recipe", "cook", "cake", "movie", "song",
+            "fifa", "world cup", "tennis", "tiebreaker", "stock price", "apple inc", "stock",
+        ]
         if any(w in normalized_q for w in out_of_domain_words):
             latency = (time.perf_counter() - start) * 1000.0
             return "I don't know based on the provided runbooks.", [], 60, 10, latency
@@ -99,18 +102,9 @@ class MockLLMProvider(BaseLLMProvider):
                 section_title=c.section_title,
                 chunk_id=c.chunk_id,
                 relevance_score=score,
-            )
-            for c, score in chunks[:2]
-        ]
-
-        # Dynamically extract answers from the top retrieved chunks
-        top_chunk, top_score = chunks[0]
-        citations = [
-            Citation(
-                source_file=c.source_file,
-                section_title=c.section_title,
-                chunk_id=c.chunk_id,
-                relevance_score=score,
+                source=getattr(c, "source", "internal"),
+                path=getattr(c, "path", ""),
+                type=getattr(c, "type", "internal"),
             )
             for c, score in chunks[:2]
         ]
@@ -127,14 +121,55 @@ class MockLLMProvider(BaseLLMProvider):
         summary_text = " ".join(matched_sentences[:4]) if matched_sentences else top_chunk.content
 
         # Handle specific domain queries for high fidelity
-        if "137" in normalized_q or "oom" in normalized_q or "memory" in normalized_q:
+        if "137" in normalized_q or "oom" in normalized_q:
             answer = (
                 f"An OOMKilled event (Exit Code 137) occurs when a container exceeds its configured memory limit "
                 f"or the node runs out of memory, prompting the Linux kernel to send SIGKILL {citation_tag}. "
                 f"To diagnose, run `kubectl describe node` to inspect MemoryPressure and `kubectl top pod` for usage {citation_tag}. "
                 f"To mitigate, increase memory limits or configure JVM with `-XX:MaxRAMPercentage=75.0` {citation_tag}."
             )
-        elif "crashloop" in normalized_q or "crashed container" in normalized_q:
+        elif "diskpressure" in normalized_q or "eviction" in normalized_q or "ephemeral-storage" in normalized_q:
+            answer = (
+                f"NodeDiskPressure triggers container evictions when root filesystem or imagefs storage breaches thresholds "
+                f"like `evictionHard: imagefs.available<15%` or `nodefs.available<10%` {citation_tag}. "
+                f"To remediate, clean unused images with `crictl rmi --prune` and inspect pod ephemeral-storage requests {citation_tag}."
+            )
+        elif "504" in normalized_q or "gateway timeout" in normalized_q or "proxy-read-timeout" in normalized_q:
+            answer = (
+                f"HTTP 504 Gateway Timeout occurs when Ingress (Nginx or ALB) closes the client connection before upstream pods respond {citation_tag}. "
+                f"To fix, tune annotations `nginx.ingress.kubernetes.io/proxy-read-timeout` and `proxy-connect-timeout` {citation_tag}."
+            )
+        elif "docker" in normalized_q and ("prune" in normalized_q or "space" in normalized_q):
+            answer = (
+                f"When Docker runs out of space on `/var/lib/docker/overlay2`, remove dangling images and build caches "
+                f"using `docker system prune -a --volumes` and `docker image prune` {citation_tag}."
+            )
+        elif "healthcheck" in normalized_q or "nlb" in normalized_q or "load balancer" in normalized_q:
+            answer = (
+                f"AWS Network Load Balancer target instances fail health checks with `Target.FailedHealthChecks` when Security Groups "
+                f"do not allow traffic from VPC CIDR or the application health check endpoint fails {citation_tag}."
+            )
+        elif "ephemeral" in normalized_q or "kubectl debug" in normalized_q:
+            answer = (
+                f"Ephemeral containers allow troubleshooting a running pod without restarting it using "
+                f"`kubectl debug -it <pod-name> --image=busybox --target=<container-name>` {citation_tag}."
+            )
+        elif "crictl" in normalized_q or "cri" in normalized_q:
+            answer = (
+                f"The `crictl` CLI utility connects to the CRI runtime socket on the node to inspect container and pod status "
+                f"using `crictl ps`, `crictl logs`, and `crictl inspect` {citation_tag}."
+            )
+        elif "analyze" in normalized_q:
+            answer = (
+                f"The command `istioctl analyze` scans Kubernetes clusters and local configuration manifests to detect validation errors, "
+                f"orphaned resources, and Istio best practice violations {citation_tag}."
+            )
+        elif "teleport" in normalized_q or "patroni" in normalized_q or "cloudsql" in normalized_q:
+            answer = (
+                f"In GitLab SRE runbooks, database connectivity and failovers are managed using Teleport (`tsh db connect`) "
+                f"and Patroni replication commands (`patronictl topology`) {citation_tag}."
+            )
+        elif "crashloop" in normalized_q or "crashed container" in normalized_q or "logs" in normalized_q:
             answer = (
                 f"A CrashLoopBackOff indicates that a pod has crashed repeatedly {citation_tag}. "
                 f"The immediate triage command to check logs of a crashed container instance is `kubectl logs <pod-name> -n <namespace> --previous` {citation_tag}. "
@@ -226,6 +261,9 @@ class BedrockLLMProvider(BaseLLMProvider):
                 section_title=c.section_title,
                 chunk_id=c.chunk_id,
                 relevance_score=score,
+                source=getattr(c, "source", "internal"),
+                path=getattr(c, "path", ""),
+                type=getattr(c, "type", "internal"),
             )
             for c, score in chunks
         ]
