@@ -18,8 +18,8 @@ This document provides a registry of all external public and internal incident r
 ## Detailed Source Registries
 
 ### 1. Internal Incident Runbooks (`type=internal`)
-- **Directory:** [data/internal/](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal)
-- **Description:** Curated, actionable, operational runbooks authored specifically for production incident response and automated remediation.
+- **Directory:** `data/internal/`
+- **Description:** Curated, authored sample operational runbooks authored specifically for production incident response and automated remediation scenarios.
 - **Coverage:**
   - `kubernetes_oom_killed.md` (Exit Code 137, Cgroups, JVM flags)
   - `kubernetes_crashloopbackoff.md` (Exit Codes 1, 139, 143, Probe failures)
@@ -54,7 +54,7 @@ This document provides a registry of all external public and internal incident r
 ### 4. GitLab Production Runbooks (`type=public`, `source=gitlab`)
 - **Repository URL:** [https://gitlab.com/gitlab-com/runbooks](https://gitlab.com/gitlab-com/runbooks)
 - **Upstream Documentation:** [https://gitlab.com/gitlab-com/runbooks](https://gitlab.com/gitlab-com/runbooks)
-- **License:** MIT License ([Code](https://gitlab.com/gitlab-com/runbooks/-/blob/master/LICENSE)) / CC BY-SA 4.0 (Documentation)
+- **License:** [MIT License](https://gitlab.com/gitlab-com/runbooks/-/blob/master/LICENSE)
 - **Ingestion Scope:**
   - `docs/` (High-availability database failovers, background worker queue saturation, network partition mitigations)
 

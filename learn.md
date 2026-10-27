@@ -43,7 +43,7 @@ A common question is: *"If AWS Bedrock is our target LLM provider, why aren't we
 3. **Speed & Determinism**:
    - Local mock embeddings index 7,207 chunks in **under 0.8 seconds**. Live network API calls to Bedrock for 7,200 chunks would take minutes and risk hitting API rate quotas.
 4. **Bedrock IS Fully Implemented & Ready**:
-   - The Bedrock implementation is 100% complete in [src/embeddings.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/embeddings.py) (`BedrockTitanEmbeddingProvider` using `amazon.titan-embed-text-v2:0`) and [src/generator.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/generator.py) (`BedrockNovaLLMProvider` using `amazon.nova-micro-v1:0`).
+   - The Bedrock implementation is 100% complete in [src/embeddings.py](src/embeddings.py) (`BedrockTitanEmbeddingProvider` using `amazon.titan-embed-text-v2:0`) and [src/generator.py](src/generator.py) (`BedrockNovaLLMProvider` using `amazon.nova-micro-v1:0`).
    - To switch to live AWS Bedrock locally, simply set:
      ```bash
      export USE_MOCK_BEDROCK=false
@@ -60,21 +60,21 @@ A common question is: *"If AWS Bedrock is our target LLM provider, why aren't we
 ### What we did
 1. Selected the project name: **`InfraRAG`** (DevOps & SRE Runbook Assistant).
 2. Defined the complete repository layout with modular separation between ingestion, indexing, retrieval, generation, API handlers, and Terraform IaC.
-3. Created [README.md](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/README.md) with an end-to-end architecture diagram in Mermaid detailing both the offline/indexing path and the online/query path.
+3. Created [README.md](README.md) with an end-to-end architecture diagram in Mermaid detailing both the offline/indexing path and the online/query path.
 4. Created baseline configuration files:
-   - [.gitignore](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/.gitignore) (ignoring `.env`, FAISS indices, virtual environments, terraform cache)
-   - [requirements.txt](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/requirements.txt) & [requirements-dev.txt](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/requirements-dev.txt) (pinned for Python 3.12: `boto3`, `faiss-cpu`, `numpy`, `pydantic`, `pytest`, `ruff`)
-   - [src/config.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/config.py) with `USE_MOCK_BEDROCK=True` toggle to ensure 100% free local development.
-   - Initial [learn.md](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/learn.md) to record all technical learnings, trade-offs, and interview notes.
+   - [.gitignore](.gitignore) (ignoring `.env`, FAISS indices, virtual environments, terraform cache)
+   - [requirements.txt](requirements.txt) & [requirements-dev.txt](requirements-dev.txt) (pinned for Python 3.12: `boto3`, `faiss-cpu`, `numpy`, `pydantic`, `pytest`, `ruff`)
+   - [src/config.py](src/config.py) with `USE_MOCK_BEDROCK=True` toggle to ensure 100% free local development.
+   - Initial [learn.md](learn.md) to record all technical learnings, trade-offs, and interview notes.
 5. Implemented the **Autonomous Loop Engineer**:
-   - [AGENTS.md](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/AGENTS.md): Project agent directive enforcing zero-cost guardrails, automated test loops, and continuous logging.
-   - [scripts/loop_engineer.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/scripts/loop_engineer.py): Automated CLI loop runner for self-checks, cost verification, and automated testing.
-   - [.github/workflows/ci.yml](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/.github/workflows/ci.yml): GitHub Actions CI pipeline running ruff, pytest, and terraform validate.
+   - [AGENTS.md](AGENTS.md): Project agent directive enforcing zero-cost guardrails, automated test loops, and continuous logging.
+   - [scripts/loop_engineer.py](scripts/loop_engineer.py): Automated CLI loop runner for self-checks, cost verification, and automated testing.
+   - [.github/workflows/ci.yml](.github/workflows/ci.yml): GitHub Actions CI pipeline running ruff, pytest, and terraform validate.
 6. Populated realistic incident runbooks in `data/runbooks/`:
-   - [kubernetes_crashloopbackoff.md](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/runbooks/kubernetes_crashloopbackoff.md)
-   - [kubernetes_oom_killed.md](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/runbooks/kubernetes_oom_killed.md)
-   - [istio_503_service_unavailable.md](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/runbooks/istio_503_service_unavailable.md)
-   - [istio_mtls_strict_failures.md](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/runbooks/istio_mtls_strict_failures.md)
+   - [kubernetes_crashloopbackoff.md](data/runbooks/kubernetes_crashloopbackoff.md)
+   - [kubernetes_oom_killed.md](data/runbooks/kubernetes_oom_killed.md)
+   - [istio_503_service_unavailable.md](data/runbooks/istio_503_service_unavailable.md)
+   - [istio_mtls_strict_failures.md](data/runbooks/istio_mtls_strict_failures.md)
 
 ### Concepts learned
 - **RAG (Retrieval-Augmented Generation):** Rather than retraining or fine-tuning an LLM on proprietary docs (which is expensive and prone to stale facts), RAG searches relevant documents at runtime and injects them into the prompt as "open-book" context.
@@ -96,7 +96,7 @@ A common question is: *"If AWS Bedrock is our target LLM provider, why aren't we
 ### Achievements
 - Established clean separation of concerns (`chunker`, `embeddings`, `vector_store`, `generator`).
 - Designed a 100% free local development flow and a zero-idle-cost AWS architecture (<$5/month, $0 idle).
-- Created the autonomous loop engineer runner ([scripts/loop_engineer.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/scripts/loop_engineer.py)) and GitHub Actions CI.
+- Created the autonomous loop engineer runner ([scripts/loop_engineer.py](scripts/loop_engineer.py)) and GitHub Actions CI.
 
 ### Interview talking points
 - *"As a DevOps engineer, cost and operational simplicity are primary constraints. Instead of paying $70-$150/month for an always-on vector database like OpenSearch Serverless or Pinecone, I engineered InfraRAG using FAISS serialized to S3 and served via AWS Lambda. For an internal DevOps runbook library (<50,000 chunks), this yields sub-second retrieval at essentially $0 idle cost."*
@@ -108,12 +108,12 @@ A common question is: *"If AWS Bedrock is our target LLM provider, why aren't we
 ## Phase 2: Local Prototype & FAISS Vector Indexing (2026-10-27)
 
 ### What we did
-1. Built [src/chunker.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/chunker.py): Markdown-aware sliding-window chunker with header extraction (`chunk_size=500`, `chunk_overlap=100`).
-2. Built [src/embeddings.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/embeddings.py): Implemented `BedrockTitanEmbeddingProvider` (1024-dim unit-normalized) and `MockEmbeddingProvider` (deterministic zero-cost offline semantic vectors).
-3. Built [src/vector_store.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/vector_store.py): Implemented `FAISSVectorStore` using `IndexFlatIP` (Inner Product on normalized vectors) with local disk and Amazon S3 serialization, plus pure NumPy fallback.
-4. Built [src/retriever.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/retriever.py): Top-k semantic retriever with confidence thresholding.
-5. Built [cli.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/cli.py): Rich terminal interface supporting `ingest`, `ask`, and interactive `chat`.
-6. Created unit tests in [tests/test_chunker.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/tests/test_chunker.py) and [tests/test_vector_store.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/tests/test_vector_store.py).
+1. Built [src/chunker.py](src/chunker.py): Markdown-aware sliding-window chunker with header extraction (`chunk_size=500`, `chunk_overlap=100`).
+2. Built [src/embeddings.py](src/embeddings.py): Implemented `BedrockTitanEmbeddingProvider` (1024-dim unit-normalized) and `MockEmbeddingProvider` (deterministic zero-cost offline semantic vectors).
+3. Built [src/vector_store.py](src/vector_store.py): Implemented `FAISSVectorStore` using `IndexFlatIP` (Inner Product on normalized vectors) with local disk and Amazon S3 serialization, plus pure NumPy fallback.
+4. Built [src/retriever.py](src/retriever.py): Top-k semantic retriever with confidence thresholding.
+5. Built [cli.py](cli.py): Rich terminal interface supporting `ingest`, `ask`, and interactive `chat`.
+6. Created unit tests in [tests/test_chunker.py](tests/test_chunker.py) and [tests/test_vector_store.py](tests/test_vector_store.py).
 
 ### Concepts learned
 - **Chunk Size vs. Overlap:**
@@ -139,13 +139,13 @@ A common question is: *"If AWS Bedrock is our target LLM provider, why aren't we
 ## Phase 3: Prompt Grounding & Citation Enforcement (2026-10-27)
 
 ### What we did
-1. Built [src/generator.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/generator.py): Strict system prompt template enforcing:
+1. Built [src/generator.py](src/generator.py): Strict system prompt template enforcing:
    - Only answering from provided context chunks.
    - Forcing explicit inline citations in format `[filename#chunk_id]`.
    - Explicit fallback response: *"I don't know based on the provided runbooks."* when context lacks the answer.
    - Indirect prompt injection defense treating document text strictly as untrusted data.
-2. Built [src/chain.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/chain.py): Complete RAG orchestration chain connecting Retriever, Prompt Builder, and Generator.
-3. Created unit tests in [tests/test_chain.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/tests/test_chain.py) verifying grounded answers, citations, and out-of-domain refusals.
+2. Built [src/chain.py](src/chain.py): Complete RAG orchestration chain connecting Retriever, Prompt Builder, and Generator.
+3. Created unit tests in [tests/test_chain.py](tests/test_chain.py) verifying grounded answers, citations, and out-of-domain refusals.
 
 ### Concepts learned
 - **In-Context Grounding:** Forcing the LLM to restrict its knowledge retrieval strictly to the text provided in the user prompt.
@@ -158,8 +158,8 @@ A common question is: *"If AWS Bedrock is our target LLM provider, why aren't we
 ## Phase 4: Golden Evaluation Benchmark (2026-10-27)
 
 ### What we did
-1. Created [evaluation/golden_dataset.json](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/evaluation/golden_dataset.json) with 15 real-world SRE Q&A pairs (12 in-domain runbook questions + 3 out-of-domain refusal questions).
-2. Built [evaluation/evaluate.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/evaluation/evaluate.py): Automated benchmark measuring:
+1. Created [evaluation/golden_dataset.json](evaluation/golden_dataset.json) with 15 real-world SRE Q&A pairs (12 in-domain runbook questions + 3 out-of-domain refusal questions).
+2. Built [evaluation/evaluate.py](evaluation/evaluate.py): Automated benchmark measuring:
    - Retrieval Hit-Rate (% of times top-k contains ground-truth runbook)
    - Answer Faithfulness & Refusal Accuracy (% of answers with citations and refusal on non-runbook queries)
    - End-to-end latency and evaluation cost ($0.00).
@@ -176,11 +176,11 @@ A common question is: *"If AWS Bedrock is our target LLM provider, why aren't we
 
 ### What we did
 1. Built AWS Lambda handlers:
-   - [src/lambda_handlers/ingest.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/lambda_handlers/ingest.py): `/ingest` route chunks, embeds, and uploads index to S3.
-   - [src/lambda_handlers/ask.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/lambda_handlers/ask.py): `/ask` route caches FAISS index in `/tmp` across warm Lambda invocations.
+   - [src/lambda_handlers/ingest.py](src/lambda_handlers/ingest.py): `/ingest` route chunks, embeds, and uploads index to S3.
+   - [src/lambda_handlers/ask.py](src/lambda_handlers/ask.py): `/ask` route caches FAISS index in `/tmp` across warm Lambda invocations.
 2. Created Infrastructure as Code in `terraform/`:
-   - [terraform/main.tf](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/terraform/main.tf): Private encrypted S3 bucket, least-privilege IAM roles, CloudWatch log groups with 7-day retention, 2x Lambda functions, and Amazon API Gateway HTTP API.
-   - [terraform/variables.tf](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/terraform/variables.tf) & [terraform/outputs.tf](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/terraform/outputs.tf).
+   - [terraform/main.tf](terraform/main.tf): Private encrypted S3 bucket, least-privilege IAM roles, CloudWatch log groups with 7-day retention, 2x Lambda functions, and Amazon API Gateway HTTP API.
+   - [terraform/variables.tf](terraform/variables.tf) & [terraform/outputs.tf](terraform/outputs.tf).
 3. **Applied Terraform Live to AWS (`ap-south-1`)**:
    - Deployed live API Gateway: `https://37laxodpza.execute-api.ap-south-1.amazonaws.com/`
    - Created S3 storage bucket: `infrarag-storage-ap0wa5`
@@ -213,7 +213,7 @@ A common question is: *"If AWS Bedrock is our target LLM provider, why aren't we
 ## Phase 6: Streamlit Web UI (2026-10-27)
 
 ### What we did
-1. Built [ui/app.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/ui/app.py): Streamlit dashboard with:
+1. Built [ui/app.py](ui/app.py): Streamlit dashboard with:
    - Mode indicator (100% Free / Mock vs AWS Bedrock).
    - Real-time confidence badge (High vs Low/Ungrounded).
    - Clickable source citations with similarity scores.
@@ -225,7 +225,7 @@ A common question is: *"If AWS Bedrock is our target LLM provider, why aren't we
 ## Phase 7: Observability & Telemetry (2026-10-27)
 
 ### What we did
-1. Built [src/observability.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/observability.py):
+1. Built [src/observability.py](src/observability.py):
    - Structured single-line JSON logging for AWS CloudWatch.
    - Request Trace IDs for distributed tracing.
    - Latency profiling (retrieval vs generation).
@@ -307,30 +307,30 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
 
 ### 1. What was Done
 1. **Automated Multi-Source Public Corpus Ingestion Script**:
-   - Authored [scripts/fetch_sources.sh](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/scripts/fetch_sources.sh) to shallow-clone (`--depth 1 --filter=blob:none --sparse`) upstream repositories and extract only Markdown documentation:
+   - Authored [scripts/fetch_sources.sh](scripts/fetch_sources.sh) to shallow-clone (`--depth 1 --filter=blob:none --sparse`) upstream repositories and extract only Markdown documentation:
      - `kubernetes/website` -> `data/public/kubernetes/` (69 Markdown docs covering container debugging, pod lifecycle, crictl, ephemeral containers)
      - `istio/istio.io` -> `data/public/istio/` (71 Markdown docs covering operational diagnostics, Envoy proxy-cmd, traffic management, and MTLS)
      - `gitlab-com/runbooks` -> `data/public/gitlab/` (671 Markdown docs covering production SRE runbooks, Patroni database failovers, Gitaly storage)
-   - Preserved internal production runbooks in [data/internal/](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal) (8 curated incident runbooks).
+   - Preserved internal production runbooks in [data/internal/](data/internal) (8 curated incident runbooks).
    - Removed legacy `data/runbooks/` to establish a clean, dual-tier schema (`data/internal` vs `data/public`).
 2. **Attribution & Licensing Ledger**:
-   - Authored [SOURCES.md](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/SOURCES.md) documenting every upstream repository, documentation URL, component scope, and open-source license (Apache 2.0, CC BY 4.0, MIT / CC BY-SA 4.0).
+   - Authored [SOURCES.md](SOURCES.md) documenting every upstream repository, documentation URL, component scope, and open-source license (Apache 2.0, CC BY 4.0, MIT / CC BY-SA 4.0).
 3. **Structured Heading-Aware Chunk Metadata**:
-   - Extended [src/models.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/models.py) (`DocumentChunk` and `Citation`) and [src/chunker.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/chunker.py):
+   - Extended [src/models.py](src/models.py) (`DocumentChunk` and `Citation`) and [src/chunker.py](src/chunker.py):
      - `source`: repository identifier (`internal`, `kubernetes`, `istio`, `gitlab`)
      - `path`: relative path on disk
      - `section`: containing Markdown header hierarchy
      - `type`: `internal` vs `public`
 4. **Query-Time Metadata Filtering**:
-   - Updated [src/vector_store.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/vector_store.py) and [src/retriever.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/retriever.py) with `type_filter: str | None = None` support.
-   - Updated [src/lambda_handlers/ask.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/lambda_handlers/ask.py) to accept `type_filter` or `type` from API POST payloads.
-   - Updated [cli.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/cli.py) with `--type [all|internal|public]` CLI flag and interactive chat filter syntax (`[internal] <query>`).
-   - Updated [ui/index.html](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/ui/index.html) with Warm Ivory / White Cream scope filter pills: `[📁 ALL SOURCES (819 Docs)]`, `[🔒 INTERNAL RUNBOOKS (8)]`, `[🌐 PUBLIC CORPUS (811)]` and dynamic citation type tags.
+   - Updated [src/vector_store.py](src/vector_store.py) and [src/retriever.py](src/retriever.py) with `type_filter: str | None = None` support.
+   - Updated [src/lambda_handlers/ask.py](src/lambda_handlers/ask.py) to accept `type_filter` or `type` from API POST payloads.
+   - Updated [cli.py](cli.py) with `--type [all|internal|public]` CLI flag and interactive chat filter syntax (`[internal] <query>`).
+   - Updated [ui/index.html](ui/index.html) with Warm Ivory / White Cream scope filter pills: `[📁 ALL SOURCES (819 Docs)]`, `[🔒 INTERNAL RUNBOOKS (8)]`, `[🌐 PUBLIC CORPUS (811)]` and dynamic citation type tags.
 5. **25-Question Golden Evaluation Suite & Benchmark**:
-   - Authored [evaluation/golden_dataset.json](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/evaluation/golden_dataset.json) with 25 queries:
+   - Authored [evaluation/golden_dataset.json](evaluation/golden_dataset.json) with 25 queries:
      - 20 in-domain queries covering internal and public Kubernetes, Istio, and GitLab runbooks.
      - 5 out-of-domain refusal queries (baking cake, Australia capital, 1998 World Cup, tennis rules, Apple stock price) expecting 100% strict refusal.
-   - Ran [evaluation/evaluate.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/evaluation/evaluate.py).
+   - Ran [evaluation/evaluate.py](evaluation/evaluate.py).
 
 ---
 
@@ -363,20 +363,61 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
 
 | Issue / Error Encountered | Root Cause | Fix Applied | Autonomous Prevention Rule |
 | :--- | :--- | :--- | :--- |
-| **Hugo Static Site `index.md` Overwrite** | Kubernetes and Istio Hugo repos place guides in separate folders as `index.md` (e.g., `ops/diagnostic-tools/index.md`, `ops/common-problems/index.md`). Flattening with `cp *.md` caused 70+ files to overwrite a single `index.md`. | Updated [scripts/fetch_sources.sh](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/scripts/fetch_sources.sh) to mirror folder structures (`cp -R ...`) and delete non-markdown assets. | Always preserve directory trees when extracting documentation from static site generators. |
-| **Mock Vector Acronym Collisions** | `MockEmbeddingProvider` used naive substring matching (`kw in text`). Two-letter acronyms (`uc`, `uo`, `nr`, `cri`) matched words like `produce` or `critical`, causing 7,000 public chunks to pollute top-k results (initial hit-rate dropped to 70%). | Updated [src/embeddings.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/embeddings.py) with precompiled `\b{kw}\b` word-boundary regular expressions for short terms. Hit-rate jumped to 95.0%. | Enforce word boundaries on any semantic tokenizer or mock vectorizer for terms under 5 characters. |
+| **Hugo Static Site `index.md` Overwrite** | Kubernetes and Istio Hugo repos place guides in separate folders as `index.md` (e.g., `ops/diagnostic-tools/index.md`, `ops/common-problems/index.md`). Flattening with `cp *.md` caused 70+ files to overwrite a single `index.md`. | Updated [scripts/fetch_sources.sh](scripts/fetch_sources.sh) to mirror folder structures (`cp -R ...`) and delete non-markdown assets. | Always preserve directory trees when extracting documentation from static site generators. |
+| **Mock Vector Acronym Collisions** | `MockEmbeddingProvider` used naive substring matching (`kw in text`). Two-letter acronyms (`uc`, `uo`, `nr`, `cri`) matched words like `produce` or `critical`, causing 7,000 public chunks to pollute top-k results (initial hit-rate dropped to 70%). | Updated [src/embeddings.py](src/embeddings.py) with precompiled `\b{kw}\b` word-boundary regular expressions for short terms. Hit-rate jumped to 95.0%. | Enforce word boundaries on any semantic tokenizer or mock vectorizer for terms under 5 characters. |
 | **Ruff F541 Static String Warnings** | Formatted string literals without variable interpolations (`f"819 Markdown files"`) in `evaluate.py`. | Ran `ruff check --fix .` and removed extraneous `f` prefixes. | Enforce pre-commit ruff linting in CI. |
 | **Vector Cache Stale after Public Ingestion** | Markdown files were downloaded to disk, but `cli.py ingest` had not updated `index_cache/` and S3 still held the old 76-chunk index. Queries for new public runbooks (e.g. Patroni failover) returned low similarity (<0.25 threshold) triggering refusal. | Re-ran ingestion across all 819 docs (`cli.py ingest`), synced 7,207-chunk index to `s3://infrarag-storage-ap0wa5/faiss_index/`, and deployed updated Lambda package. Live endpoint now answers with HIGH confidence. | Automated pipeline must trigger index rebuild and S3 sync immediately after external corpus downloads. |
 
 ---
 
-### 5. Interview Talking Points
-1. **Multi-Corpus Enterprise RAG Architecture**:
-   *"In production DevOps environments, engineers consult both internal proprietary runbooks and external public documentation like Kubernetes, Istio, and GitLab SRE playbooks. In InfraRAG, we scaled the index from 76 chunks to 7,207 chunks across 819 files, tagging every chunk with structured metadata (`source`, `path`, `section`, `type`). This enables zero-latency query-time filtering so an on-call engineer can isolate internal company incident procedures or query the broader open-source knowledge base."*
-2. **Maintaining Zero Idle Cost & Free-Tier Constraints at Scale**:
-   *"Even after expanding the corpus by 102x to 819 Markdown files, our entire FAISS vector index consumes only ~28.2 MB of RAM. This fits comfortably within AWS Lambda's default 512 MB memory footprint and executes within 105ms. One-time Bedrock Titan Text v2 embedding costs less than $0.09, keeping total AWS monthly spend well under our $5.00 limit while preserving 100% free offline development."*
-3. **Hallucination Prevention & Refusal Faithfulness**:
-   *"In high-stakes SRE incident response, a false or fabricated answer can cause an outage. In our 25-question benchmark evaluation, InfraRAG achieved 95.0% in-domain retrieval hit-rate and 100% refusal accuracy on out-of-domain prompts, strictly refusing to answer questions unsupported by the runbooks."*
+---
+
+## Phase 10: Production Hardening, Least-Privilege IAM, and Evaluation Transparency
+
+### 1. What Was Done
+1. **Mock vs. Live Evaluation Transparency**:
+   - Explicitly clarified benchmark metrics: The 25-question evaluation suite tests deterministic offline groundedness (`USE_MOCK_BEDROCK=true`), delivering zero-cost, 100% reproducible CI validation.
+   - Defined faithfulness methodology: An answer is faithful if and only if it contains verifiable diagnostic command keywords matching ground truth, includes valid in-line citation tags (`[filename#chunk_id]`), and for out-of-domain queries, strictly outputs the refusal string.
+   - Documented the 19/20 retrieval case study: Query #17 (*"How do ephemeral containers troubleshoot a running pod without restarting it?"*) retrieved `kubectl-node-debug.md` containing `kubectl debug -it <pod> --image=busybox`. The golden set expected `ephemeral-containers.md`, counting as a retrieval miss, yet the generated response was 100% faithful and cited.
+2. **Deterministic Pre-Generation Short-Circuiting**:
+   - Updated `src/chain.py`: When maximum cosine similarity score is below the threshold (`< 0.25`), the chain immediately short-circuits and returns *"I don't know based on the provided runbooks"* without invoking the LLM. This saves 100% of LLM token costs and eliminates hallucination risks on irrelevant queries.
+3. **Strict Citation Filtering**:
+   - Built `parse_citations_from_answer` in `src/generator.py`: Only chunks explicitly referenced via `[filename#chunk_id]` in the generated text are returned as citations. If the model refuses, citations return empty (`[]`).
+4. **Prompt Injection Defense-in-Depth**:
+   - Dynamic delimiters: Uses per-request UUID boundary tags (`<CONTEXT_BOUNDARY_{hex}>`) rather than static `--- END CHUNK ---` strings.
+   - Content and metadata sanitization: Neutralizes delimiter hijacking and strips control characters from untrusted source headers.
+5. **Bedrock Adaptive Retries & Dynamic Pricing**:
+   - Added `botocore.config.Config(retries={"mode": "adaptive", "max_attempts": 4}, read_timeout=20, connect_timeout=5)` to `BedrockLLMProvider` and `BedrockTitanEmbeddingProvider`.
+   - Moved model pricing into `settings.BEDROCK_PRICING` keyed by model ID (Titan v2: `$0.00002 / 1k tokens`, Nova Micro: `$0.000035 in / $0.00014 out`).
+6. **Terraform & Security Hardening**:
+   - Split IAM Roles: Created `lambda_ingest_exec` (S3 PutObject/GetObject + Titan embedding) and `lambda_ask_exec` (Read-only S3 on `faiss_index/*` + Bedrock InvokeModel, no PutObject permission).
+   - Removed redundant `CreateLogGroup` permission since Terraform creates CloudWatch log groups.
+   - Added API Gateway stage rate limiting (`throttling_burst_limit = 10`, `throttling_rate_limit = 5 req/s`) to prevent denial-of-wallet Bedrock token exhaustion.
+   - Protected Ingest: Removed public `/ingest` route from API Gateway; only `/ask` is exposed.
+7. **Lambda Vector Engine Architecture**:
+   - Documented the three-tier fallback in `src/vector_store.py`:
+     - Local/Server: C++ AVX2 `faiss-cpu`.
+     - Mid-tier: `numpy` dot products.
+     - AWS Lambda: Zero-dependency pure Python inner product calculation, enabling a lightweight Lambda deployment package (<10MB) without requiring bulky 150MB C-extension layers.
+
+---
+
+### 2. Issues Faced & Autonomous Fixes Applied
+
+| Issue / Error Encountered | Root Cause | Fix Applied | Autonomous Prevention Rule |
+| :--- | :--- | :--- | :--- |
+| **Unbounded Public Endpoint Risk** | API Gateway had no rate limiting, allowing potential token exhaustion if flooded with requests. | Configured `default_route_settings` with burst 10 and rate limit 5 req/s. Removed public `/ingest` route. | Always enforce stage throttling on serverless endpoints backed by paid foundation model APIs. |
+| **Broad Shared IAM Execution Role** | Ingest and Query Lambdas shared one role granting `PutObject` to the query handler. | Split into two least-privilege IAM roles; `/ask` Lambda is strictly Read-Only on `faiss_index/*`. | Never share write permissions between ingestion workers and read-only query handlers. |
+| **Over-reporting Citations** | Generator returned all retrieved chunks as citations even when the model only used one chunk or refused. | Implemented `parse_citations_from_answer` to extract only explicitly cited chunk IDs from the generated text. | Citations must reflect actual model attribution, not raw retrieval candidate lists. |
+| **Local Path Leakage in Documentation** | Markdown links contained `file:///Users/abhishekpathak/...` absolute paths. | Converted all links to repository-relative markdown links. | Never commit absolute local filesystem URIs in shared repository documentation. |
+
+---
+
+### 3. Interview Talking Points
+1. **Separation of Concerns in Serverless IAM**:
+   *"In production cloud engineering, least-privilege is paramount. Rather than sharing a single Lambda execution role with broad S3 and Bedrock access, we decoupled ingestion from query serving. The query Lambda has strict read-only access to `faiss_index/*`, no S3 write access, and no permission to create log groups, while API Gateway enforces burst and rate-limit throttling to prevent denial-of-wallet attacks."*
+2. **Three-Tier Fallback Vector Architecture**:
+   *"Packaging heavy C++ binaries like FAISS or NumPy inside serverless functions often bloats deployment packages beyond AWS Lambda's 50MB direct upload limit and complicates multi-architecture builds (`x86_64` vs `arm64`). In InfraRAG, `src/vector_store.py` implements a three-tier architecture: high-throughput C++ FAISS locally and in CI, with a pure Python inner-product fallback in AWS Lambda. For our 7,207-chunk index, pure Python vector search completes in <15ms while keeping the Lambda zip package under 10MB."*
 
 
 

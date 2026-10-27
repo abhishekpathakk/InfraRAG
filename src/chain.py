@@ -102,34 +102,55 @@ class RAGChain:
             type_filter=type_filter,
         )
 
-        # 2. Determine confidence
-        confidence = "high"
-        if not matched_chunks or matched_chunks[0][1] < 0.25:
-            confidence = "low"
+        # 2. Check relevance threshold: short-circuit before LLM generation if below threshold
+        min_threshold = 0.25
+        if not matched_chunks or matched_chunks[0][1] < min_threshold:
+            total_latency_ms = (time.perf_counter() - total_start) * 1000.0
+            return RAGResponse(
+                query=query,
+                answer="I don't know based on the provided runbooks.",
+                citations=[],
+                confidence="low",
+                retrieved_chunks=[c for c, _ in matched_chunks],
+                latency_ms=round(total_latency_ms, 2),
+                retrieval_latency_ms=round(retrieval_latency_ms, 2),
+                generation_latency_ms=0.0,
+                input_tokens=0,
+                output_tokens=0,
+                estimated_cost_usd=0.0,
+            )
 
-        # 3. Generate grounded answer
+        # 3. Generate grounded answer via LLM
         answer_text, citations, in_tokens, out_tokens, gen_latency_ms = self.llm_provider.generate(
             query=query, chunks=matched_chunks
         )
 
         total_latency_ms = (time.perf_counter() - total_start) * 1000.0
 
-        # 4. Calculate cost
+        # 4. Calculate cost from model pricing registry
         estimated_cost = 0.0
         if not settings.USE_MOCK_BEDROCK:
-            # Bedrock Pricing (ap-south-1):
-            # Titan Text Embeddings v2: $0.0001 / 1k tokens
-            # Nova Micro: $0.000035 / 1k input tokens, $0.00014 / 1k output tokens
+            embed_pricing = settings.BEDROCK_PRICING.get(
+                settings.BEDROCK_EMBEDDING_MODEL_ID,
+                {"input_per_1k": 0.00002, "output_per_1k": 0.0},
+            )
+            llm_pricing = settings.BEDROCK_PRICING.get(
+                settings.BEDROCK_LLM_MODEL_ID,
+                {"input_per_1k": 0.000035, "output_per_1k": 0.00014},
+            )
             query_tokens = len(query.split()) * 1.3
-            embed_cost = (query_tokens / 1000.0) * 0.0001
-            gen_cost = ((in_tokens / 1000.0) * 0.000035) + ((out_tokens / 1000.0) * 0.00014)
+            embed_cost = (query_tokens / 1000.0) * embed_pricing["input_per_1k"]
+            gen_cost = (
+                ((in_tokens / 1000.0) * llm_pricing["input_per_1k"])
+                + ((out_tokens / 1000.0) * llm_pricing["output_per_1k"])
+            )
             estimated_cost = embed_cost + gen_cost
 
         return RAGResponse(
             query=query,
             answer=answer_text,
             citations=citations,
-            confidence=confidence,
+            confidence="high",
             retrieved_chunks=[c for c, _ in matched_chunks],
             latency_ms=round(total_latency_ms, 2),
             retrieval_latency_ms=round(retrieval_latency_ms, 2),

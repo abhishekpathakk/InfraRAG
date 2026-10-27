@@ -37,10 +37,25 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "storage_crypto" {
 }
 
 # ---------------------------------------------------------------------------
-# IAM Roles & Policies (Least Privilege)
 # ---------------------------------------------------------------------------
-resource "aws_iam_role" "lambda_exec" {
-  name = "${var.project_name}-lambda-exec-role"
+# CloudWatch Log Groups (7-Day Retention for Cost Containment)
+# ---------------------------------------------------------------------------
+resource "aws_cloudwatch_log_group" "ingest_logs" {
+  name              = "/aws/lambda/${var.project_name}-ingest"
+  retention_in_days = 7
+}
+
+resource "aws_cloudwatch_log_group" "ask_logs" {
+  name              = "/aws/lambda/${var.project_name}-ask"
+  retention_in_days = 7
+}
+
+# ---------------------------------------------------------------------------
+# IAM Roles & Policies (Separated Least-Privilege per Lambda)
+# ---------------------------------------------------------------------------
+# Ingest Role: Needs S3 PutObject/GetObject and Titan Embeddings
+resource "aws_iam_role" "lambda_ingest_exec" {
+  name = "${var.project_name}-lambda-ingest-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -56,69 +71,110 @@ resource "aws_iam_role" "lambda_exec" {
   })
 }
 
-resource "aws_iam_policy" "lambda_policy" {
-  name        = "${var.project_name}-least-privilege-policy"
-  description = "Scoped permissions for S3 bucket, Bedrock runtime, and CloudWatch logs"
+resource "aws_iam_policy" "lambda_ingest_policy" {
+  name        = "${var.project_name}-ingest-policy"
+  description = "Scoped permissions for S3 write, Bedrock embeddings, and CloudWatch logs"
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "S3Access"
+        Sid    = "S3BucketList"
+        Effect = "Allow"
+        Action = ["s3:ListBucket"]
+        Resource = [aws_s3_bucket.storage.arn]
+      },
+      {
+        Sid    = "S3ObjectReadWrite"
         Effect = "Allow"
         Action = [
           "s3:GetObject",
-          "s3:PutObject",
-          "s3:ListBucket"
+          "s3:PutObject"
         ]
+        Resource = ["${aws_s3_bucket.storage.arn}/*"]
+      },
+      {
+        Sid    = "BedrockEmbeddingAccess"
+        Effect = "Allow"
+        Action = ["bedrock:InvokeModel"]
         Resource = [
-          aws_s3_bucket.storage.arn,
-          "${aws_s3_bucket.storage.arn}/*"
+          "arn:aws:bedrock:${var.aws_region}::foundation-model/${var.embedding_model_id}"
         ]
       },
       {
-        Sid    = "BedrockRuntimeAccess"
+        Sid    = "CloudWatchLogsIngest"
         Effect = "Allow"
         Action = [
-          "bedrock:InvokeModel",
-          "bedrock:Converse"
-        ]
-        Resource = [
-          "arn:aws:bedrock:${var.aws_region}::foundation-model/${var.embedding_model_id}",
-          "arn:aws:bedrock:${var.aws_region}::foundation-model/${var.llm_model_id}",
-          "arn:aws:bedrock:us-east-1::foundation-model/*"
-        ]
-      },
-      {
-        Sid    = "CloudWatchLogs"
-        Effect = "Allow"
-        Action = [
-          "logs:CreateLogGroup",
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ]
-        Resource = "arn:aws:logs:${var.aws_region}:*:*"
+        Resource = "${aws_cloudwatch_log_group.ingest_logs.arn}:*"
       }
     ]
   })
 }
 
-resource "aws_iam_role_policy_attachment" "lambda_policy_attach" {
-  role       = aws_iam_role.lambda_exec.name
-  policy_arn = aws_iam_policy.lambda_policy.arn
+resource "aws_iam_role_policy_attachment" "lambda_ingest_policy_attach" {
+  role       = aws_iam_role.lambda_ingest_exec.name
+  policy_arn = aws_iam_policy.lambda_ingest_policy.arn
 }
 
-# ---------------------------------------------------------------------------
-# CloudWatch Log Groups (7-Day Retention for Cost Containment)
-# ---------------------------------------------------------------------------
-resource "aws_cloudwatch_log_group" "ingest_logs" {
-  name              = "/aws/lambda/${var.project_name}-ingest"
-  retention_in_days = 7
+# Ask Role: Read-ONLY access to FAISS vectors and Bedrock InvokeModel
+resource "aws_iam_role" "lambda_ask_exec" {
+  name = "${var.project_name}-lambda-ask-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
+  })
 }
 
-resource "aws_cloudwatch_log_group" "ask_logs" {
-  name              = "/aws/lambda/${var.project_name}-ask"
-  retention_in_days = 7
+resource "aws_iam_policy" "lambda_ask_policy" {
+  name        = "${var.project_name}-ask-policy"
+  description = "Read-only permissions for S3 faiss_index, Bedrock models, and CloudWatch logs"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "S3IndexReadOnly"
+        Effect = "Allow"
+        Action = ["s3:GetObject"]
+        Resource = ["${aws_s3_bucket.storage.arn}/faiss_index/*"]
+      },
+      {
+        Sid    = "BedrockRuntimeAccess"
+        Effect = "Allow"
+        Action = ["bedrock:InvokeModel"]
+        Resource = [
+          "arn:aws:bedrock:${var.aws_region}::foundation-model/${var.embedding_model_id}",
+          "arn:aws:bedrock:${var.aws_region}::foundation-model/${var.llm_model_id}"
+        ]
+      },
+      {
+        Sid    = "CloudWatchLogsAsk"
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "${aws_cloudwatch_log_group.ask_logs.arn}:*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_ask_policy_attach" {
+  role       = aws_iam_role.lambda_ask_exec.name
+  policy_arn = aws_iam_policy.lambda_ask_policy.arn
 }
 
 # ---------------------------------------------------------------------------
@@ -126,7 +182,7 @@ resource "aws_cloudwatch_log_group" "ask_logs" {
 # ---------------------------------------------------------------------------
 resource "aws_lambda_function" "ingest" {
   function_name    = "${var.project_name}-ingest"
-  role             = aws_iam_role.lambda_exec.arn
+  role             = aws_iam_role.lambda_ingest_exec.arn
   handler          = "src.lambda_handlers.ingest.handler"
   runtime          = "python3.12"
   filename         = "${path.module}/build/lambda_payload.zip"
@@ -147,7 +203,7 @@ resource "aws_lambda_function" "ingest" {
 
 resource "aws_lambda_function" "ask" {
   function_name    = "${var.project_name}-ask"
-  role             = aws_iam_role.lambda_exec.arn
+  role             = aws_iam_role.lambda_ask_exec.arn
   handler          = "src.lambda_handlers.ask.handler"
   runtime          = "python3.12"
   filename         = "${path.module}/build/lambda_payload.zip"
@@ -168,7 +224,7 @@ resource "aws_lambda_function" "ask" {
 }
 
 # ---------------------------------------------------------------------------
-# API Gateway HTTP API ($0 Free Tier eligible)
+# API Gateway HTTP API ($0 Free Tier eligible) with Rate Limiting
 # ---------------------------------------------------------------------------
 resource "aws_apigatewayv2_api" "http_api" {
   name          = "${var.project_name}-api"
@@ -185,31 +241,14 @@ resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.http_api.id
   name        = "$default"
   auto_deploy = true
+
+  default_route_settings {
+    throttling_burst_limit = 10
+    throttling_rate_limit  = 5
+  }
 }
 
-# Route /ingest
-resource "aws_apigatewayv2_integration" "ingest_integration" {
-  api_id                 = aws_apigatewayv2_api.http_api.id
-  integration_type       = "AWS_PROXY"
-  integration_uri        = aws_lambda_function.ingest.invoke_arn
-  payload_format_version = "2.0"
-}
-
-resource "aws_apigatewayv2_route" "ingest_route" {
-  api_id    = aws_apigatewayv2_api.http_api.id
-  route_key = "POST /ingest"
-  target    = "integrations/${aws_apigatewayv2_integration.ingest_integration.id}"
-}
-
-resource "aws_lambda_permission" "apigw_ingest" {
-  statement_id  = "AllowAPIGatewayInvokeIngest"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.ingest.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.http_api.execution_arn}/*/*/ingest"
-}
-
-# Route /ask
+# Route /ask (Ingest is kept private and not exposed via public API Gateway)
 resource "aws_apigatewayv2_integration" "ask_integration" {
   api_id                 = aws_apigatewayv2_api.http_api.id
   integration_type       = "AWS_PROXY"

@@ -107,7 +107,7 @@ def run_evaluation(golden_dataset_path: Path | str | None = None) -> dict:
     avg_latency = total_latency_ms / len(golden_set)
     total_chunks = len(chain.vector_store.chunks)
     total_tokens = sum(getattr(c, "token_count", 350) for c in chain.vector_store.chunks)
-    titan_est_cost = (total_tokens / 1000.0) * 0.0001  # $0.0001 per 1k tokens
+    titan_est_cost = (total_tokens / 1000.0) * 0.00002  # $0.00002 per 1k tokens (Amazon Titan Embeddings v2)
 
     # Render summary table
     table = Table(title="InfraRAG Benchmark Evaluation Results (25 Queries)", show_header=True, header_style="bold green")

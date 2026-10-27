@@ -36,6 +36,13 @@ try:
         DATA_DIR: Path = BASE_DIR / "data"
         CACHE_DIR: Path = BASE_DIR / "index_cache"
 
+        # Model Pricing (per 1,000 tokens)
+        BEDROCK_PRICING: dict[str, dict[str, float]] = {
+            "amazon.titan-embed-text-v2:0": {"input_per_1k": 0.00002, "output_per_1k": 0.0},
+            "amazon.nova-micro-v1:0": {"input_per_1k": 0.000035, "output_per_1k": 0.00014},
+            "anthropic.claude-3-haiku-20240307-v1:0": {"input_per_1k": 0.00025, "output_per_1k": 0.00125},
+        }
+
     settings = Settings()
 
 except ImportError:
@@ -56,5 +63,10 @@ except ImportError:
             self.BASE_DIR = Path("/tmp")
             self.DATA_DIR = Path(__file__).resolve().parent.parent / "data"
             self.CACHE_DIR = Path("/tmp/faiss_index")
+            self.BEDROCK_PRICING = {
+                "amazon.titan-embed-text-v2:0": {"input_per_1k": 0.00002, "output_per_1k": 0.0},
+                "amazon.nova-micro-v1:0": {"input_per_1k": 0.000035, "output_per_1k": 0.00014},
+                "anthropic.claude-3-haiku-20240307-v1:0": {"input_per_1k": 0.00025, "output_per_1k": 0.00125},
+            }
 
     settings = StandaloneSettings()

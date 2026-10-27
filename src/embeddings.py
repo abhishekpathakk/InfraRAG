@@ -162,8 +162,14 @@ class BedrockTitanEmbeddingProvider(BaseEmbeddingProvider):
     def _get_client(self):
         if self._client is None:
             import boto3
+            from botocore.config import Config
 
-            self._client = boto3.client("bedrock-runtime", region_name=self._region)
+            boto_cfg = Config(
+                retries={"mode": "adaptive", "max_attempts": 4},
+                read_timeout=20,
+                connect_timeout=5,
+            )
+            self._client = boto3.client("bedrock-runtime", region_name=self._region, config=boto_cfg)
         return self._client
 
     @property

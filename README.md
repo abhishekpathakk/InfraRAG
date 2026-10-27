@@ -104,19 +104,25 @@ flowchart TD
 
 ## 📊 Corpus & Benchmark Evaluation (Before vs. After)
 
-We evaluated InfraRAG across a **25-question golden dataset** ([evaluation/golden_dataset.json](evaluation/golden_dataset.json)), comprising **20 in-domain technical incidents** and **5 out-of-domain refusal queries** (questions whose answers are not in the documentation, testing strict refusal):
+We evaluated InfraRAG across a **25-question golden dataset** ([evaluation/golden_dataset.json](evaluation/golden_dataset.json)), comprising **20 in-domain technical incidents** and **5 out-of-domain refusal queries** (questions whose answers are not in the documentation, testing strict refusal).
 
-| Metric Dimension | Before (Internal Runbooks Only) | After (Internal + Public Corpus) | Delta / Operational Impact |
+> [!NOTE]
+> **Evaluation Mode Transparency**: The automated benchmark report below reflects the deterministic offline test suite (`USE_MOCK_BEDROCK=true`), which runs locally and in GitHub Actions CI with $0.00 spend.
+> - **Faithfulness Methodology**: An answer is scored faithful if and only if: (1) it contains verifiable diagnostic command keywords matching ground truth, (2) it includes valid in-line citation tags (`[filename#chunk_id]`), and (3) for out-of-domain queries, it strictly refuses with *"I don't know based on the provided runbooks."*
+> - **The 19/20 Retrieval Case Study**: On Query #17 (*"How do ephemeral containers troubleshoot a running pod without restarting it?"*), retrieval returned `kubectl-node-debug.md` (`kubectl debug -it <pod> --image=busybox`). This was scored as a retrieval miss because the golden set strictly looked for `ephemeral-containers.md`, yet the generated answer was 100% faithful, cited, and operationally correct.
+
+| Metric Dimension | Before (Authored Runbooks Only) | After (Authored + Public Corpus) | Delta / Operational Impact |
 | :--- | :--- | :--- | :--- |
 | **Total Ingested Documents** | 8 Markdown runbooks | **819 Markdown files** | **+811 files (+102x expansion)** |
 | **Indexed Vector Chunks** | 76 chunks | **7,207 chunks** | **+7,131 chunks (+94.8x)** |
-| **FAISS In-RAM Footprint** | ~727 KB | **~28.2 MB** | Fits easily inside AWS Lambda 512MB RAM |
+| **Vector Index In-RAM Footprint** | ~727 KB | **~28.2 MB** | Fits easily inside AWS Lambda 512MB RAM |
 | **Offline Dev / Local Embedding Cost** | **$0.00** | **$0.00** | **100% Free local execution preserved** |
-| **AWS Titan v2 Embedding Cost** | ~$0.0028 | **~$0.0846** (one-time indexing) | **< $0.10** (well below $5.00 budget) |
+| **AWS Titan v2 Embedding Cost** | ~$0.0028 | **~$0.0169** (one-time indexing) | **< $0.05** (well below $5.00 budget) |
 | **Retrieval Hit-Rate (In-Domain)** | 100.0% (12/12) | **95.0% (19/20)** | **PASS** (Threshold >= 90.0%) |
-| **Answer Faithfulness & Groundedness** | 100.0% (15/15) | **100.0% (25/25)** | **PASS** (Zero hallucination) |
+| **Answer Faithfulness & Refusal Rate** | 100.0% (15/15) | **100.0% (25/25)** | **PASS** (Zero ungrounded hallucinations) |
 | **Out-of-Domain Refusal Accuracy** | 100.0% (3/3) | **100.0% (5/5)** | **100.0%** (Strict refusal preserved) |
-| **Average End-to-End Query Latency** | ~98.4 ms | **104.4 ms** | **Sub-110ms** across 7,207 vector chunks |
+| **Deterministic Mock Query Latency** | ~98.4 ms | **102.4 ms** | **Sub-110ms** across 7,207 vector chunks |
+| **Live Bedrock Latency (Nova Micro)** | N/A | **~250 – 420 ms (p50)** | Serverless Bedrock runtime API |
 
 *(Full benchmark report generated automatically by [evaluation/evaluate.py](evaluation/evaluate.py) to [evaluation/eval_report.json](evaluation/eval_report.json)).*
 
@@ -128,13 +134,13 @@ InfraRAG is architected under a **strict Free-Tier First policy** (Directive #1 
 
 | AWS Service | Active Usage Assumptions | Estimated Monthly Cost | Free Tier Allocation |
 | :--- | :--- | :--- | :--- |
-| **Amazon Bedrock (Titan Text v2)** | Re-indexing + 1,000 queries/mo (~1.5M tokens) | ~$0.15 | Pay-per-token ($0.0001 / 1k tokens) |
-| **Amazon Bedrock (Nova Micro)** | 1,000 queries (~500 input / 150 output tokens) | ~$0.05 | Pay-per-token ($0.035 / 1M input tokens) |
+| **Amazon Bedrock (Titan Text v2)** | Re-indexing + 1,000 queries/mo (~1.5M tokens) | ~$0.03 | Pay-per-token ($0.00002 / 1k tokens) |
+| **Amazon Bedrock (Nova Micro)** | 1,000 queries (~500 input / 150 output tokens) | ~$0.04 | Pay-per-token ($0.035 / 1M in, $0.14 / 1M out) |
 | **AWS Lambda** | 1,000 invocations @ 1024MB RAM, ~120ms | **$0.00** | 1,000,000 free requests/mo |
 | **Amazon S3** | < 100 MB index storage + GET/PUT requests | **$0.01** | 5 GB free standard storage |
 | **Amazon API Gateway** | HTTP API v2 (1,000 requests) | **$0.00** | 1,000,000 free requests/mo |
 | **Amazon CloudWatch** | Structured JSON logs (< 100MB ingested) | **$0.00** | 5 GB free log ingestion |
-| **Total Monthly Spend** | **Active Production Runbook Assistant** | **~$0.21 – $0.85 / month** | **$0.00 Idle Cost (Hard limit: <$5.00)** |
+| **Total Monthly Spend** | **Active Production Runbook Assistant** | **~$0.08 – $0.45 / month** | **$0.00 Idle Cost (Hard limit: <$5.00)** |
 
 ---
 
@@ -257,10 +263,12 @@ terraform apply
 
 ### 9. How does Terraform enforce security in this deployment?
 > **Answer:** Our Terraform code enforces:
-> - Private S3 bucket with `block_public_acls = true` and default AES-256 server-side encryption.
-> - IAM execution role with least privilege: `s3:GetObject` and `s3:PutObject` scoped strictly to the InfraRAG bucket ARN; `bedrock:InvokeModel` scoped strictly to the specific Titan and Nova model ARNs.
-> - CloudWatch log groups with 7-day retention to prevent unexpected log storage costs.
-> - API Gateway HTTP API with scoped CORS policies.
+> - **Separated Least-Privilege IAM Roles**:
+>   - Ingest Lambda role gets S3 write (`s3:PutObject`) and Bedrock Titan embedding permissions.
+>   - Query Lambda (`/ask`) gets **Read-Only** access scoped strictly to `${aws_s3_bucket.storage.arn}/faiss_index/*` (no `PutObject`, no `ListBucket`), Bedrock `bedrock:InvokeModel` scoped to regional foundation models, and no redundant `CreateLogGroup` permission since Terraform manages log groups.
+> - **Private Encrypted S3 Bucket**: S3 public access block enabled with server-side encryption (`AES256`).
+> - **API Gateway Cost & DDoS Protection**: Stage-level default route throttling (`throttling_burst_limit = 10`, `throttling_rate_limit = 5 req/s`) preventing denial-of-wallet Bedrock token exhaustion.
+> - **Protected Ingest**: Ingest is kept private and not exposed via public API Gateway.
 
 ### 10. How would you scale this architecture to support 100,000+ engineers or enterprise-wide docs?
 > **Answer:** At enterprise scale:
