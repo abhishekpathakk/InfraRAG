@@ -218,5 +218,16 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
      - Configured `pyproject.toml` with `[tool.ruff.lint] ignore = ["E402", "E501"]` and directory exclusions.
    - **Verification**: Run [40475113998](https://github.com/abhishekpathakk/InfraRAG/actions/runs/40475113998) completed with **100% SUCCESS** on both `Lint, Test & Validate` and `Terraform Validate & Lint`.
 
+### 2. Plain-Language Concept & One-Line Analogy
+- **Terraform Validation vs. File Presence**: 
+  - *Analogy:* Calling `filebase64sha256()` on a file that doesn't exist yet is like asking a chef to weigh a cake before they've even baked the ingredients.
+  - *DevOps Lesson:* Static analysis and validation in CI should never depend on generated build artifacts unless the pipeline explicitly stages them first.
+
+### 3. Interview Talking Points
+1. **Handling Ephemeral Build Artifacts in Terraform IaC**:
+   *"In serverless CI pipelines, Lambda deployment packages are typically git-ignored to prevent bloating repo history. If Terraform's `source_code_hash` uses `filebase64sha256()`, `terraform validate` will crash on clean checkouts. We solved this by using a `fileexists()` ternary guard in Terraform and staging a pre-validation zip build step in GitHub Actions."*
+2. **Deterministic CI Lint Standards with Ruff**:
+   *"We enforce zero dead code and high static analysis rigor using Ruff. In monorepo-style CLI/UI utilities where `sys.path` injection is required, we configured `[tool.ruff.lint]` in `pyproject.toml` to explicitly ignore `E402` while strictly failing on unused imports and dead code, maintaining a sub-second lint pass in CI."*
+
 
 
