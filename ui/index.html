@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InfraRAG | DevOps & SRE Incident Copilot</title>
+  <meta name="description" content="Serverless, zero-cost DevOps & SRE incident assistant for Kubernetes, Istio, and cloud runbooks with strict citations.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0f1d;
+      --bg-secondary: #111827;
+      --bg-card: rgba(17, 24, 39, 0.75);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(6, 182, 212, 0.35);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-cyan: #06b6d4;
+      --accent-teal: #14b8a6;
+      --accent-purple: #8b5cf6;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-yellow: #f59e0b;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(6, 182, 212, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.12) 0%, transparent 45%);
+      background-attachment: fixed;
+      line-height: 1.6;
+    }
+
+    header {
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid var(--border-color);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(10, 15, 29, 0.85);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+    }
+
+    .brand-logo svg {
+      width: 22px;
+      height: 22px;
+      fill: #ffffff;
+    }
+
+    .brand-text h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(120deg, #ffffff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-text p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.85rem;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--accent-green);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--accent-green);
+      box-shadow: 0 0 10px var(--accent-green);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    main {
+      flex: 1;
+      max-width: 960px;
+      width: 100%;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    .hero-banner {
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .hero-title {
+      font-size: 2.15rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #ffffff 40%, #06b6d4 80%, #8b5cf6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    /* Query Box */
+    .query-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(12px);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .query-card:focus-within {
+      border-color: var(--border-glow);
+      box-shadow: 0 0 25px rgba(6, 182, 212, 0.2);
+    }
+
+    .input-wrapper {
+      display: flex;
+      gap: 0.75rem;
+      position: relative;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      font-size: 1rem;
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    input[type="text"]::placeholder {
+      color: #64748b;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent-cyan);
+      background: rgba(15, 23, 42, 0.95);
+    }
+
+    button#submit-btn {
+      background: linear-gradient(135deg, var(--accent-cyan), #0284c7);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      padding: 0 1.75rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+      box-shadow: 0 4px 14px rgba(6, 182, 212, 0.3);
+      white-space: nowrap;
+    }
+
+    button#submit-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.45);
+    }
+
+    button#submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Prompt Chips */
+    .chips-section {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .chips-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-right: 0.25rem;
+    }
+
+    .chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 9999px;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.78rem;
+      color: #cbd5e1;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .chip:hover {
+      background: rgba(6, 182, 212, 0.15);
+      border-color: rgba(6, 182, 212, 0.4);
+      color: #38bdf8;
+      transform: translateY(-1px);
+    }
+
+    /* Result Container */
+    #result-container {
+      display: none;
+      flex-direction: column;
+      gap: 1.25rem;
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .response-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.75rem;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    .response-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .response-title {
+      font-size: 1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .confidence-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .confidence-high {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: var(--accent-green);
+    }
+
+    .confidence-low, .confidence-ungrounded {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: var(--accent-yellow);
+    }
+
+    .answer-body {
+      font-size: 1rem;
+      line-height: 1.75;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+    }
+
+    .answer-body code {
+      font-family: var(--font-mono);
+      background: rgba(0, 0, 0, 0.35);
+      padding: 0.15rem 0.4rem;
+      border-radius: 6px;
+      font-size: 0.88em;
+      color: #38bdf8;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Citations */
+    .citations-section {
+      margin-top: 1.5rem;
+    }
+
+    .section-subtitle {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .citation-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .citation-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 0.9rem 1rem;
+      transition: border-color 0.2s;
+    }
+
+    .citation-card:hover {
+      border-color: rgba(6, 182, 212, 0.4);
+    }
+
+    .citation-file {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: #38bdf8;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .citation-section {
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      margin-top: 0.25rem;
+    }
+
+    .citation-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .relevance-score {
+      color: var(--accent-green);
+      font-weight: 600;
+      font-family: var(--font-mono);
+    }
+
+    /* Metrics Bar */
+    .metrics-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+    }
+
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 0.9rem;
+      text-align: center;
+    }
+
+    .metric-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .metric-value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      color: #ffffff;
+      margin-top: 0.25rem;
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #ffffff;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+      margin-top: auto;
+    }
+
+    footer a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 640px) {
+      .input-wrapper {
+        flex-direction: column;
+      }
+      button#submit-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 0.85rem;
+      }
+      .metrics-bar {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>InfraRAG</h1>
+        <p>DevOps & SRE Autonomous Incident Copilot</p>
+      </div>
+    </div>
+    <div class="status-badge" id="api-status">
+      <div class="status-dot"></div>
+      <span id="api-status-text">AWS ap-south-1 Live</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero-banner">
+      <h2 class="hero-title">Incident Runbook Q&A</h2>
+      <p class="hero-subtitle">
+        Strictly grounded retrieval across Kubernetes, Istio, and DevOps runbooks with source chunk citations and 100% cost transparency.
+      </p>
+    </section>
+
+    <!-- Query Input Card -->
+    <section class="query-card">
+      <div class="input-wrapper">
+        <input 
+          type="text" 
+          id="query-input" 
+          placeholder="e.g., What causes container Exit Code 137 in Kubernetes?" 
+          autocomplete="off"
+        />
+        <button id="submit-btn" onclick="submitQuery()">
+          <span id="btn-text">Ask Assistant</span>
+        </button>
+      </div>
+
+      <!-- Quick Prompt Chips -->
+      <div class="chips-section">
+        <span class="chips-label">Try asking:</span>
+        <span class="chip" onclick="setQuery('Why is my pod getting OOMKilled with Exit Code 137?')">OOMKilled 137</span>
+        <span class="chip" onclick="setQuery('How do I triage CrashLoopBackOff on Kubernetes?')">CrashLoopBackOff</span>
+        <span class="chip" onclick="setQuery('What causes Istio 503 UF Envoy errors?')">Istio 503 UF</span>
+        <span class="chip" onclick="setQuery('How to configure STRICT mTLS bypass for Prometheus metrics?')">mTLS STRICT Bypass</span>
+        <span class="chip" onclick="setQuery('How do I bake a chocolate cake?')">Refusal Test (Cake)</span>
+      </div>
+    </section>
+
+    <!-- Result Display Section -->
+    <section id="result-container">
+      <!-- Response Card -->
+      <div class="response-card">
+        <div class="response-header">
+          <div class="response-title">
+            <span>📋 Grounded Runbook Answer</span>
+          </div>
+          <span class="confidence-badge confidence-high" id="confidence-badge">HIGH CONFIDENCE</span>
+        </div>
+        <div class="answer-body" id="answer-content">
+          <!-- Populated by JavaScript -->
+        </div>
+
+        <!-- Citations List -->
+        <div class="citations-section" id="citations-section">
+          <div class="section-subtitle">📎 Source Runbook Citations</div>
+          <div class="citation-list" id="citation-list">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Telemetry & Performance Metrics -->
+      <div class="metrics-bar">
+        <div class="metric-card">
+          <div class="metric-label">Total Latency</div>
+          <div class="metric-value" id="metric-latency">0.0 ms</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Retrieval Latency</div>
+          <div class="metric-value" id="metric-retrieval">0.0 ms</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Generation Latency</div>
+          <div class="metric-value" id="metric-generation">0.0 ms</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Invocation Cost</div>
+          <div class="metric-value" id="metric-cost">$0.000000</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>
+      InfraRAG &bull; Powered by AWS Lambda, Amazon Bedrock, & FAISS &bull; 
+      <a href="https://github.com/abhishekpathakk/InfraRAG" target="_blank" rel="noopener">GitHub Repository</a>
+    </p>
+  </footer>
+
+  <script>
+    // Live AWS API Gateway Endpoint
+    const API_ENDPOINT = "https://37laxodpza.execute-api.ap-south-1.amazonaws.com/ask";
+
+    const queryInput = document.getElementById("query-input");
+    const submitBtn = document.getElementById("submit-btn");
+    const btnText = document.getElementById("btn-text");
+    const resultContainer = document.getElementById("result-container");
+    const answerContent = document.getElementById("answer-content");
+    const confidenceBadge = document.getElementById("confidence-badge");
+    const citationsSection = document.getElementById("citations-section");
+    const citationList = document.getElementById("citation-list");
+
+    const metricLatency = document.getElementById("metric-latency");
+    const metricRetrieval = document.getElementById("metric-retrieval");
+    const metricGeneration = document.getElementById("metric-generation");
+    const metricCost = document.getElementById("metric-cost");
+
+    queryInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        submitQuery();
+      }
+    });
+
+    function setQuery(text) {
+      queryInput.value = text;
+      submitQuery();
+    }
+
+    async function submitQuery() {
+      const query = queryInput.value.trim();
+      if (!query) return;
+
+      // Loading state
+      submitBtn.disabled = true;
+      btnText.innerHTML = '<span class="spinner"></span> Querying...';
+
+      try {
+        const response = await fetch(API_ENDPOINT, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ query: query })
+        });
+
+        if (!response.ok) {
+          throw new Error(`API Gateway HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        renderResult(data);
+
+      } catch (err) {
+        console.error("Query failure:", err);
+        renderError(err.message);
+      } finally {
+        submitBtn.disabled = false;
+        btnText.innerText = "Ask Assistant";
+      }
+    }
+
+    function renderResult(data) {
+      resultContainer.style.display = "flex";
+
+      // Answer formatting
+      let formattedAnswer = escapeHtml(data.answer || "No response text.");
+      // Bold syntax
+      formattedAnswer = formattedAnswer.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      // Inline citations format [file.md#chunk]
+      formattedAnswer = formattedAnswer.replace(/\[(.*?)\]/g, '<code>[$1]</code>');
+      answerContent.innerHTML = formattedAnswer;
+
+      // Confidence badge
+      const conf = (data.confidence || "high").toLowerCase();
+      confidenceBadge.className = "confidence-badge";
+      if (conf === "high") {
+        confidenceBadge.classList.add("confidence-high");
+        confidenceBadge.innerText = "HIGH CONFIDENCE";
+      } else {
+        confidenceBadge.classList.add("confidence-low");
+        confidenceBadge.innerText = conf.toUpperCase();
+      }
+
+      // Citations
+      citationList.innerHTML = "";
+      if (data.citations && data.citations.length > 0) {
+        citationsSection.style.display = "block";
+        data.citations.forEach(cit => {
+          const card = document.createElement("div");
+          card.className = "citation-card";
+          card.innerHTML = `
+            <div class="citation-file">📄 ${escapeHtml(cit.source_file)}</div>
+            <div class="citation-section">Section: <em>${escapeHtml(cit.section_title || 'General')}</em></div>
+            <div class="citation-meta">
+              <span>Chunk: <code>${escapeHtml(cit.chunk_id)}</code></span>
+              <span class="relevance-score">${(cit.relevance_score * 100).toFixed(1)}% match</span>
+            </div>
+          `;
+          citationList.appendChild(card);
+        });
+      } else {
+        citationsSection.style.display = "none";
+      }
+
+      // Metrics
+      const m = data.metrics || {};
+      metricLatency.innerText = `${(m.latency_ms || 0).toFixed(1)} ms`;
+      metricRetrieval.innerText = `${(m.retrieval_latency_ms || 0).toFixed(1)} ms`;
+      metricGeneration.innerText = `${(m.generation_latency_ms || 0).toFixed(1)} ms`;
+      metricCost.innerText = `$${(m.estimated_cost_usd || 0).toFixed(6)}`;
+
+      // Smooth scroll to answer
+      resultContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function renderError(errorMessage) {
+      resultContainer.style.display = "flex";
+      answerContent.innerHTML = `<span style="color: var(--accent-red);">⚠️ Error contacting InfraRAG API: ${escapeHtml(errorMessage)}</span>`;
+      confidenceBadge.className = "confidence-badge confidence-low";
+      confidenceBadge.innerText = "REQUEST FAILED";
+      citationsSection.style.display = "none";
+      metricLatency.innerText = "ERR";
+      metricRetrieval.innerText = "ERR";
+      metricGeneration.innerText = "ERR";
+      metricCost.innerText = "$0.00";
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>'"]/g, 
+        tag => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          "'": '&#39;',
+          '"': '&quot;'
+        }[tag] || tag)
+      );
+    }
+  </script>
+</body>
+</html>
