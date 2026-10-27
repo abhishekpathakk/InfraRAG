@@ -1,8 +1,8 @@
 {
   "total_queries": 25,
-  "hit_rate_pct": 95.0,
-  "faithfulness_pct": 100.0,
-  "avg_latency_ms": 102.45,
+  "hit_rate_pct": 100.0,
+  "faithfulness_pct": 64.0,
+  "avg_latency_ms": 106.57,
   "total_cost_usd": 0.0,
   "results": [
     {
@@ -12,7 +12,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 111.23,
+      "latency_ms": 110.34,
       "citations": [
         {
           "source_file": "kubernetes_crashloopbackoff.md",
@@ -22,9 +22,18 @@
           "source": "kubernetes",
           "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/kubernetes_crashloopbackoff.md",
           "type": "internal"
+        },
+        {
+          "source_file": "kubernetes_crashloopbackoff.md",
+          "section_title": "4. Verification & Resolution",
+          "chunk_id": "kubernetes_crashloopbackoff.md-c10",
+          "relevance_score": 0.99994957447052,
+          "source": "kubernetes",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/kubernetes_crashloopbackoff.md",
+          "type": "internal"
         }
       ],
-      "answer": "A CrashLoopBackOff indicates that a pod has crashed repeatedly [kubernetes_crashloopbackoff.md#kubernetes_crashloopbackoff.md-c5]. The immediate triage command to check logs of a crashed container instance is `kubectl logs <pod-name> -n <namespace> --previous` [kubernetes_crashloopbackoff.md#kubernetes_crashloopbackoff.md-c5]. Check rollout status using `kubectl rollout status deployment/<deployment-name>` [kubernetes_crashloopbackoff.md#kubernetes_crashloopbackoff.md-c5]."
+      "answer": "[Check logs of previous crashed container instance (CRITICAL)] [kubernetes_crashloopbackoff.md#kubernetes_crashloopbackoff.md-c5] kubectl logs <pod-name> -n <namespace> --previous ``` [kubernetes_crashloopbackoff.md#kubernetes_crashloopbackoff.md-c5] After applying patches to the Deployment: ```bash kubectl rollout status deployment/<deployment-name> -n <namespace> ``` Verify that container status changes from `CrashLoopBackOff` to `Running` and readiness probe succeeds (1/1 Ready) [kubernetes_crashloopbackoff.md#kubernetes_crashloopbackoff.md-c10]"
     },
     {
       "id": 2,
@@ -33,19 +42,19 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 102.39,
+      "latency_ms": 101.46,
       "citations": [
         {
-          "source_file": "gitaly-repos-cgroup.md",
-          "section_title": "Reference links for Gitaly cgroup",
-          "chunk_id": "gitaly-repos-cgroup.md-c2",
-          "relevance_score": 0.9998985528945923,
+          "source_file": "OrbitContainerOOMKilled.md",
+          "section_title": "Overview",
+          "chunk_id": "OrbitContainerOOMKilled.md-c1",
+          "relevance_score": 0.9998205900192261,
           "source": "gitlab",
-          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/gitaly-repos-cgroup.md",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/OrbitContainerOOMKilled.md",
           "type": "public"
         }
       ],
-      "answer": "An OOMKilled event (Exit Code 137) occurs when a container exceeds its configured memory limit or the node runs out of memory, prompting the Linux kernel to send SIGKILL [gitaly-repos-cgroup.md#gitaly-repos-cgroup.md-c2]. To diagnose, run `kubectl describe node` to inspect MemoryPressure and `kubectl top pod` for usage [gitaly-repos-cgroup.md#gitaly-repos-cgroup.md-c2]. To mitigate, increase memory limits or configure JVM with `-XX:MaxRAMPercentage=75.0` [gitaly-repos-cgroup.md#gitaly-repos-cgroup.md-c2]."
+      "answer": "The kernel OOM killer terminated an Orbit container because it exceeded its memory limit [OrbitContainerOOMKilled.md#OrbitContainerOOMKilled.md-c1]"
     },
     {
       "id": 3,
@@ -54,7 +63,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 103.1,
+      "latency_ms": 100.77,
       "citations": [
         {
           "source_file": "istio_503_service_unavailable.md",
@@ -64,9 +73,18 @@
           "source": "istio",
           "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/istio_503_service_unavailable.md",
           "type": "internal"
+        },
+        {
+          "source_file": "istio_503_service_unavailable.md",
+          "section_title": "1. Overview",
+          "chunk_id": "istio_503_service_unavailable.md-c0",
+          "relevance_score": 0.9999929070472717,
+          "source": "istio",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/istio_503_service_unavailable.md",
+          "type": "internal"
         }
       ],
-      "answer": "In Istio, HTTP 503 errors with Envoy flags UF (Upstream Connection Failure) or UC (Upstream Connection Termination) indicate that the client proxy failed to establish or maintain a connection to the upstream pod [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c2]. Ensure a DestinationRule with ISTIO_MUTUAL exists when PeerAuthentication is STRICT [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c2]."
+      "answer": "Envoy attaches response flags to its access logs that pinpoint the exact failure reason: - `UF` = Upstream Connection Failure - `UC` = Upstream Connection Termination - `UO` = Upstream Overflow (circuit breaker tripped) - `NR` = No Route configured [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c0] kubectl logs <client-pod> -c istio-proxy -n <namespace> | grep -E '503|UF|UC|UO|NR' [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c2] [Check Envoy access logs for response flags] [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c2]"
     },
     {
       "id": 4,
@@ -75,7 +93,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 103.88,
+      "latency_ms": 100.92,
       "citations": [
         {
           "source_file": "istio_mtls_strict_failures.md",
@@ -85,30 +103,39 @@
           "source": "istio",
           "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/istio_mtls_strict_failures.md",
           "type": "internal"
+        },
+        {
+          "source_file": "index.md",
+          "section_title": "Server mTLS",
+          "chunk_id": "index.md-c11",
+          "relevance_score": 0.9999839067459106,
+          "source": "istio",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/istio/deployment/security-model/index.md",
+          "type": "public"
         }
       ],
-      "answer": "In Istio STRICT mTLS mode, client requests must carry mutual TLS certificates [istio_mtls_strict_failures.md#istio_mtls_strict_failures.md-c0]. Legacy pods without sidecars can be accommodated using a port-level exception with `mode: PERMISSIVE` in the `PeerAuthentication` policy [istio_mtls_strict_failures.md#istio_mtls_strict_failures.md-c0]. DestinationRule with `mode: ISTIO_MUTUAL` configures client proxies for mTLS [istio_mtls_strict_failures.md#istio_mtls_strict_failures.md-c0]."
+      "answer": "When an Istio namespace or workload is configured with `PeerAuthentication` in `STRICT` mode, any client connecting over plain unencrypted TCP/HTTP without an authenticated mTLS certificate handshake will be immediately rejected with TCP connection reset or `connection termination` [istio_mtls_strict_failures.md#istio_mtls_strict_failures.md-c0] By default, Istio will accept mTLS and non-mTLS traffic (often called \"permissive mode\") [index.md#index.md-c11] Users can opt-in to strict enforcement by writing `PeerAuthentication` or `AuthorizationPolicy` rules requiring mTLS [index.md#index.md-c11]"
     },
     {
       "id": 5,
       "question": "What JVM argument should be set to prevent OOMKilled errors in containerized Java apps?",
       "is_in_domain": true,
       "retrieval_hit": true,
-      "answer_faithful": true,
+      "answer_faithful": false,
       "confidence": "high",
-      "latency_ms": 103.53,
+      "latency_ms": 100.9,
       "citations": [
         {
           "source_file": "kubernetes_oom_killed.md",
-          "section_title": "Check node memory pressure",
-          "chunk_id": "kubernetes_oom_killed.md-c3",
-          "relevance_score": 0.9999533295631409,
+          "section_title": "1. Overview",
+          "chunk_id": "kubernetes_oom_killed.md-c0",
+          "relevance_score": 0.9999364614486694,
           "source": "kubernetes",
           "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/kubernetes_oom_killed.md",
           "type": "internal"
         }
       ],
-      "answer": "An OOMKilled event (Exit Code 137) occurs when a container exceeds its configured memory limit or the node runs out of memory, prompting the Linux kernel to send SIGKILL [kubernetes_oom_killed.md#kubernetes_oom_killed.md-c3]. To diagnose, run `kubectl describe node` to inspect MemoryPressure and `kubectl top pod` for usage [kubernetes_oom_killed.md#kubernetes_oom_killed.md-c3]. To mitigate, increase memory limits or configure JVM with `-XX:MaxRAMPercentage=75.0` [kubernetes_oom_killed.md#kubernetes_oom_killed.md-c3]."
+      "answer": "An `OOMKilled` event indicates that a container or pod exceeded its physical memory limit, or the Kubernetes node ran completely out of allocatable memory [kubernetes_oom_killed.md#kubernetes_oom_killed.md-c0]"
     },
     {
       "id": 6,
@@ -117,7 +144,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 103.42,
+      "latency_ms": 100.9,
       "citations": [
         {
           "source_file": "istio_503_service_unavailable.md",
@@ -127,9 +154,18 @@
           "source": "istio",
           "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/istio_503_service_unavailable.md",
           "type": "internal"
+        },
+        {
+          "source_file": "istio_503_service_unavailable.md",
+          "section_title": "1. Overview",
+          "chunk_id": "istio_503_service_unavailable.md-c0",
+          "relevance_score": 0.9999877214431763,
+          "source": "istio",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/istio_503_service_unavailable.md",
+          "type": "internal"
         }
       ],
-      "answer": "In Istio access logs, the Envoy response flag UO indicates Upstream Overflow, meaning circuit breaker limits (max connections or pending requests) were exceeded [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c2]."
+      "answer": "Envoy attaches response flags to its access logs that pinpoint the exact failure reason: - `UF` = Upstream Connection Failure - `UC` = Upstream Connection Termination - `UO` = Upstream Overflow (circuit breaker tripped) - `NR` = No Route configured [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c0] [Check Envoy access logs for response flags] [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c2] kubectl logs <client-pod> -c istio-proxy -n <namespace> | grep -E '503|UF|UC|UO|NR' [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c2]"
     },
     {
       "id": 7,
@@ -138,7 +174,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 103.49,
+      "latency_ms": 101.01,
       "citations": [
         {
           "source_file": "kubernetes_crashloopbackoff.md",
@@ -148,9 +184,18 @@
           "source": "kubernetes",
           "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/kubernetes_crashloopbackoff.md",
           "type": "internal"
+        },
+        {
+          "source_file": "kubernetes_crashloopbackoff.md",
+          "section_title": "1. Overview",
+          "chunk_id": "kubernetes_crashloopbackoff.md-c0",
+          "relevance_score": 0.9999554753303528,
+          "source": "kubernetes",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/kubernetes_crashloopbackoff.md",
+          "type": "internal"
         }
       ],
-      "answer": "The command to verify pod rollout status after applying a patch is `kubectl rollout status deployment/<deployment-name> -n <namespace>` [kubernetes_crashloopbackoff.md#kubernetes_crashloopbackoff.md-c10]."
+      "answer": "After applying patches to the Deployment: ```bash kubectl rollout status deployment/<deployment-name> -n <namespace> ``` Verify that container status changes from `CrashLoopBackOff` to `Running` and readiness probe succeeds (1/1 Ready) [kubernetes_crashloopbackoff.md#kubernetes_crashloopbackoff.md-c10] A `CrashLoopBackOff` status indicates that a Kubernetes pod has repeatedly crashed, and the kubelet is waiting with an exponential backoff delay before restarting it again (up to a 5-minute cap) [kubernetes_crashloopbackoff.md#kubernetes_crashloopbackoff.md-c0]"
     },
     {
       "id": 8,
@@ -159,7 +204,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 102.77,
+      "latency_ms": 100.81,
       "citations": [
         {
           "source_file": "istio_mtls_strict_failures.md",
@@ -169,9 +214,18 @@
           "source": "istio",
           "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/istio_mtls_strict_failures.md",
           "type": "internal"
+        },
+        {
+          "source_file": "istio_mtls_strict_failures.md",
+          "section_title": "Missing DestinationRule for cross-namespace or egress traffic",
+          "chunk_id": "istio_mtls_strict_failures.md-c6",
+          "relevance_score": 0.9999628067016602,
+          "source": "istio",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/istio_mtls_strict_failures.md",
+          "type": "internal"
         }
       ],
-      "answer": "In Istio STRICT mTLS mode, client requests must carry mutual TLS certificates [istio_mtls_strict_failures.md#istio_mtls_strict_failures.md-c0]. Legacy pods without sidecars can be accommodated using a port-level exception with `mode: PERMISSIVE` in the `PeerAuthentication` policy [istio_mtls_strict_failures.md#istio_mtls_strict_failures.md-c0]. DestinationRule with `mode: ISTIO_MUTUAL` configures client proxies for mTLS [istio_mtls_strict_failures.md#istio_mtls_strict_failures.md-c0]."
+      "answer": "When an Istio namespace or workload is configured with `PeerAuthentication` in `STRICT` mode, any client connecting over plain unencrypted TCP/HTTP without an authenticated mTLS certificate handshake will be immediately rejected with TCP connection reset or `connection termination` [istio_mtls_strict_failures.md#istio_mtls_strict_failures.md-c0] Symptom:** Client has a sidecar, but traffic fails because the client does not initiate TLS handshake [istio_mtls_strict_failures.md#istio_mtls_strict_failures.md-c6] Fix:** Apply a cluster-wide or namespace-scoped `DestinationRule` specifying `mode: ISTIO_MUTUAL` [istio_mtls_strict_failures.md#istio_mtls_strict_failures.md-c6]"
     },
     {
       "id": 9,
@@ -180,7 +234,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 102.11,
+      "latency_ms": 227.0,
       "citations": [
         {
           "source_file": "kubernetes_crashloopbackoff.md",
@@ -192,7 +246,7 @@
           "type": "internal"
         }
       ],
-      "answer": "Exit Code 139 indicates a Segmentation Fault in Kubernetes [kubernetes_crashloopbackoff.md#kubernetes_crashloopbackoff.md-c8]. It is caused by memory access violations in compiled binaries or native shared library incompatibilities [kubernetes_crashloopbackoff.md#kubernetes_crashloopbackoff.md-c8]."
+      "answer": "[Exit Code 139 (Segmentation Fault)] [kubernetes_crashloopbackoff.md#kubernetes_crashloopbackoff.md-c8]"
     },
     {
       "id": 10,
@@ -201,7 +255,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 101.4,
+      "latency_ms": 103.81,
       "citations": [
         {
           "source_file": "kubernetes_oom_killed.md",
@@ -211,9 +265,18 @@
           "source": "kubernetes",
           "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/kubernetes_oom_killed.md",
           "type": "internal"
+        },
+        {
+          "source_file": "kubernetes_oom_killed.md",
+          "section_title": "1. Overview",
+          "chunk_id": "kubernetes_oom_killed.md-c0",
+          "relevance_score": 0.9999746680259705,
+          "source": "kubernetes",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/kubernetes_oom_killed.md",
+          "type": "internal"
         }
       ],
-      "answer": "To display node memory pressure conditions in Kubernetes, run: `kubectl describe node <node-name> | grep -E \"MemoryPressure|Allocatable\"` [kubernetes_oom_killed.md#kubernetes_oom_killed.md-c3]."
+      "answer": "[Check node memory pressure] [kubernetes_oom_killed.md#kubernetes_oom_killed.md-c3] An `OOMKilled` event indicates that a container or pod exceeded its physical memory limit, or the Kubernetes node ran completely out of allocatable memory [kubernetes_oom_killed.md#kubernetes_oom_killed.md-c0] kubectl get nodes kubectl describe node <node-name> | grep -E \"MemoryPressure|Allocatable\" [kubernetes_oom_killed.md#kubernetes_oom_killed.md-c3]"
     },
     {
       "id": 11,
@@ -222,7 +285,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 101.95,
+      "latency_ms": 102.99,
       "citations": [
         {
           "source_file": "istio_503_service_unavailable.md",
@@ -232,18 +295,27 @@
           "source": "istio",
           "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/istio_503_service_unavailable.md",
           "type": "internal"
+        },
+        {
+          "source_file": "istio_503_service_unavailable.md",
+          "section_title": "Check Istio proxy synchronization status",
+          "chunk_id": "istio_503_service_unavailable.md-c3",
+          "relevance_score": 0.9999920129776001,
+          "source": "istio",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/istio_503_service_unavailable.md",
+          "type": "internal"
         }
       ],
-      "answer": "The command to check synchronization status between istiod control plane and Envoy sidecar proxies is `istioctl proxy-status` [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c2]."
+      "answer": "[Check Istio proxy synchronization status] [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c3] [Check Envoy access logs for response flags] [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c2] istioctl proxy-status [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c3]"
     },
     {
       "id": 12,
       "question": "How do you inspect the active TLS certificates in an Istio client proxy?",
       "is_in_domain": true,
       "retrieval_hit": true,
-      "answer_faithful": true,
+      "answer_faithful": false,
       "confidence": "high",
-      "latency_ms": 101.31,
+      "latency_ms": 101.13,
       "citations": [
         {
           "source_file": "istio_mtls_strict_failures.md",
@@ -253,9 +325,27 @@
           "source": "istio",
           "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/istio_mtls_strict_failures.md",
           "type": "internal"
+        },
+        {
+          "source_file": "index.md",
+          "section_title": "Server mTLS",
+          "chunk_id": "index.md-c11",
+          "relevance_score": 0.999955415725708,
+          "source": "istio",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/istio/deployment/security-model/index.md",
+          "type": "public"
+        },
+        {
+          "source_file": "istio_mtls_strict_failures.md",
+          "section_title": "Missing DestinationRule for cross-namespace or egress traffic",
+          "chunk_id": "istio_mtls_strict_failures.md-c6",
+          "relevance_score": 0.9999536275863647,
+          "source": "istio",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/istio_mtls_strict_failures.md",
+          "type": "internal"
         }
       ],
-      "answer": "To inspect active TLS certificates in an Istio client proxy, run `istioctl proxy-config secret <client-pod>.<namespace>` [istio_mtls_strict_failures.md#istio_mtls_strict_failures.md-c0]."
+      "answer": "When an Istio namespace or workload is configured with `PeerAuthentication` in `STRICT` mode, any client connecting over plain unencrypted TCP/HTTP without an authenticated mTLS certificate handshake will be immediately rejected with TCP connection reset or `connection termination` [istio_mtls_strict_failures.md#istio_mtls_strict_failures.md-c0] Symptom:** Client has a sidecar, but traffic fails because the client does not initiate TLS handshake [istio_mtls_strict_failures.md#istio_mtls_strict_failures.md-c6] By default, Istio will accept mTLS and non-mTLS traffic (often called \"permissive mode\") [index.md#index.md-c11]"
     },
     {
       "id": 13,
@@ -264,7 +354,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 101.92,
+      "latency_ms": 100.82,
       "citations": [
         {
           "source_file": "kubernetes_node_disk_pressure.md",
@@ -276,16 +366,16 @@
           "type": "internal"
         }
       ],
-      "answer": "NodeDiskPressure triggers container evictions when root filesystem or imagefs storage breaches thresholds like `evictionHard: imagefs.available<15%` or `nodefs.available<10%` [kubernetes_node_disk_pressure.md#kubernetes_node_disk_pressure.md-c0]. To remediate, clean unused images with `crictl rmi --prune` and inspect pod ephemeral-storage requests [kubernetes_node_disk_pressure.md#kubernetes_node_disk_pressure.md-c0]."
+      "answer": "`NodeDiskPressure` occurs when the Kubelet detects that available disk space or inodes on the root filesystem (or the image filesystem) falls below configured eviction thresholds (default: available disk < 15% or free inodes < 5%) [kubernetes_node_disk_pressure.md#kubernetes_node_disk_pressure.md-c0] The Kubelet immediately refuses to schedule new pods on the affected node [kubernetes_node_disk_pressure.md#kubernetes_node_disk_pressure.md-c0] Pods enter `Evicted` status with the reason `The node was low on resource: ephemeral-storage` [kubernetes_node_disk_pressure.md#kubernetes_node_disk_pressure.md-c0]"
     },
     {
       "id": 14,
       "question": "What Nginx ingress annotation should be tuned to resolve 504 Gateway Timeout on long-running APIs?",
       "is_in_domain": true,
       "retrieval_hit": true,
-      "answer_faithful": true,
+      "answer_faithful": false,
       "confidence": "high",
-      "latency_ms": 102.12,
+      "latency_ms": 100.89,
       "citations": [
         {
           "source_file": "kubernetes_ingress_504_gateway_timeout.md",
@@ -295,9 +385,18 @@
           "source": "kubernetes",
           "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/kubernetes_ingress_504_gateway_timeout.md",
           "type": "internal"
+        },
+        {
+          "source_file": "kubernetes_ingress_504_gateway_timeout.md",
+          "section_title": "Overview & Symptoms",
+          "chunk_id": "kubernetes_ingress_504_gateway_timeout.md-c0",
+          "relevance_score": 0.9485876560211182,
+          "source": "kubernetes",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/kubernetes_ingress_504_gateway_timeout.md",
+          "type": "internal"
         }
       ],
-      "answer": "HTTP 504 Gateway Timeout occurs when Ingress (Nginx or ALB) closes the client connection before upstream pods respond [kubernetes_ingress_504_gateway_timeout.md#kubernetes_ingress_504_gateway_timeout.md-c6]. To fix, tune annotations `nginx.ingress.kubernetes.io/proxy-read-timeout` and `proxy-connect-timeout` [kubernetes_ingress_504_gateway_timeout.md#kubernetes_ingress_504_gateway_timeout.md-c6]."
+      "answer": "HTTP 504 Gateway Timeout occurs when an edge proxy or Kubernetes Ingress Controller (Nginx Ingress, AWS Load Balancer Controller / ALB, Traefik) fails to receive a timely response from an upstream backend service pod within the configured timeout window [kubernetes_ingress_504_gateway_timeout.md#kubernetes_ingress_504_gateway_timeout.md-c0] Immediate Fix:** Add timeout annotations to the Ingress resource: ```yaml metadata: annotations: nginx [kubernetes_ingress_504_gateway_timeout.md#kubernetes_ingress_504_gateway_timeout.md-c6] Client sees:** `504 Gateway Time-out` - **Ingress Controller log shows:** `upstream timed out (110: Connection timed out) while reading response header from upstream` - **Impact:** Failed API transactions, degraded user checkout/request flows, and customer-facing incident alerts [kubernetes_ingress_504_gateway_timeout.md#kubernetes_ingress_504_gateway_timeout.md-c0]"
     },
     {
       "id": 15,
@@ -306,7 +405,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 101.63,
+      "latency_ms": 100.88,
       "citations": [
         {
           "source_file": "docker_daemon_out_of_space.md",
@@ -316,9 +415,18 @@
           "source": "internal",
           "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/docker_daemon_out_of_space.md",
           "type": "internal"
+        },
+        {
+          "source_file": "docker_daemon_out_of_space.md",
+          "section_title": "Deep build cache purge (often reclaims 10GB - 50GB in CI hosts)",
+          "chunk_id": "docker_daemon_out_of_space.md-c7",
+          "relevance_score": 0.999984085559845,
+          "source": "internal",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/docker_daemon_out_of_space.md",
+          "type": "internal"
         }
       ],
-      "answer": "Based on the runbooks: [Prune all stopped containers, unused networks, and dangling images] docker system prune -f --volumes [Deep build cache purge (often reclaims 10GB - 50GB in CI hosts)] docker builder prune -a -f ``` [docker_daemon_out_of_space.md#docker_daemon_out_of_space.md-c6]."
+      "answer": "[Prune all stopped containers, unused networks, and dangling images] [docker_daemon_out_of_space.md#docker_daemon_out_of_space.md-c6] docker system prune -f --volumes [docker_daemon_out_of_space.md#docker_daemon_out_of_space.md-c6] [Deep build cache purge (often reclaims 10GB - 50GB in CI hosts)] [docker_daemon_out_of_space.md#docker_daemon_out_of_space.md-c7]"
     },
     {
       "id": 16,
@@ -327,7 +435,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 101.77,
+      "latency_ms": 100.88,
       "citations": [
         {
           "source_file": "aws_network_load_balancer_unhealthy_hosts.md",
@@ -337,18 +445,27 @@
           "source": "internal",
           "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/aws_network_load_balancer_unhealthy_hosts.md",
           "type": "internal"
+        },
+        {
+          "source_file": "aws_network_load_balancer_unhealthy_hosts.md",
+          "section_title": "1. Check Target Group Health via AWS CLI",
+          "chunk_id": "aws_network_load_balancer_unhealthy_hosts.md-c1",
+          "relevance_score": 0.9999101161956787,
+          "source": "internal",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/aws_network_load_balancer_unhealthy_hosts.md",
+          "type": "internal"
         }
       ],
-      "answer": "AWS Network Load Balancer target instances fail health checks with `Target.FailedHealthChecks` when Security Groups do not allow traffic from VPC CIDR or the application health check endpoint fails [aws_network_load_balancer_unhealthy_hosts.md#aws_network_load_balancer_unhealthy_hosts.md-c0]."
+      "answer": "When traffic arrives at an AWS Application Load Balancer (ALB) or Network Load Balancer (NLB), target instances or container IPs in the Target Group fail health checks and are marked `Unhealthy` [aws_network_load_balancer_unhealthy_hosts.md#aws_network_load_balancer_unhealthy_hosts.md-c0] Check Target Group Health via AWS CLI] [aws_network_load_balancer_unhealthy_hosts.md#aws_network_load_balancer_unhealthy_hosts.md-c1] ```bash aws elbv2 describe-target-health \\ --target-group-arn <target-group-arn> \\ --query \"TargetHealthDescriptions[] [aws_network_load_balancer_unhealthy_hosts.md#aws_network_load_balancer_unhealthy_hosts.md-c1]"
     },
     {
       "id": 17,
       "question": "How do ephemeral containers troubleshoot a running pod in Kubernetes without restarting it?",
       "is_in_domain": true,
-      "retrieval_hit": false,
+      "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 101.6,
+      "latency_ms": 100.96,
       "citations": [
         {
           "source_file": "kubectl-node-debug.md",
@@ -358,9 +475,18 @@
           "source": "kubernetes",
           "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/kubernetes/kubectl-node-debug.md",
           "type": "public"
+        },
+        {
+          "source_file": "windows.md",
+          "section_title": "Node-level troubleshooting {#troubleshooting-node}",
+          "chunk_id": "windows.md-c1",
+          "relevance_score": 0.9996744990348816,
+          "source": "kubernetes",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/kubernetes/windows.md",
+          "type": "public"
         }
       ],
-      "answer": "Ephemeral containers allow troubleshooting a running pod without restarting it using `kubectl debug -it <pod-name> --image=busybox --target=<container-name>` [kubectl-node-debug.md#kubectl-node-debug.md-c4]."
+      "answer": "[Change the pod name accordingly] [kubectl-node-debug.md#kubectl-node-debug.md-c4] kubectl delete pod node-debugger-mynode-pdx84 --now ``` ```none pod \"node-debugger-mynode-pdx84\" deleted ``` {{< note >}} The `kubectl debug node` command won't work if the Node is down (disconnected from the network, or kubelet dies and won't restart, etc [kubectl-node-debug.md#kubectl-node-debug.md-c4] My Pods are stuck at \"Container Creating\" or restarting over and over Ensure that your pause image is compatible with your Windows OS version [windows.md#windows.md-c1]"
     },
     {
       "id": 18,
@@ -369,28 +495,28 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 101.64,
+      "latency_ms": 100.71,
       "citations": [
         {
-          "source_file": "k8s-adhoc-observability.md",
-          "section_title": "List containers.",
-          "chunk_id": "k8s-adhoc-observability.md-c9",
-          "relevance_score": 0.9999529719352722,
-          "source": "gitlab",
-          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/k8s-adhoc-observability.md",
+          "source_file": "crictl.md",
+          "section_title": "{{% heading \"prerequisites\" %}}",
+          "chunk_id": "crictl.md-c1",
+          "relevance_score": 0.9999515414237976,
+          "source": "kubernetes",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/kubernetes/crictl.md",
           "type": "public"
         }
       ],
-      "answer": "The `crictl` CLI utility connects to the CRI runtime socket on the node to inspect container and pod status using `crictl ps`, `crictl logs`, and `crictl inspect` [k8s-adhoc-observability.md#k8s-adhoc-observability.md-c9]."
+      "answer": "`crictl` requires a Linux operating system with a CRI runtime [crictl.md#crictl.md-c1]"
     },
     {
       "id": 19,
       "question": "What istioctl command analyzes cluster resources for configuration errors and best practices?",
       "is_in_domain": true,
       "retrieval_hit": true,
-      "answer_faithful": true,
+      "answer_faithful": false,
       "confidence": "high",
-      "latency_ms": 101.7,
+      "latency_ms": 100.7,
       "citations": [
         {
           "source_file": "advanced-pod-config.md",
@@ -400,9 +526,18 @@
           "source": "kubernetes",
           "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/kubernetes/pods/advanced-pod-config.md",
           "type": "public"
+        },
+        {
+          "source_file": "_index.md",
+          "section_title": "Pod security settings {#pod-security}",
+          "chunk_id": "_index.md-c17",
+          "relevance_score": 0.32945722341537476,
+          "source": "kubernetes",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/kubernetes/pods/_index.md",
+          "type": "public"
         }
       ],
-      "answer": "The command `istioctl analyze` scans Kubernetes clusters and local configuration manifests to detect validation errors, orphaned resources, and Istio best practice violations [advanced-pod-config.md#advanced-pod-config.md-c7]."
+      "answer": "You can set simple security contexts: ```yaml apiVersion: v1 kind: Pod metadata: name: security-context-demo spec: securityContext: runAsUser: 1000 runAsGroup: 3000 fsGroup: 2000 containers: - name: sec-ctx-demo image: busybox command: [\"sh\", \"-c\", \"sleep 1h\"] ``` For advanced security context configuration including capabilities, seccomp profiles, and detailed security options, see the [security concepts](/docs/concepts/security/) section [_index.md#_index.md-c17] [Pod and container level security context configuration {#security-context}] [advanced-pod-config.md#advanced-pod-config.md-c7] See [Advanced Pod Configuration](/docs/concepts/workloads/pods/advanced-pod-config/) for more details [_index.md#_index.md-c17]"
     },
     {
       "id": 20,
@@ -411,7 +546,7 @@
       "retrieval_hit": true,
       "answer_faithful": true,
       "confidence": "high",
-      "latency_ms": 101.32,
+      "latency_ms": 100.7,
       "citations": [
         {
           "source_file": "deleted-project-restore.md",
@@ -421,64 +556,141 @@
           "source": "gitlab",
           "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/deleted-project-restore.md",
           "type": "public"
+        },
+        {
+          "source_file": "PostgresSplitBrain.md",
+          "section_title": "Verify the members in the cluster and find the erroneus leader",
+          "chunk_id": "PostgresSplitBrain.md-c9",
+          "relevance_score": 0.9999478459358215,
+          "source": "gitlab",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/PostgresSplitBrain.md",
+          "type": "public"
+        },
+        {
+          "source_file": "teleport_admin.md",
+          "section_title": "Deployment overview",
+          "chunk_id": "teleport_admin.md-c10",
+          "relevance_score": 0.9999446868896484,
+          "source": "gitlab",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/teleport_admin.md",
+          "type": "public"
         }
       ],
-      "answer": "In GitLab SRE runbooks, database connectivity and failovers are managed using Teleport (`tsh db connect`) and Patroni replication commands (`patronictl topology`) [deleted-project-restore.md#deleted-project-restore.md-c6]."
+      "answer": "![GitLab Teleport Architecture]( [teleport_admin.md#teleport_admin.md-c10] gitlab-patronictl pause <cluster-name> [deleted-project-restore.md#deleted-project-restore.md-c6] sudo gitlab-patronictl list [PostgresSplitBrain.md#PostgresSplitBrain.md-c9]"
     },
     {
       "id": 21,
       "question": "How do I bake a triple chocolate fudge brownie cake?",
       "is_in_domain": false,
-      "retrieval_hit": true,
-      "answer_faithful": true,
+      "retrieval_hit": false,
+      "answer_faithful": false,
       "confidence": "high",
-      "latency_ms": 101.04,
-      "citations": [],
-      "answer": "I don't know based on the provided runbooks."
+      "latency_ms": 100.61,
+      "citations": [
+        {
+          "source_file": "init-containers.md",
+          "section_title": "Examples",
+          "chunk_id": "init-containers.md-c5",
+          "relevance_score": 0.26420968770980835,
+          "source": "kubernetes",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/kubernetes/pods/init-containers.md",
+          "type": "public"
+        }
+      ],
+      "answer": "Here are some ideas for how to use init containers: * Wait for a {{< glossary_tooltip text=\"Service\" term_id=\"service\">}} to be created, using a shell one-line command like: ```shell for i in {1 [init-containers.md#init-containers.md-c5]"
     },
     {
       "id": 22,
       "question": "What is the capital city of Australia?",
       "is_in_domain": false,
-      "retrieval_hit": true,
-      "answer_faithful": true,
+      "retrieval_hit": false,
+      "answer_faithful": false,
       "confidence": "high",
-      "latency_ms": 101.72,
-      "citations": [],
-      "answer": "I don't know based on the provided runbooks."
+      "latency_ms": 101.06,
+      "citations": [
+        {
+          "source_file": "provisioning.md",
+          "section_title": "How to Move a Cell Out of the Quarantine Ring",
+          "chunk_id": "provisioning.md-c10",
+          "relevance_score": 0.4902482032775879,
+          "source": "gitlab",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/provisioning.md",
+          "type": "public"
+        }
+      ],
+      "answer": "According to provisioning.md (How to Move a Cell Out of the Quarantine Ring): [How to Move a Cell Out of the Quarantine Ring]\nThis is currently a manual process. 1. Interrogate the target cell configuration and the target Ring destination 2. Validate the version of Instrumentor [provisioning.md#provisioning.md-c10]."
     },
     {
       "id": 23,
       "question": "Who won the FIFA World Cup in 1998?",
       "is_in_domain": false,
-      "retrieval_hit": true,
-      "answer_faithful": true,
+      "retrieval_hit": false,
+      "answer_faithful": false,
       "confidence": "high",
-      "latency_ms": 101.59,
-      "citations": [],
-      "answer": "I don't know based on the provided runbooks."
+      "latency_ms": 100.82,
+      "citations": [
+        {
+          "source_file": "VaultRaftSnapshot.md",
+          "section_title": "VaultRaftSnapshotJobStale",
+          "chunk_id": "VaultRaftSnapshot.md-c5",
+          "relevance_score": 0.550000011920929,
+          "source": "gitlab",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/VaultRaftSnapshot.md",
+          "type": "public"
+        }
+      ],
+      "answer": "According to VaultRaftSnapshot.md (VaultRaftSnapshotJobStale): [VaultRaftSnapshotJobStale]\nNo successful snapshot in the last two hours. The cronjob is either failing repeatedly, suspended, or stuck in `Active`. Pages in `ops`. Silent in `pre`. [VaultRaftSnapshot.md#VaultRaftSnapshot.md-c5]."
     },
     {
       "id": 24,
       "question": "What are the tiebreaker scoring rules in a professional tennis match?",
       "is_in_domain": false,
-      "retrieval_hit": true,
-      "answer_faithful": true,
+      "retrieval_hit": false,
+      "answer_faithful": false,
       "confidence": "high",
-      "latency_ms": 101.26,
-      "citations": [],
-      "answer": "I don't know based on the provided runbooks."
+      "latency_ms": 101.83,
+      "citations": [
+        {
+          "source_file": "auditing-metrics.md",
+          "section_title": "Auditing Metrics",
+          "chunk_id": "auditing-metrics.md-c0",
+          "relevance_score": 0.40876471996307373,
+          "source": "gitlab",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/auditing-metrics.md",
+          "type": "public"
+        },
+        {
+          "source_file": "cost-attribution.md",
+          "section_title": "Cost Attribution",
+          "chunk_id": "cost-attribution.md-c0",
+          "relevance_score": 0.39006295800209045,
+          "source": "gitlab",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/cost-attribution.md",
+          "type": "public"
+        }
+      ],
+      "answer": "`make generate` turns it into a recording rule in a new per-service rule file, in one of the Mimir tenants on the [cost attribution allowlist](#which-tenant-the-rules-are-recorded-into), and the cost warehouse reads that metric to apportion the service's bill [cost-attribution.md#cost-attribution.md-c0] libsonnet), the rules are built in [`libsonnet/recording-rules/cost-attribution-usage [cost-attribution.md#cost-attribution.md-c0] In the following example we will use Mimirtool to identify which metrics are, and are not being used [auditing-metrics.md#auditing-metrics.md-c0]"
     },
     {
       "id": 25,
       "question": "What is the current live stock price of Apple Inc.?",
       "is_in_domain": false,
-      "retrieval_hit": true,
-      "answer_faithful": true,
+      "retrieval_hit": false,
+      "answer_faithful": false,
       "confidence": "high",
-      "latency_ms": 101.25,
-      "citations": [],
-      "answer": "I don't know based on the provided runbooks."
+      "latency_ms": 101.46,
+      "citations": [
+        {
+          "source_file": "downward-api.md",
+          "section_title": "Information available via `fieldRef` {#downwardapi-fieldRef}",
+          "chunk_id": "downward-api.md-c2",
+          "relevance_score": 0.41198575496673584,
+          "source": "kubernetes",
+          "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/kubernetes/downward-api.md",
+          "type": "public"
+        }
+      ],
+      "answer": "According to downward-api.md (Information available via `fieldRef` {#downwardapi-fieldRef}): [Information available via `fieldRef` {#downwardapi-fieldRef}]\nFor some Pod-level fields, you can provide them to a container either as an environment variable or using a `downwardAPI` volume. The fie [downward-api.md#downward-api.md-c2]."
     }
   ]
 }

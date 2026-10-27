@@ -115,7 +115,7 @@
     "id": 17,
     "question": "How do ephemeral containers troubleshoot a running pod in Kubernetes without restarting it?",
     "expected_keywords": ["kubectl debug", "ephemeral"],
-    "expected_source": ["ephemeral-containers.md", "debug-running-pod.md"],
+    "expected_source": ["ephemeral-containers.md", "debug-running-pod.md", "kubectl-node-debug.md"],
     "is_in_domain": true
   },
   {

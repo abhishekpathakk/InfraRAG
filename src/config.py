@@ -31,6 +31,7 @@ try:
         CHUNK_SIZE: int = 500
         CHUNK_OVERLAP: int = 100
         TOP_K: int = 3
+        MIN_RELEVANCE_THRESHOLD: float = float(os.getenv("MIN_RELEVANCE_THRESHOLD", "0.25"))
 
         BASE_DIR: Path = Path(__file__).resolve().parent.parent
         DATA_DIR: Path = BASE_DIR / "data"
@@ -60,6 +61,7 @@ except ImportError:
             self.CHUNK_SIZE = 500
             self.CHUNK_OVERLAP = 100
             self.TOP_K = 3
+            self.MIN_RELEVANCE_THRESHOLD = float(os.getenv("MIN_RELEVANCE_THRESHOLD", "0.25"))
             self.BASE_DIR = Path("/tmp")
             self.DATA_DIR = Path(__file__).resolve().parent.parent / "data"
             self.CACHE_DIR = Path("/tmp/faiss_index")

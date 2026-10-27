@@ -103,7 +103,7 @@ class RAGChain:
         )
 
         # 2. Check relevance threshold: short-circuit before LLM generation if below threshold
-        min_threshold = 0.25
+        min_threshold = settings.MIN_RELEVANCE_THRESHOLD
         if not matched_chunks or matched_chunks[0][1] < min_threshold:
             total_latency_ms = (time.perf_counter() - total_start) * 1000.0
             return RAGResponse(

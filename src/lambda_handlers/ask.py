@@ -50,6 +50,18 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     logger.info(f"Received query event: {event.get('rawPath', '')}")
 
     try:
+        # Optional shared-secret API key protection
+        expected_key = os.environ.get("INFRARAG_API_KEY")
+        if expected_key:
+            headers = event.get("headers") or {}
+            client_key = headers.get("x-api-key") or headers.get("X-API-KEY")
+            if client_key != expected_key:
+                return {
+                    "statusCode": 401,
+                    "headers": {"Content-Type": "application/json"},
+                    "body": json.dumps({"error": "Unauthorized: Missing or invalid 'x-api-key' header."}),
+                }
+
         body = event.get("body", "{}")
         if isinstance(body, str):
             body_json = json.loads(body) if body else {}
