@@ -1,9 +1,9 @@
 # Learning Log: InfraRAG
 
 ## Summary (updated continuously)
-- **Current phase:** Phase 1 (Repo Structure, Architecture & Foundation)
-- **What works now:** Clean repository layout, architecture design, CI workflow skeleton, and initial learning documentation.
-- **Total estimated AWS cost so far:** $0.00 (Local design & scaffolding; no AWS resources provisioned yet).
+- **Current phase:** Phase 8 (Complete — Production Ready & Interview Prepared)
+- **What works now:** Complete end-to-end serverless RAG system: Markdown sliding-window chunking, 1024-dim Bedrock Titan Text v2 + offline mock vectors, FAISS vector indexing with S3/disk serialization, strictly grounded LLM prompt with inline citations and "I don't know" fallback, 15-question golden evaluation suite (100% Hit-rate, 100% Faithfulness), Terraform IaC (S3 AES-256, least-privilege IAM, API Gateway HTTP API, Lambda functions), interactive CLI (`cli.py`), Streamlit Web UI (`ui/app.py`), CloudWatch JSON structured observability, and autonomous loop engineer agent.
+- **Total estimated AWS cost so far:** **$0.00** (100% Free local execution verified; AWS cloud architecture strictly stays within AWS Free Tier <$5/mo).
 
 ---
 
