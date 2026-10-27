@@ -437,8 +437,9 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
    - Corrected documentation: Clarified that <15ms retrieval requires NumPy/FAISS, while pure Python in a zero-dependency Lambda package takes ~160ms.
 5. **API Authentication**:
    - Added optional `x-api-key` header verification in `src/lambda_handlers/ask.py` (`INFRARAG_API_KEY`).
-6. **Git Identity**:
-   - Configured `git config user.name "Abhishek Pathak"` and `git config user.email "abhishekpathak@users.noreply.github.com"`.
+6. **Git Identity & Contributor History**:
+   - Configured `git config user.name "Abhishek Pathak"` and `git config user.email "abhishekpathakk@users.noreply.github.com"`.
+   - Purged stale commit authorship via `git filter-branch` so 100% of commits reflect the verified GitHub user `abhishekpathakk`.
 
 ---
 
@@ -449,6 +450,7 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
 | **Overfitted Mock Evaluator** | `MockLLMProvider` had hardcoded conditional checks matching golden dataset strings, producing artificial 100% scores. | Replaced with query-overlap extractive sentence ranker that operates on arbitrary text. | Test mocks must implement generic extraction or parsing logic, never hardcoded question keys. |
 | **Markdown / YAML Corruption in Prompts** | Sanitizer replaced `---` with `- - -` and code fences with spaces, corrupting Kubernetes manifests. | Relied strictly on per-request UUID boundary tags `<CONTEXT_BOUNDARY_{hex}>` and only escaped boundary tag closures. | Never alter standard Markdown formatting characters inside passive context blocks. |
 | **CPython Dot Product Latency Discrepancy** | Claimed pure Python dot product across 7,207 vectors took <15ms; real execution took ~160ms. | Measured exact timings with Python `perf_counter` and updated documentation to distinguish NumPy (~1ms) from pure Python (~160ms). | Always benchmark vector operations directly in the target runtime rather than estimating. |
+| **Stale Contributor Attribution on GitHub** | Commit author email was configured with a single 'k' (`abhishekpathak@...`), attributing commits to another GitHub account. | Configured `user.email "abhishekpathakk@users.noreply.github.com"`, rewrote all commits with `git filter-branch`, and force-pushed clean history. | Always verify `git config user.email` matches your exact GitHub username/noreply email before creating repo commits. |
 
 ---
 
