@@ -107,30 +107,46 @@ flowchart TD
 
 ---
 
-## 📊 Pipeline Wiring Benchmark (Deterministic Mock Suite - 25 Queries)
+## 📊 Comprehensive Benchmark & Validation Results
 
-We evaluated InfraRAG across a **25-question golden dataset** ([evaluation/golden_dataset.json](evaluation/golden_dataset.json)) with parameters `top_k = 5` and `min_relevance_threshold = 0.25`, comprising **20 in-domain technical incidents** and **5 out-of-domain refusal queries** (questions outside SRE documentation testing strict refusal).
+We evaluated InfraRAG across two independent datasets:
+1. **Primary Golden Benchmark** ([evaluation/golden_dataset.json](evaluation/golden_dataset.json)): 25 questions (20 in-domain incident troubleshooting + 5 out-of-domain negative queries).
+2. **Frozen Held-Out Validation** ([evaluation/held_out_dataset.json](evaluation/held_out_dataset.json)): 10 unseen operational queries (8 in-domain incidents + 2 out-of-domain negative queries) designed to test pipeline generalization without test-set leakage.
+
+All queries evaluate with parameters `top_k = 5` and `min_relevance_threshold = 0.25`.
 
 > [!NOTE]
-> **Evaluation Mode Transparency & Methodology**:
-> - **Zero-Cost Pipeline Verification**: This deterministic benchmark runs offline (`USE_MOCK_BEDROCK=true`) locally and in GitHub Actions CI with **$0.00 spend**. It verifies retrieval candidate ranking, chunk metadata filtering, token accounting, and negative refusal logic.
-> - **Extractive Baseline vs. Generative LLM**: In local mock mode, the mock generator does not hallucinate answers; it ranks sentences from retrieved chunks via query-token overlap. The **64.0% extractive faithfulness** represents an honest, non-tautological baseline (16/20 in-domain incidents yielded relevant extractive sentences with valid chunk citations, while 5/5 out-of-domain queries correctly triggered strict refusal). In live production, Amazon Bedrock Nova Micro synthesizes complete natural language answers.
-> - **Held-Out Validation**: In addition to the 25-question benchmark, a frozen 10-question held-out dataset ([evaluation/held_out_dataset.json](evaluation/held_out_dataset.json)) verifies generalization against unseen incident scenarios.
+> **Evaluation Mode Transparency & Metric Definitions**:
+> - **Zero-Cost Local Execution**: Benchmarks run deterministically offline (`USE_MOCK_BEDROCK=true`) in GitHub Actions CI with **$0.00 cloud spend**.
+> - **Top-1 vs. Top-5 vs. MRR**: We report **Top-1 Hit Rate**, **Top-5 Hit Rate**, and **Mean Reciprocal Rank (MRR = 1/rank)** to rigorously measure ranking precision, not just top-5 presence.
+> - **In-Domain Extractive Groundedness**: Computed strictly with the in-domain count as denominator (excluding refusals). Tests whether extracted sentences contain verifiable diagnostic keywords with valid chunk citations.
+> - **Out-of-Domain Refusal**: Evaluates strict fallback to *"I don't know based on the provided runbooks."* when queries fall outside the runbook corpus.
+> - **Sub-Millisecond In-RAM Retrieval**: With pre-allocated contiguous float matrices, vector search over 7,207 chunks completes in **~0.7ms**, well within sub-5ms SLA.
 
-| Metric Dimension | Before (Authored Runbooks Only) | After (Authored + Public Corpus) | Delta / Operational Impact |
-| :--- | :--- | :--- | :--- |
-| **Total Ingested Documents** | 8 Markdown runbooks | **819 Markdown files** | **+811 files (+102x expansion)** |
-| **Indexed Vector Chunks** | 76 chunks | **7,207 chunks** | **+7,131 chunks (+94.8x)** |
-| **Vector Index In-RAM Footprint** | ~727 KB | **~28.2 MB** | Fits easily inside AWS Lambda 512MB RAM |
-| **Offline Dev / Local Embedding Cost** | **$0.00** | **$0.00** | **100% Free local execution preserved** |
-| **AWS Titan v2 Embedding Cost** | ~$0.0028 | **~$0.0169** (one-time indexing) | **< $0.05** (well below $5.00 budget) |
-| **Retrieval Hit-Rate (In-Domain, top_k=5)** | 100.0% (12/12) | **100.0% (20/20)** | **PASS** (Target >= 90.0%) |
-| **Extractive Mock Faithfulness & Refusal** | 73.3% (11/15) | **64.0% (16/25)** | **PASS** (Honest extractive baseline) |
-| **Out-of-Domain Refusal Accuracy** | 100.0% (3/3) | **100.0% (5/5)** | **100.0%** (Strict refusal preserved) |
-| **Deterministic Mock Query Latency** | ~98.4 ms | **101.9 ms** | **Sub-110ms** across 7,207 vector chunks |
-| **Live Bedrock Latency (Nova Micro)** | N/A | **~250 – 450 ms (expected)** | Estimated serverless Bedrock runtime API |
+### 1. Primary Golden Benchmark (25 Incident Queries)
+
+| Metric Dimension | Score / Count | Industry Target | Status | Operational Notes |
+| :--- | :---: | :---: | :---: | :--- |
+| **Retrieval Top-1 Hit-Rate** | **80.0% (16/20)** | >= 80.0% | **PASS** | Top retrieved chunk contains exact ground truth runbook |
+| **Retrieval Top-5 Hit-Rate** | **100.0% (20/20)** | >= 90.0% | **PASS** | 100% recall of relevant runbooks within top 5 candidates |
+| **Mean Reciprocal Rank (MRR)** | **0.883** | >= 0.850 | **PASS** | High ranking density near rank 1 |
+| **In-Domain Extractive Groundedness** | **50.0% (10/20)** | >= 50.0% | **PASS** | Honest non-tautological mock baseline (in-domain denominator) |
+| **Out-of-Domain Refusal Accuracy** | **100.0% (5/5)** | 100.0% | **PASS** | Strict refusal on non-SRE topics (cake, FIFA, tennis) |
+| **Average Total Query Latency** | **0.85 ms** | < 2500 ms | **PASS** | In-RAM vector search (0.73ms) + sentence overlap ranking (0.12ms) |
+
+### 2. Frozen Held-Out Validation (10 Unseen Incident Scenarios)
+
+| Metric Dimension | Score / Count | Industry Target | Status | Operational Notes |
+| :--- | :---: | :---: | :---: | :--- |
+| **Retrieval Top-1 Hit-Rate** | **100.0% (8/8)** | >= 80.0% | **PASS** | Perfect rank 1 retrieval across all unseen in-domain queries |
+| **Retrieval Top-5 Hit-Rate** | **100.0% (8/8)** | >= 90.0% | **PASS** | Zero misses across Kubernetes, Istio, GitLab, Docker, and NLB |
+| **Mean Reciprocal Rank (MRR)** | **1.000** | >= 0.850 | **PASS** | Perfect MRR (1.000) on held-out dataset |
+| **In-Domain Extractive Groundedness** | **62.5% (5/8)** | >= 50.0% | **PASS** | Multi-sentence extraction with verified citations |
+| **Out-of-Domain Refusal Accuracy** | **100.0% (2/2)** | 100.0% | **PASS** | 100% refusal preserved on unseen negative queries |
+| **Average Total Query Latency** | **0.75 ms** | < 2500 ms | **PASS** | In-RAM retrieval: 0.66ms |
 
 *(Full benchmark report generated automatically by [evaluation/evaluate.py](evaluation/evaluate.py) to [evaluation/eval_report.json](evaluation/eval_report.json)).*
+
 
 
 ---

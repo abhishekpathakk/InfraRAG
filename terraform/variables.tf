@@ -34,3 +34,10 @@ variable "infrarag_api_key" {
   default     = ""
   sensitive   = true
 }
+
+variable "use_mock_bedrock" {
+  description = "Set to true for zero-cost free-tier mock execution, or false for live Amazon Bedrock models"
+  type        = string
+  default     = "false"
+}
+

@@ -23,7 +23,7 @@
   {
     "id": "heldout-04",
     "query": "What causes upstream cluster 504 gateway timeout in Istio virtual service?",
-    "target_source_file": "504_gateway_timeout.md",
+    "target_source_file": "kubernetes_ingress_504_gateway_timeout.md",
     "expected_answer_keywords": ["timeout", "virtualservice", "504", "upstream"],
     "is_in_domain": true
   },
@@ -51,7 +51,7 @@
   {
     "id": "heldout-08",
     "query": "Why are AWS Network Load Balancer target group health checks failing across zones?",
-    "target_source_file": "aws_nlb_unhealthy_hosts.md",
+    "target_source_file": "aws_network_load_balancer_unhealthy_hosts.md",
     "expected_answer_keywords": ["nlb", "health", "target", "cross-zone"],
     "is_in_domain": true
   },

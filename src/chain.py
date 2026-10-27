@@ -125,6 +125,16 @@ class RAGChain:
             query=query, chunks=matched_chunks
         )
 
+        # Enforce citation grounding across ALL providers (Mock and Bedrock):
+        # If the generated response is not a refusal but has zero valid citations, fall back to refusal.
+        if not citations and "I don't know based on the provided runbooks" not in answer_text:
+            logger.warning(f"Response had 0 valid citations; forcing ungrounded fallback for query: '{query}'")
+            answer_text = "I don't know based on the provided runbooks."
+            citations = []
+            confidence = "low"
+        else:
+            confidence = "high"
+
         total_latency_ms = (time.perf_counter() - total_start) * 1000.0
 
         # 4. Calculate cost from model pricing registry
@@ -150,7 +160,7 @@ class RAGChain:
             query=query,
             answer=answer_text,
             citations=citations,
-            confidence="high",
+            confidence=confidence,
             retrieved_chunks=[c for c, _ in matched_chunks],
             latency_ms=round(total_latency_ms, 2),
             retrieval_latency_ms=round(retrieval_latency_ms, 2),
@@ -159,3 +169,4 @@ class RAGChain:
             output_tokens=out_tokens,
             estimated_cost_usd=round(estimated_cost, 6),
         )
+

@@ -491,6 +491,45 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
 2. **Defensive Error Handling and Request Correlation**:
    *"In production cloud architectures, returning raw exception messages like `str(e)` violates security hygiene by leaking internal system paths and database topology. In InfraRAG, all unhandled exceptions generate an ephemeral 8-character `request_id`, log the full traceback in CloudWatch for SRE triage, and return a sanitized 500 response to the client."*
 
+---
+
+## Phase 13: Sub-Millisecond Vector Optimization, MRR Metric Profiling & Held-Out Generalization
+
+### 1. What Was Done
+1. **Sub-Millisecond Vector Search Optimization**:
+   - Profiling revealed that `similarity_search` spent ~100ms re-allocating a NumPy matrix from a nested Python list of 7,207 * 1024 floats on every query.
+   - Pre-allocated and cached `self._matrix` during ingestion and switched to `np.argpartition` for top-k selection.
+   - Vector search latency dropped from **107.5 ms** to **0.69 ms** (**155x speedup**), validating our sub-millisecond retrieval claim across 7,207 chunks.
+2. **MRR & Top-1 Ranking Precision**:
+   - Upgraded `evaluation/evaluate.py` to calculate **Top-1 Hit-Rate**, **Top-5 Hit-Rate**, and **Mean Reciprocal Rank (MRR)**.
+   - Golden Benchmark achieved **Top-1: 80.0% (16/20)**, **Top-5: 100.0% (20/20)**, and **MRR: 0.883**.
+   - Held-Out Validation achieved **Top-1: 100.0% (8/8)**, **Top-5: 100.0% (8/8)**, and **MRR: 1.000**.
+3. **Provider-Agnostic Citation Grounding Enforcement**:
+   - Moved the ungrounded refusal guard directly into `src/chain.py`. If any LLM provider (including Amazon Bedrock) returns a non-refusal response with 0 valid citations, the chain intercepts and falls back to *"I don't know based on the provided runbooks."*
+4. **Sentence Overlap & Stopwords Precision**:
+   - Expanded stopwords to filter single-letter tokens (`'i'`) and auxiliary words (`'are'`), and required multi-term overlap (`min_overlap >= 2`) for multi-word queries.
+   - Achieved **100% (5/5) Out-of-Domain Refusal** on the golden dataset and **100% (2/2)** on the held-out dataset.
+5. **Terraform Parameterization**:
+   - Parameterized `USE_MOCK_BEDROCK` via `var.use_mock_bedrock` (defaulting to `"false"` in production).
+
+---
+
+### 2. Issues Faced & Autonomous Fixes Applied
+
+| Issue / Error Encountered | Root Cause | Fix Applied | Autonomous Prevention Rule |
+| :--- | :--- | :--- | :--- |
+| **Unexpected 100ms Vector Search Latency** | `similarity_search` invoked `np.array(self._vectors)` on every query, converting 7.4M Python floats to C-arrays. | Pre-allocated `self._matrix` at document ingestion and cached in-memory. | Never re-instantiate NumPy arrays from nested Python lists in per-request hot paths. |
+| **False-Positive Out-of-Domain Matches** | Grammatical words like `'i'` (matching shell `for i in...`) or `'are'` passed term overlap filters. | Expanded pronoun/auxiliary stopwords and mandated `min_overlap >= 2` for multi-word queries. | Always filter conversational stopwords and require multi-token overlap before citing extractive snippets. |
+| **Bedrock Citation Leak Risk** | The citation validation check only existed inside `MockLLMProvider`, leaving Bedrock vulnerable to uncited hallucinations. | Relocated fallback check to `RAGChain.answer_question`. | System-level invariants (citations, refusals) must be enforced at the orchestration layer, not inside individual model adapters. |
+
+---
+
+### 3. Interview Talking Points
+1. **Memory Layout Profiling in High-Throughput Python Systems**:
+   *"While measuring our vector search performance, we diagnosed a 100ms latency discrepancy between NumPy dot products and our similarity search method. The root cause was memory re-allocation: converting 7,207 Python lists of 1024 floats into a NumPy matrix on every query took 118ms, whereas the SIMD dot product itself took only 0.7ms. By pre-allocating a contiguous float32 matrix in RAM upon ingestion, search latency dropped to 0.69ms."*
+2. **Beyond Top-K: Why MRR and Top-1 Hit-Rate Matter in Production RAG**:
+   *"Reporting only a top-5 hit rate can obscure serious ranking degradation—a model where the correct document is always ranked 5th still scores 100% top-5 hit rate. By computing Mean Reciprocal Rank (MRR) alongside Top-1 and Top-5 hit rates, we verified an MRR of 0.883 on our golden benchmark and 1.000 on our held-out test suite, demonstrating that the retriever places the correct runbook in the top slot 80-100% of the time."*
+
 
 
 

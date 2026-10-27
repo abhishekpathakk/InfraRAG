@@ -81,13 +81,13 @@ def build_rag_prompt(query: str, chunks: list[DocumentChunk]) -> str:
         for c in chunks:
             # Escape boundary close tag to prevent injection while preserving markdown and YAML
             clean_content = c.content.replace(f"</{boundary}>", "")
-            # Strip control characters and brackets from untrusted metadata headers
-            clean_source = re.sub(r"[\r\n\<\>\[\]]", "", c.source_file)
-            clean_section = re.sub(r"[\r\n\<\>\[\]]", "", c.section_title)
-            clean_id = re.sub(r"[\r\n\<\>\[\]]", "", c.chunk_id)
+            # Strip control characters, brackets, and quotes from untrusted metadata headers
+            clean_source = re.sub(r'[\r\n\<\>\[\]"]', "", c.source_file)
+            clean_section = re.sub(r'[\r\n\<\>\[\]"]', "", c.section_title)
+            clean_id = re.sub(r'[\r\n\<\>\[\]"]', "", c.chunk_id)
 
             context_pieces.append(
-                f"<{boundary} id=\"{clean_id}\" source=\"{clean_source}\" section=\"{clean_section}\">\n"
+                f'<{boundary} id="{clean_id}" source="{clean_source}" section="{clean_section}">\n'
                 f"{clean_content}\n"
                 f"</{boundary}>"
             )
@@ -129,28 +129,39 @@ class MockLLMProvider(BaseLLMProvider):
         start = time.perf_counter()
 
         # If no chunks or below threshold, refuse
-        if not chunks or (chunks and chunks[0][1] < 0.20):
+        if not chunks or (chunks and chunks[0][1] < settings.MIN_RELEVANCE_THRESHOLD):
             latency = (time.perf_counter() - start) * 1000.0
             return "I don't know based on the provided runbooks.", [], 50, 10, latency
 
         top_chunk, top_score = chunks[0]
-        q_words = set(re.findall(r"\w+", query.lower())) - {
+        stopwords = {
             "what", "is", "the", "in", "to", "how", "a", "an", "and", "or", "of", "for",
             "do", "does", "during", "which", "who", "why", "when", "can", "should", "be",
+            "i", "are", "me", "my", "we", "our", "you", "your", "it", "its", "they", "them",
+            "their", "this", "that", "these", "those", "with", "from", "at", "by", "on", "as",
         }
+        q_words = set(re.findall(r"\w+", query.lower())) - stopwords
+
+
+        min_overlap = 2 if len(q_words) >= 4 else 1
 
         # Rank candidate sentences/code lines across retrieved chunks
+        # Split on newlines or sentence boundaries (avoiding decimals like 75.0 or hostnames like istio.io)
         candidate_snippets = []
         for c, score in chunks:
-            pieces = re.split(r"[\n\.]+", c.content)
+            pieces = re.split(r"\n+|(?<=[a-zA-Z0-9])\.\s+", c.content)
             for p in pieces:
-                clean = p.strip().lstrip("#-*> ").strip()
-                if not clean or len(clean) < 15:
+                clean = p.strip().lstrip("#-*> `").rstrip("`").strip()
+                if not clean:
+                    continue
+                # Keep short shell commands (e.g., docker ps, kubectl top) while dropping noise
+                if len(clean) < 8 and not any(kw in clean.lower() for kw in ["ps", "top", "run", "log", "cat", "get"]):
                     continue
                 words = set(re.findall(r"\w+", clean.lower()))
                 overlap = len(q_words & words)
-                if overlap > 0:
+                if overlap >= min_overlap:
                     candidate_snippets.append((overlap, clean, c))
+
 
         candidate_snippets.sort(key=lambda x: x[0], reverse=True)
 
@@ -163,7 +174,8 @@ class MockLLMProvider(BaseLLMProvider):
                     top_lines.append(f"{s} [{c.source_file}#{c.chunk_id}]")
             answer = " ".join(top_lines)
         else:
-            answer = f"According to {top_chunk.source_file} ({top_chunk.section_title}): {top_chunk.content[:200]} [{top_chunk.source_file}#{top_chunk.chunk_id}]."
+            # If retrieved chunks have zero query overlap, the information is absent -> strict refusal
+            return "I don't know based on the provided runbooks.", [], 50, 10, (time.perf_counter() - start) * 1000.0
 
         latency = (time.perf_counter() - start) * 1000.0
         input_tokens = sum(c.token_count for c, _ in chunks) + 80
@@ -175,6 +187,7 @@ class MockLLMProvider(BaseLLMProvider):
             answer = "I don't know based on the provided runbooks."
 
         return answer, citations, input_tokens, output_tokens, latency
+
 
 
 class BedrockLLMProvider(BaseLLMProvider):

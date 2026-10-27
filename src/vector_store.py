@@ -75,6 +75,8 @@ class FAISSVectorStore(BaseVectorStore):
         except ImportError:
             self._has_faiss = False
 
+        self._matrix = None
+
     def add_documents(self, chunks: list[DocumentChunk], embeddings: list[list[float]]) -> None:
         if len(chunks) != len(embeddings):
             raise ValueError(f"Mismatch: {len(chunks)} chunks vs {len(embeddings)} embeddings")
@@ -85,6 +87,13 @@ class FAISSVectorStore(BaseVectorStore):
         if self._has_faiss and HAS_NUMPY:
             mat = np.array(embeddings, dtype=np.float32)
             self._index.add(mat)
+        elif HAS_NUMPY:
+            new_mat = np.array(embeddings, dtype=np.float32)
+            if getattr(self, "_matrix", None) is None:
+                self._matrix = new_mat
+            else:
+                self._matrix = np.vstack([self._matrix, new_mat])
+            self._vectors.extend(embeddings)
         else:
             self._vectors.extend(embeddings)
 
@@ -115,11 +124,16 @@ class FAISSVectorStore(BaseVectorStore):
                     if len(results) >= top_k:
                         break
             return results
-        elif HAS_NUMPY and self._vectors:
+        elif HAS_NUMPY and (getattr(self, "_matrix", None) is not None or self._vectors):
+            if getattr(self, "_matrix", None) is None:
+                self._matrix = np.array(self._vectors, dtype=np.float32)
             q_vec = np.array(query_embedding, dtype=np.float32)
-            mat = np.array(self._vectors, dtype=np.float32)
-            scores = np.dot(mat, q_vec)
-            top_indices = np.argsort(scores)[::-1]
+            scores = np.dot(self._matrix, q_vec)
+            if search_k < len(scores):
+                top_indices = np.argpartition(scores, -search_k)[-search_k:]
+                top_indices = top_indices[np.argsort(scores[top_indices])[::-1]]
+            else:
+                top_indices = np.argsort(scores)[::-1]
             results = []
             for idx in top_indices:
                 chunk = self.chunks[idx]
