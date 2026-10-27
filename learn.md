@@ -7,6 +7,54 @@
 
 ---
 
+## Comprehensive Technology & Tooling Guide
+
+This section details every tool, library, cloud service, and architectural pattern used in **InfraRAG**, explaining **what it is**, **why it was chosen**, and **its specific role** in our autonomous SRE architecture.
+
+| Tool / Technology | Category | What It Is | Why We Use It in InfraRAG | Alternatives Considered & Why Rejected |
+| :--- | :--- | :--- | :--- | :--- |
+| **Ruff** | Code Quality & Linting | An extremely fast Python linter and code formatter written in Rust. | Replaces Flake8, Black, isort, and pyupgrade at 10-100x speed. In CI and pre-commit checks, it instantly catches syntax errors, unused imports (`F401`), invalid imports order (`E402`), and empty f-strings (`F541`) in under 20ms. | *Flake8 + Black:* Too slow for fast autonomous loops; takes several seconds on multi-file repos. |
+| **Pytest** | Testing Framework | Modern Python automated unit and integration test runner. | Provides fixture management, parameterization, and assertion introspection to verify chunking logic, FAISS persistence, citation extraction, and fallback refusals in <0.2s. | *unittest (stdlib):* More verbose, lacks powerful fixture dependency injection and rich failure diffs. |
+| **FAISS (Facebook AI Similarity Search)** | Vector Store | Open-source C++ library with Python bindings for high-performance dense vector clustering and similarity search. | Enables sub-5ms cosine similarity lookups over 7,200+ vectors in RAM without running an expensive always-on database cluster. Serializes to disk and S3 for serverless loading. | *Pinecone / OpenSearch Serverless:* Minimum $70-$150/month idle cost. FAISS costs $0.00 idle. |
+| **AWS Bedrock** | Foundation Models | AWS fully managed service offering foundation models from Amazon, Anthropic, and Meta via a single unified API. | Provides production embeddings via **Titan Text Embeddings v2** (1024-dim, unit-normalized) and LLM inference via **Nova Micro** ($0.035 / 1M input tokens). | *OpenAI / Anthropic Direct:* Requires external API keys, egress traffic out of AWS, and separate billing. |
+| **Mock Bedrock Layer (`USE_MOCK_BEDROCK=true`)** | Zero-Cost Engine | Deterministic 1024-dimensional semantic vector generator and pattern-based response engine. | Enforces **Directive #1 (Strict Zero-Cost)**. Allows running all tests, CI pipelines, and benchmarks on any machine without AWS credentials or API charges. | *Running live Bedrock during dev:* Costs money, requires AWS keys, hits rate limits, and slows tests down with network latency. |
+| **AWS Lambda** | Compute | Serverless event-driven compute platform that executes code in response to HTTP requests. | Scales to zero when idle ($0.00/month idle cost). AWS Free Tier grants 1,000,000 free invocations and 3.2M seconds of compute every month. | *Amazon ECS / EKS:* Continuous EC2/Fargate hourly compute charges even when no incidents are being triaged. |
+| **AWS API Gateway (HTTP API v2)** | API Gateway | High-performance, low-latency HTTP reverse proxy and ingress router. | Routes `POST /ask` requests to Lambda with CORS preflight handling. 70% cheaper and lower latency than traditional REST APIs (1M requests free per month). | *Application Load Balancer (ALB):* Minimum ~$16-$22/month base charge. HTTP API v2 costs $0.00 idle. |
+| **AWS S3 (Simple Storage Service)** | Object Storage | Scalable cloud object storage with server-side encryption (SSE-S3 AES-256). | Houses the serialized FAISS vector index binary and `chunks.json` metadata for on-demand Lambda cold-start retrieval. | *EFS (Elastic File System):* Minimum mount overhead and unnecessary complexity for read-mostly vector index files. |
+| **AWS CloudWatch** | Observability | AWS monitoring, metric aggregation, and structured logging service. | Logs structured JSON events per query (Latency, FAISS search time, Generation time, Tokens, Estimated cost, Citations) for compliance auditing. | *Datadog / New Relic:* Third-party agents with recurring monthly subscription fees. |
+| **Terraform (HashiCorp)** | IaC (Infrastructure as Code) | Declarative cloud resource provisioning tool. | Defines reproducible, version-controlled cloud infrastructure (S3 bucket, least-privilege IAM roles, Lambda function, API Gateway, CloudWatch). | *AWS CloudFormation / CDK:* CloudFormation is verbose; CDK requires Node.js runtime overhead. |
+| **Boto3** | Cloud SDK | Official AWS SDK for Python. | Interacts with AWS services: downloads vector indices from S3 and invokes Bedrock models (`bedrock-runtime.invoke_model`). | *Raw HTTP requests:* Lacks built-in AWS SigV4 request signing and automatic retry backoff. |
+| **Pydantic v2 & Pydantic-Settings** | Data Modeling | Fast, Rust-backed data validation and environment variable parsing library. | Enforces strict schemas on `DocumentChunk`, `Citation`, and `RAGResponse`. Has stdlib dataclass fallback for minimal Lambda container overhead. | *Plain Python Dicts:* Lacks runtime type validation and fails silently on missing keys or malformed JSON payloads. |
+| **Git Sparse-Checkout** | Git Optimization | Git capability that checks out only designated subtrees of a repository. | Enables cloning only the `docs/` folder of massive repositories (e.g., `kubernetes/website`), saving 90% bandwidth and disk space in `fetch_sources.sh`. | *Full git clone:* Downloads gigabytes of commit history, build scripts, translations, and images. |
+| **GitHub Actions** | CI/CD Automation | Cloud-native CI pipeline runner built into GitHub. | Acts as the automated quality gatekeeper: runs `ruff check`, `pytest tests/`, and `terraform validate` on every commit and PR. | *Jenkins / GitLab CI:* Requires self-hosted server maintenance or external setup. |
+| **Vanilla HTML5 / CSS3 / ES6** | User Interface | Zero-dependency SRE Operations Console (`ui/index.html`). | Delivers a high-density, Warm Ivory/White Cream operations console with zero npm dependencies, instant loading (<50ms), and real-time telemetry. | *React / Next.js:* Requires Node.js build steps, bulky node_modules, and heavy client-side JavaScript bundles. |
+
+---
+
+### Why Aren't We Using Bedrock in Local Development?
+
+A common question is: *"If AWS Bedrock is our target LLM provider, why aren't we calling it on every local query or test?"*
+
+1. **Strict Zero-Cost & Free-Tier Guardrail (Directive #1 in AGENTS.md)**:
+   - Calling Bedrock Titan embeddings over 7,207 chunks repeatedly during development would incur unnecessary per-token charges.
+   - By creating a deterministic `MockEmbeddingProvider` and `MockLLMProvider`, developers and CI runners can run tests and benchmarks **1,000 times a day for $0.00**.
+2. **Zero-Credentials Local Development**:
+   - Anyone cloning this repository can immediately run `pytest tests/`, `python cli.py ask "..."`, or the evaluation benchmark without having an AWS account or configuring `AWS_ACCESS_KEY_ID`.
+3. **Speed & Determinism**:
+   - Local mock embeddings index 7,207 chunks in **under 0.8 seconds**. Live network API calls to Bedrock for 7,200 chunks would take minutes and risk hitting API rate quotas.
+4. **Bedrock IS Fully Implemented & Ready**:
+   - The Bedrock implementation is 100% complete in [src/embeddings.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/embeddings.py) (`BedrockTitanEmbeddingProvider` using `amazon.titan-embed-text-v2:0`) and [src/generator.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/generator.py) (`BedrockNovaLLMProvider` using `amazon.nova-micro-v1:0`).
+   - To switch to live AWS Bedrock locally, simply set:
+     ```bash
+     export USE_MOCK_BEDROCK=false
+     export AWS_REGION=ap-south-1
+     ```
+   - In AWS Lambda production, `USE_MOCK_BEDROCK` defaults to `false` and automatically runs against live Bedrock.
+
+---
+
+---
+
 ## Phase 1: Repo Structure, Architecture & Foundation (2026-10-27)
 
 ### What we did
