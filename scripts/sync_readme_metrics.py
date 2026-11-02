@@ -257,14 +257,15 @@ def generate_tables(report: dict) -> str:
         lines.append(f"> - **Frozen Refusal Threshold**: `{local_rep.get('frozen_refusal_threshold')}` (Empirically calibrated on separate `dev_calibration_dataset.json` with zero exposure to eval sets)")
         lines.append("> - **Reproduction Command**: `python scripts/build_local_index.py && python evaluation/evaluate_local.py`")
         lines.append("")
-        lines.append("| Suite Classification | Evaluation Suite | Dense-Only (Top-1) | Hybrid (Top-1) | BM25 Delta | Dense-Only (MRR) | Hybrid (MRR) | Refusal Acc (Dense / Hybrid) |")
-        lines.append("| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |")
+        lines.append("| Suite Classification | Evaluation Suite | Dense Top-1 | Hybrid Top-1 | Dense Top-5 | Hybrid Top-5 | BM25 Delta | Dense MRR | Hybrid MRR | Refusal Acc (Dense / Hybrid) |")
+        lines.append("| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |")
 
         suite_order = [
             ("Reference (Burned/Seen)", "Golden Benchmark (Burned/Seen)"),
             ("Reference (Burned/Seen)", "Tagged Held-Out v1 (Burned/Seen)"),
             ("Held-Out (Unseen/Blind)", "Blind Held-Out v2 (Unseen)"),
             ("Held-Out (Unseen/Blind)", "Blind Held-Out v3 (Unseen)"),
+            ("Held-Out (Unseen/Blind, 65 Qs)", "Blind Held-Out v4 (Unseen, 65 Questions)"),
         ]
 
         for classification, name in suite_order:
@@ -274,7 +275,7 @@ def generate_tables(report: dict) -> str:
                 delta = h.get("top1_hit_rate_pct", 0.0) - d.get("top1_hit_rate_pct", 0.0)
                 delta_str = f"+{delta:.1f}%" if delta > 0 else f"{delta:.1f}%"
                 lines.append(
-                    f"| {classification} | **{name}** | **{d.get('top1_hit_rate_pct', 0.0)}%** | **{h.get('top1_hit_rate_pct', 0.0)}%** | {delta_str} | {d.get('mrr', 0.0):.3f} | {h.get('mrr', 0.0):.3f} | {d.get('out_domain_refusal_pct', 0.0)}% / {h.get('out_domain_refusal_pct', 0.0)}% |"
+                    f"| {classification} | **{name}** | **{d.get('top1_hit_rate_pct', 0.0)}%** | **{h.get('top1_hit_rate_pct', 0.0)}%** | {d.get('top5_hit_rate_pct', 0.0)}% | {h.get('top5_hit_rate_pct', 0.0)}% | {delta_str} | {d.get('mrr', 0.0):.3f} | {h.get('mrr', 0.0):.3f} | {d.get('out_domain_refusal_pct', 0.0)}% / {h.get('out_domain_refusal_pct', 0.0)}% |"
                 )
         lines.append("")
 

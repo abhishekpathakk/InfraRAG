@@ -2,15 +2,23 @@
 
 [![CI Pipeline](https://github.com/abhishekpathakk/InfraRAG/actions/workflows/ci.yml/badge.svg)](https://github.com/abhishekpathakk/InfraRAG/actions)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3120/)
-[![AWS Bedrock](https://img.shields.io/badge/AWS-Amazon%20Bedrock-orange.svg)](https://aws.amazon.com/bedrock/)
+[![Neural Embeddings](https://img.shields.io/badge/Embeddings-BGE--Small--v1.5%20(ONNX)-green.svg)](https://huggingface.co/BAAI/bge-small-en-v1.5)
+[![AWS Bedrock](https://img.shields.io/badge/AWS-Amazon%20Bedrock%20(Optional)-orange.svg)](https://aws.amazon.com/bedrock/)
 [![Terraform](https://img.shields.io/badge/IaC-Terraform-purple.svg)](https://www.terraform.io/)
-> **InfraRAG** is a serverless Retrieval-Augmented Generation (RAG) assistant purpose-built for DevOps and SRE teams. It indexes **819 runbook and documentation files (7,207 searchable chunks)** across Kubernetes, Istio, GitLab incident runbooks, and authored internal operational guides. By pairing an in-RAM vector store on **Amazon S3** with **AWS Lambda**, **Amazon Bedrock (Titan Text Embeddings v2 + Nova Micro)**, and **API Gateway**, InfraRAG delivers grounded answers with strict source citations.
+
+> [!IMPORTANT]
+> **System Architecture & Operational Status**:
+> - **Primary Default Pipeline**: 100% Sovereign Local Inference via FastEmbed ONNX (`BAAI/bge-small-en-v1.5`, 384-dimensional dense vectors) paired with BM25 Reciprocal Rank Fusion hybrid retrieval.
+> - **Serverless AWS Deployment**: The deployed AWS Lambda function and HTTP API Gateway operate in zero-cost offline mock verification mode (`USE_MOCK_BEDROCK=true`) using an in-RAM FAISS index.
+> - **Amazon Bedrock Cloud Extension**: Fully implemented in code (`BedrockTitanEmbeddingProvider` and `BedrockNovaLLMProvider`) and configurable via `USE_MOCK_BEDROCK=false` when running on an AWS account with approved Bedrock on-demand quotas.
+
+> **InfraRAG** is a sovereign, serverless Retrieval-Augmented Generation (RAG) assistant purpose-built for DevOps and SRE teams. It indexes **819 runbook and documentation files (7,207 searchable chunks)** across Kubernetes, Istio, GitLab incident runbooks, and authored internal operational guides. By pairing an in-RAM vector store with **FastEmbed neural embeddings**, **BM25 hybrid ranking**, and an optional serverless **AWS Lambda / API Gateway** layer, InfraRAG delivers grounded incident resolution steps with strict source citations.
 
 ---
 
 ## ⚡ Live Demo & Quick Verification
 
-### 1. Query the Live AWS Production Endpoint (or Local Mock API)
+### 1. Query the Deployed AWS Lambda Endpoint (Mock Verification Mode)
 The HTTP API Gateway endpoint is deployed in `ap-south-1` (Mumbai):
 
 ```bash
@@ -190,15 +198,16 @@ All queries evaluate with parameters `top_k = 5` and `min_relevance_threshold = 
 > - **Model & Architecture**: `BAAI/bge-small-en-v1.5` (384-dimensional dense vectors)
 > - **Exact Canonical Revision**: [`5c38ec7c405ec4b44b94cc5a9bb96e735b38267a`](https://huggingface.co/BAAI/bge-small-en-v1.5/commit/5c38ec7c405ec4b44b94cc5a9bb96e735b38267a)
 > - **Optimized ONNX Distribution**: `Qdrant/bge-small-en-v1.5-onnx-Q (aa8f8b060edb00e03bfdd08813a2949946c8ba55)`
-> - **Frozen Refusal Threshold**: `0.69` (Empirically calibrated on separate `dev_calibration_dataset.json` with zero exposure to eval sets)
+> - **Frozen Refusal Threshold**: `0.8` (Empirically calibrated on separate `dev_calibration_dataset.json` with zero exposure to eval sets)
 > - **Reproduction Command**: `python scripts/build_local_index.py && python evaluation/evaluate_local.py`
 
-| Suite Classification | Evaluation Suite | Dense-Only (Top-1) | Hybrid (Top-1) | BM25 Delta | Dense-Only (MRR) | Hybrid (MRR) | Refusal Acc (Dense / Hybrid) |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| Reference (Burned/Seen) | **Golden Benchmark (Burned/Seen)** | **90.0%** | **85.0%** | -5.0% | 0.900 | 0.875 | 100.0% / 100.0% |
-| Reference (Burned/Seen) | **Tagged Held-Out v1 (Burned/Seen)** | **90.0%** | **75.0%** | -15.0% | 0.925 | 0.833 | 100.0% / 100.0% |
-| Held-Out (Unseen/Blind) | **Blind Held-Out v2 (Unseen)** | **60.0%** | **65.0%** | +5.0% | 0.642 | 0.650 | 100.0% / 100.0% |
-| Held-Out (Unseen/Blind) | **Blind Held-Out v3 (Unseen)** | **45.0%** | **50.0%** | +5.0% | 0.542 | 0.617 | 100.0% / 100.0% |
+| Suite Classification | Evaluation Suite | Dense Top-1 | Hybrid Top-1 | Dense Top-5 | Hybrid Top-5 | BM25 Delta | Dense MRR | Hybrid MRR | Refusal Acc (Dense / Hybrid) |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| Reference (Burned/Seen) | **Golden Benchmark (Burned/Seen)** | **90.0%** | **85.0%** | 90.0% | 90.0% | -5.0% | 0.900 | 0.875 | 100.0% / 100.0% |
+| Reference (Burned/Seen) | **Tagged Held-Out v1 (Burned/Seen)** | **90.0%** | **75.0%** | 95.0% | 95.0% | -15.0% | 0.925 | 0.833 | 100.0% / 100.0% |
+| Held-Out (Unseen/Blind) | **Blind Held-Out v2 (Unseen)** | **60.0%** | **65.0%** | 70.0% | 65.0% | +5.0% | 0.642 | 0.650 | 100.0% / 100.0% |
+| Held-Out (Unseen/Blind) | **Blind Held-Out v3 (Unseen)** | **45.0%** | **50.0%** | 65.0% | 75.0% | +5.0% | 0.542 | 0.617 | 100.0% / 100.0% |
+| Held-Out (Unseen/Blind, 65 Qs) | **Blind Held-Out v4 (Unseen, 65 Questions)** | **68.0%** | **66.0%** | 84.0% | 88.0% | -2.0% | 0.750 | 0.757 | 100.0% / 33.33% |
 
 *(Full benchmark report generated automatically by [evaluation/evaluate.py](evaluation/evaluate.py) to [evaluation/eval_report.json](evaluation/eval_report.json)).*
 
@@ -303,7 +312,7 @@ InfraRAG is architected under a **strict Free-Tier First policy** (Directive #1 
      ```text
      IllegalArgumentException: An error occurred (IllegalArgumentException) when calling the RequestServiceQuotaIncrease operation: The request failed because the specified quota is not adjustable.
      ```
-     Because Bedrock on-demand quotas for new accounts cannot be adjusted self-service via the Service Quotas API, quota increases require manual account verification via the AWS Management Console Support Center (AWS Support Case `CASE-BEDROCK-TITAN-V2-INCREASE`; programmatic `support:DescribeCases` returns `SubscriptionRequiredException` on accounts with AWS Basic Support).
+     Because Bedrock on-demand quotas for new accounts cannot be adjusted self-service via the Service Quotas API, quota increases require manual request submission via the AWS Management Console Support Center (programmatic `support:DescribeCases` returns `SubscriptionRequiredException` on accounts without a paid AWS Support plan).
    - Until AWS Support grants additional on-demand throughput or provisioned model units are configured, live Amazon Bedrock indexing cannot proceed, and the deployment defaults to offline mock or local neural verification.
 
 2. **Extractive Mock Generator vs Neural LLM**:

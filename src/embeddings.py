@@ -259,8 +259,12 @@ class LocalFastEmbedProvider(BaseEmbeddingProvider):
 
 
 def get_embedding_provider() -> BaseEmbeddingProvider:
-    """Factory returns Mock or AWS Bedrock provider based on configuration."""
-    if settings.USE_MOCK_BEDROCK:
+    """Factory returns Local FastEmbed, Mock, or AWS Bedrock provider based on configuration."""
+    provider_type = getattr(settings, "EMBEDDING_PROVIDER", "mock" if settings.USE_MOCK_BEDROCK else "bedrock").lower()
+    if provider_type in ("local", "fastembed"):
+        logger.info("Using Sovereign LocalFastEmbedProvider (BAAI/bge-small-en-v1.5, 384-dim).")
+        return LocalFastEmbedProvider()
+    if settings.USE_MOCK_BEDROCK or provider_type == "mock":
         logger.info("Using 100% Free MockEmbeddingProvider for zero-cost execution.")
         return MockEmbeddingProvider(dimension=settings.EMBEDDING_DIMENSION)
     return BedrockTitanEmbeddingProvider(

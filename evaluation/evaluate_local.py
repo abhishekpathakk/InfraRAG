@@ -170,6 +170,7 @@ def run_local_evaluation() -> dict:
         ("Tagged Held-Out v1 (Burned/Seen)", settings.BASE_DIR / "evaluation" / "held_out_dataset.json"),
         ("Blind Held-Out v2 (Unseen)", settings.BASE_DIR / "evaluation" / "held_out_dataset_v2.json"),
         ("Blind Held-Out v3 (Unseen)", settings.BASE_DIR / "evaluation" / "held_out_dataset_v3.json"),
+        ("Blind Held-Out v4 (Unseen, 65 Questions)", settings.BASE_DIR / "evaluation" / "held_out_dataset_v4.json"),
     ]
 
     dense_results = {}
@@ -194,11 +195,13 @@ def run_local_evaluation() -> dict:
         header_style="bold green",
     )
     table.add_column("Evaluation Suite", style="bold")
-    table.add_column("Dense-Only (Top-1)", justify="center")
-    table.add_column("Hybrid (Top-1)", justify="center", style="bold yellow")
+    table.add_column("Dense Top-1", justify="center")
+    table.add_column("Hybrid Top-1", justify="center", style="bold yellow")
+    table.add_column("Dense Top-5", justify="center")
+    table.add_column("Hybrid Top-5", justify="center", style="bold yellow")
     table.add_column("BM25 Delta", justify="center")
-    table.add_column("Dense-Only (MRR)", justify="center")
-    table.add_column("Hybrid (MRR)", justify="center", style="bold yellow")
+    table.add_column("Dense MRR", justify="center")
+    table.add_column("Hybrid MRR", justify="center", style="bold yellow")
     table.add_column("Refusal Acc (Dense / Hybrid)", justify="center")
 
     for name, _ in suites:
@@ -211,6 +214,8 @@ def run_local_evaluation() -> dict:
                 name,
                 f"{d['top1_hit_rate_pct']}%",
                 f"{h['top1_hit_rate_pct']}%",
+                f"{d['top5_hit_rate_pct']}%",
+                f"{h['top5_hit_rate_pct']}%",
                 f"[green]{delta_str}[/green]" if delta > 0 else f"[dim]{delta_str}[/dim]",
                 f"{d['mrr']:.3f}",
                 f"{h['mrr']:.3f}",

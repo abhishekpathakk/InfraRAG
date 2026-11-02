@@ -1,6 +1,6 @@
 {
   "dev_dataset": "dev_calibration_dataset.json",
-  "total_queries": 15,
+  "total_queries": 25,
   "in_domain_scores": {
     "min": 0.7856,
     "median": 0.8302,
@@ -9,9 +9,9 @@
   },
   "out_of_domain_scores": {
     "min": 0.5598,
-    "median": 0.5736,
-    "max": 0.6723,
-    "mean": 0.5989
+    "median": 0.7293,
+    "max": 0.7829,
+    "mean": 0.6988
   },
-  "frozen_refusal_threshold": 0.69
+  "frozen_refusal_threshold": 0.8
 }

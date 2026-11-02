@@ -103,6 +103,76 @@
     "target_source_file": "OUT_OF_DOMAIN",
     "expected_answer_keywords": ["REFUSAL"],
     "is_in_domain": false
+  },
+  {
+    "id": "dev-16",
+    "query": "How to configure a Terraform dynamic block for AWS security group ingress rules?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  },
+  {
+    "id": "dev-17",
+    "query": "How to troubleshoot route table blackholes in AWS Transit Gateway peering attachments?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  },
+  {
+    "id": "dev-18",
+    "query": "How to revoke all active child tokens and dynamic database leases under a compromised HashiCorp Vault role?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  },
+  {
+    "id": "dev-19",
+    "query": "How to trigger an Apache Kafka partition rebalance using kafka-reassign-partitions.sh after adding a broker?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  },
+  {
+    "id": "dev-20",
+    "query": "How to use ansible-vault to encrypt host_vars across multi-environment inventory directories?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  },
+  {
+    "id": "dev-21",
+    "query": "How to configure grouped routing trees and inhibition rules in Prometheus alertmanager.yml?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  },
+  {
+    "id": "dev-22",
+    "query": "How to diagnose BGP session flapping on a Cisco CSR1000v router using show ip bgp summary?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  },
+  {
+    "id": "dev-23",
+    "query": "How to configure self-hosted GitHub Actions runners with ephemeral autoscaling on AWS ECS?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  },
+  {
+    "id": "dev-24",
+    "query": "How to use bpftrace to inspect raw Linux kernel socket connect syscall latencies?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  },
+  {
+    "id": "dev-25",
+    "query": "How to configure automated partition expiration and clustering keys in Google Cloud BigQuery?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
   }
 ]
 
