@@ -1,0 +1,177 @@
+[
+  {
+    "id": "v3-blind-01",
+    "query": "How to identify which cgroup subsystem throttled a containerized process on Linux?",
+    "target_source_file": "kubernetes_oom_killed.md",
+    "expected_answer_keywords": ["cgroup", "memory", "oom", "limits"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v3-blind-02",
+    "query": "What are the remediation steps when Envoy sidecar returns upstream connect failure on port 8080?",
+    "target_source_file": "istio_503_service_unavailable.md",
+    "expected_answer_keywords": ["503", "envoy", "upstream", "connection"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v3-blind-03",
+    "query": "Kubernetes cluster autoscaler cannot provision new nodes because disk space on existing kubelet rootfs is depleted.",
+    "target_source_file": "kubernetes_node_disk_pressure.md",
+    "expected_answer_keywords": ["eviction", "diskpressure", "nodefs", "imagefs"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v3-blind-04",
+    "query": "How to permit unencrypted legacy clients to communicate with an upgraded service mesh component?",
+    "target_source_file": "istio_mtls_strict_failures.md",
+    "expected_answer_keywords": ["permissive", "portlevelmtls", "peerauthentication", "mtls"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v3-blind-05",
+    "query": "Container engine fails pulling new images with ENOSPC error on host filesystem.",
+    "target_source_file": "docker_daemon_out_of_space.md",
+    "expected_answer_keywords": ["docker", "prune", "overlay2", "space"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v3-blind-06",
+    "query": "HTTP API client experiences 504 Gateway Timeout when executing long-running database migrations through ingress proxy.",
+    "target_source_file": "kubernetes_ingress_504_gateway_timeout.md",
+    "expected_answer_keywords": ["504", "proxy-read-timeout", "timeout", "ingress"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v3-blind-07",
+    "query": "AWS Network Load Balancer health check probes fail after updating host firewall iptables rules.",
+    "target_source_file": "aws_network_load_balancer_unhealthy_hosts.md",
+    "expected_answer_keywords": ["nlb", "health check", "target group", "failedhealthchecks"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v3-blind-08",
+    "query": "Application crashes immediately upon startup due to missing environment variable configuration.",
+    "target_source_file": "kubernetes_crashloopbackoff.md",
+    "expected_answer_keywords": ["crashloopbackoff", "restart", "exit code", "logs"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v3-blind-09",
+    "query": "How can site reliability engineers execute ad-hoc diagnostic commands inside a running container that lacks a shell?",
+    "target_source_file": "kubernetes_crashloopbackoff.md",
+    "expected_answer_keywords": ["kubectl debug", "ephemeral", "crictl"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v3-blind-10",
+    "query": "PostgreSQL high-availability cluster failover procedure using Patroni command line utility.",
+    "target_source_file": "gitlab_connect_to_database_console_via_teleport.md",
+    "expected_answer_keywords": ["patroni", "patronictl", "teleport", "failover"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v3-blind-11",
+    "query": "Where in kubelet configuration do you adjust the high watermark for container image garbage collection?",
+    "target_source_file": "kubernetes_node_disk_pressure.md",
+    "expected_answer_keywords": ["imagegchighthresholdpercent", "eviction", "kubelet"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v3-blind-12",
+    "query": "What is the procedure for updating mutual TLS client certificates in an Istio mesh when certificates expire?",
+    "target_source_file": "istio_mtls_strict_failures.md",
+    "expected_answer_keywords": ["certificate", "mtls", "peerauthentication", "handshake"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v3-blind-13",
+    "query": "Envoy proxy access logs show UO response flag during peak traffic periods.",
+    "target_source_file": "istio_503_service_unavailable.md",
+    "expected_answer_keywords": ["uo", "upstream overflow", "circuit breaker", "503"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v3-blind-14",
+    "query": "Root disk partition reports zero free blocks due to orphaned overlay filesystem directories.",
+    "target_source_file": "docker_daemon_out_of_space.md",
+    "expected_answer_keywords": ["df -i", "overlay2", "docker", "prune"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v3-blind-15",
+    "query": "Operating system kernel invokes out of memory killer and terminates highest badness score task.",
+    "target_source_file": "kubernetes_oom_killed.md",
+    "expected_answer_keywords": ["oomkilled", "sigkill", "exit code 137", "memory"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v3-blind-16",
+    "query": "CloudWatch alarms indicate high UnHealthyHostCount on AWS network load balancer target group.",
+    "target_source_file": "aws_network_load_balancer_unhealthy_hosts.md",
+    "expected_answer_keywords": ["target.failedhealthchecks", "nlb", "health check", "target group"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v3-blind-17",
+    "query": "Retrieving previous container standard error streams after an unexpected pod crash.",
+    "target_source_file": "kubernetes_crashloopbackoff.md",
+    "expected_answer_keywords": ["kubectl logs", "--previous", "logs"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v3-blind-18",
+    "query": "Configuring ingress controller annotations to extend backend read and write response timeouts.",
+    "target_source_file": "kubernetes_ingress_504_gateway_timeout.md",
+    "expected_answer_keywords": ["proxy-read-timeout", "timeout", "ingress", "504"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v3-blind-19",
+    "query": "Setting Java container memory parameters so heap and native memory fit within assigned cgroup limits.",
+    "target_source_file": "kubernetes_oom_killed.md",
+    "expected_answer_keywords": ["-xx:maxrampercentage", "heap", "cgroup", "limits"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v3-blind-20",
+    "query": "Analyzing service mesh configuration inconsistencies using command line diagnostic tools.",
+    "target_source_file": "istio_503_service_unavailable.md",
+    "expected_answer_keywords": ["istioctl analyze", "virtualservice", "destinationrule"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v3-blind-21",
+    "query": "What is the boiling point of ethanol at standard atmospheric pressure?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  },
+  {
+    "id": "v3-blind-22",
+    "query": "How do you calculate compound interest on an annual savings bond?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  },
+  {
+    "id": "v3-blind-23",
+    "query": "What are the key differences between Impressionist and Expressionist painting styles?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  },
+  {
+    "id": "v3-blind-24",
+    "query": "How to properly change transmission fluid in a front-wheel drive passenger car?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  },
+  {
+    "id": "v3-blind-25",
+    "query": "What is the offside rule in professional soccer?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  }
+]

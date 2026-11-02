@@ -184,6 +184,7 @@ def run_evaluation() -> dict:
     golden_path = settings.BASE_DIR / "evaluation" / "golden_dataset.json"
     heldout_path = settings.BASE_DIR / "evaluation" / "held_out_dataset.json"
     heldout_v2_path = settings.BASE_DIR / "evaluation" / "held_out_dataset_v2.json"
+    heldout_v3_path = settings.BASE_DIR / "evaluation" / "held_out_dataset_v3.json"
 
     # 1. Main Run: Mock with Clusters
     console.print("[bold cyan]Initializing InfraRAG Engine (With Clusters)...[/bold cyan]")
@@ -211,11 +212,20 @@ def run_evaluation() -> dict:
             title="3. InfraRAG Blind Held-Out Validation (v2.0, Keyword-Bucket Dependent)",
         )
 
+    heldout_v3_summary = None
+    if heldout_v3_path.exists():
+        heldout_v3_summary = evaluate_dataset(
+            chain=chain,
+            dataset_path=heldout_v3_path,
+            title="4. InfraRAG Blind Held-Out Validation (v3.0 Unseen, Keyword-Bucket Dependent)",
+        )
+
     # 2. Hash-Only Ablation Run (No Keyword Clusters)
-    console.print("\n[bold yellow]Running Hash-Only Ablation Suite (use_clusters=False)...[/bold yellow]")
+    # Both document ingestion and query retrieval MUST share the same hash-only provider
+    console.print("\n[bold yellow]Running Hash-Only Ablation Suite (use_clusters=False, Matched Retriever)...[/bold yellow]")
     from src.embeddings import MockEmbeddingProvider
-    ablation_chain = RAGChain()
-    ablation_chain.embedding_provider = MockEmbeddingProvider(dimension=settings.EMBEDDING_DIMENSION, use_clusters=False)
+    hash_provider = MockEmbeddingProvider(dimension=settings.EMBEDDING_DIMENSION, use_clusters=False)
+    ablation_chain = RAGChain(embedding_provider=hash_provider)
     ablation_chain.ingest_directory(settings.DATA_DIR)
 
     golden_ablated = evaluate_dataset(
@@ -236,6 +246,14 @@ def run_evaluation() -> dict:
             chain=ablation_chain,
             dataset_path=heldout_v2_path,
             title="Ablation: Blind Held-Out v2 (Hash-Only, No Clusters)",
+        )
+
+    heldout_v3_ablated = None
+    if heldout_v3_path.exists():
+        heldout_v3_ablated = evaluate_dataset(
+            chain=ablation_chain,
+            dataset_path=heldout_v3_path,
+            title="Ablation: Blind Held-Out v3 Unseen (Hash-Only, No Clusters)",
         )
 
     # Print Comparative Ablation Table
@@ -272,6 +290,14 @@ def run_evaluation() -> dict:
             f"{heldout_v2_summary['mrr']:.3f}",
             f"{heldout_v2_ablated['mrr']:.3f}",
         )
+    if heldout_v3_summary and heldout_v3_ablated:
+        ablation_table.add_row(
+            "Blind Held-Out v3 (Unseen)",
+            f"{heldout_v3_summary['top1_hit_rate_pct']}%",
+            f"{heldout_v3_ablated['top1_hit_rate_pct']}%",
+            f"{heldout_v3_summary['mrr']:.3f}",
+            f"{heldout_v3_ablated['mrr']:.3f}",
+        )
     console.print()
     console.print(ablation_table)
 
@@ -290,6 +316,10 @@ def run_evaluation() -> dict:
         full_report["new_blind_held_out_v2"] = heldout_v2_summary
     if heldout_v2_ablated:
         full_report["ablation_study"]["held_out_v2_hash_only"] = heldout_v2_ablated
+    if heldout_v3_summary:
+        full_report["new_blind_held_out_v3"] = heldout_v3_summary
+    if heldout_v3_ablated:
+        full_report["ablation_study"]["held_out_v3_hash_only"] = heldout_v3_ablated
 
     with open(report_path, "w", encoding="utf-8") as f:
         json.dump(full_report, f, indent=2)

@@ -138,7 +138,7 @@ All queries evaluate with parameters `top_k = 5` and `min_relevance_threshold = 
 | **Mean Reciprocal Rank (MRR)** | **0.867** | >= 0.850 | **PASS** | High ranking density near rank 1 |
 | **In-Domain Keyword Recall** | **50.0%** | >= 60.0% (Prod Target) | **BASELINE (Mock)** | Extractive mock baseline (in-domain denominator) |
 | **Out-of-Domain Refusal Accuracy** | **100.0% (5/5)** | 100.0% | **PASS** | Strict refusal on non-SRE topics (cake, FIFA, tennis, stocks) |
-| **Average Total Query Latency** | **6.09 ms** | < 2500 ms | **PASS** | In-RAM vector search (5.98ms) |
+| **Average Total Query Latency** | **6.40 ms** | < 2500 ms | **PASS** | In-RAM vector search (6.29ms) |
 
 ### 2. Tagged Held-Out Baseline (v1.0.0-eval-frozen, Keyword-Bucket Dependent)
 
@@ -149,7 +149,7 @@ All queries evaluate with parameters `top_k = 5` and `min_relevance_threshold = 
 | **Mean Reciprocal Rank (MRR)** | **0.792** | >= 0.850 | **BASELINE** | Tagged-state MRR without post-freeze adjustments |
 | **In-Domain Keyword Recall** | **55.0%** | >= 60.0% (Prod Target) | **BASELINE (Mock)** | Multi-sentence extraction with verified citations |
 | **Out-of-Domain Refusal Accuracy** | **100.0% (5/5)** | 100.0% | **PASS** | 100% refusal preserved on unseen negative queries |
-| **Average Total Query Latency** | **6.21 ms** | < 2500 ms | **PASS** | In-RAM retrieval: 6.09ms |
+| **Average Total Query Latency** | **7.11 ms** | < 2500 ms | **PASS** | In-RAM retrieval: 6.99ms |
 
 ### 3. Blind Held-Out Validation (v2.0, Keyword-Bucket Dependent)
 
@@ -160,7 +160,18 @@ All queries evaluate with parameters `top_k = 5` and `min_relevance_threshold = 
 | **Mean Reciprocal Rank (MRR)** | **0.550** | >= 0.850 | **BASELINE** | Blind first-run MRR reported as-is |
 | **In-Domain Keyword Recall** | **55.0%** | >= 60.0% (Prod Target) | **BASELINE (Mock)** | Extractive mock keyword presence |
 | **Out-of-Domain Refusal Accuracy** | **100.0% (5/5)** | 100.0% | **PASS** | 100% strict refusal on out-of-domain queries |
-| **Average Total Query Latency** | **7.07 ms** | < 2500 ms | **PASS** | In-RAM retrieval: 6.97ms |
+| **Average Total Query Latency** | **7.86 ms** | < 2500 ms | **PASS** | In-RAM retrieval: 7.76ms |
+
+### 4. Blind Held-Out Validation (v3.0 Unseen, Keyword-Bucket Dependent)
+
+| Metric Dimension | Score / Count | Internal Target | Status | Operational Notes |
+| :--- | :---: | :---: | :---: | :--- |
+| **Retrieval Top-1 Hit-Rate** | **40.0% (8/20)** | >= 80.0% | **REVIEW** | Authored blind without consulting embedding clusters or internal mock weights |
+| **Retrieval Top-5 Hit-Rate** | **45.0% (9/20)** | >= 90.0% | **BASELINE** | First-run blind top-5 candidate presence reported as-is |
+| **Mean Reciprocal Rank (MRR)** | **0.417** | >= 0.850 | **BASELINE** | Uncalibrated blind first-run MRR |
+| **In-Domain Keyword Recall** | **55.0%** | >= 60.0% (Prod Target) | **BASELINE (Mock)** | Extractive mock keyword coverage |
+| **Out-of-Domain Refusal Accuracy** | **100.0% (5/5)** | 100.0% | **PASS** | Strict refusal on out-of-domain distractor topics |
+| **Average Total Query Latency** | **8.03 ms** | < 2500 ms | **PASS** | In-RAM retrieval: 7.91ms |
 
 ### 🔬 Keyword-Bucket vs. Hash-Only Ablation Study
 
@@ -169,9 +180,10 @@ All queries evaluate with parameters `top_k = 5` and `min_relevance_threshold = 
 
 | Evaluation Suite | With Keyword Clusters (Mock Boost) | Hash-Only (No Clusters) | Top-1 Delta | MRR (Clusters / Hash-Only) |
 | :--- | :---: | :---: | :---: | :---: |
-| **Primary Golden Benchmark** | **85.0%** | **10.0%** | -75.0% | 0.867 / 0.133 |
-| **Tagged Held-Out Baseline (v1)** | **75.0%** | **45.0%** | -30.0% | 0.792 / 0.483 |
-| **Blind Held-Out Suite (v2)** | **55.0%** | **5.0%** | -50.0% | 0.550 / 0.075 |
+| **Primary Golden Benchmark** | **85.0%** | **45.0%** | -40.0% | 0.867 / 0.467 |
+| **Tagged Held-Out Baseline (v1)** | **75.0%** | **70.0%** | -5.0% | 0.792 / 0.700 |
+| **Blind Held-Out Suite (v2)** | **55.0%** | **30.0%** | -25.0% | 0.550 / 0.342 |
+| **Blind Held-Out Suite (v3 Unseen)** | **40.0%** | **25.0%** | -15.0% | 0.417 / 0.292 |
 
 *(Full benchmark report generated automatically by [evaluation/evaluate.py](evaluation/evaluate.py) to [evaluation/eval_report.json](evaluation/eval_report.json)).*
 
@@ -253,6 +265,18 @@ InfraRAG is architected under a **strict Free-Tier First policy** (Directive #1 
    - By default in [`terraform/variables.tf`](terraform/variables.tf) and [`src/config.py`](src/config.py), `use_mock_bedrock` is set to `true`.
    - This ensures zero unintended AWS Bedrock spending during development, testing, and continuous integration.
    - Deploying live Bedrock requires setting `use_mock_bedrock = false` in `terraform.tfvars`, configuring AWS credentials with Bedrock invocation permissions in a supported region (e.g., `us-west-2` or `us-east-1`), and ensuring Bedrock daily token quotas are requested.
+   - **Current Live Bedrock Probe Output**: Probing live `amazon.titan-embed-text-v2:0` across AWS regions reveals that on-demand invocations are blocked by account rate limits (`ThrottlingException`) or disabled regional model access (`ValidationException`):
+     ```text
+     === Probing Bedrock Titan in us-east-1 ===
+     FAILED in us-east-1: ThrottlingException - An error occurred (ThrottlingException) when calling the InvokeModel operation (reached max retries: 4): Too many requests, please wait before trying again.
+     === Probing Bedrock Titan in us-west-2 ===
+     FAILED in us-west-2: ThrottlingException - An error occurred (ThrottlingException) when calling the InvokeModel operation (reached max retries: 4): Too many requests, please wait before trying again.
+     === Probing Bedrock Titan in eu-central-1 ===
+     FAILED in eu-central-1: ValidationException - An error occurred (ValidationException) when calling the InvokeModel operation: Operation not allowed
+     === Probing Bedrock Titan in ap-south-1 ===
+     FAILED in ap-south-1: ValidationException - An error occurred (ValidationException) when calling the InvokeModel operation: Operation not allowed
+     ```
+   - Until AWS Service Quotas grants additional on-demand throughput or provisioned model units are configured, live neural indexing cannot proceed, and the deployment defaults to offline mock verification.
 
 2. **Extractive Mock Generator vs Neural LLM**:
    - In local and CI mock mode, `MockLLMGenerator` performs extractive keyword and sentence matching rather than abstractive generative synthesis.
