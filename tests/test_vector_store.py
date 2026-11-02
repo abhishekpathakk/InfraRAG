@@ -169,13 +169,90 @@ def test_vector_store_s3_save_and_load():
     bucket = "test-infrarag-bucket"
     store.save_to_s3(s3_client=mock_s3, bucket=bucket, prefix="faiss_index", embedding_model_id="mock-v1")
 
-    # Verify S3 received chunks.json and index_metadata.json
+    # Verify S3 received chunks.json, index_metadata.json, and vectors.npy
     assert f"{bucket}/faiss_index/chunks.json" in storage
     assert f"{bucket}/faiss_index/index_metadata.json" in storage
+    assert f"{bucket}/faiss_index/vectors.npy" in storage
 
-    # Load from mock S3
-    restored_store = FAISSVectorStore(dimension=1024)
-    restored_store.load_from_s3(s3_client=mock_s3, bucket=bucket, prefix="faiss_index", expected_model_id="mock-v1")
-    assert len(restored_store.chunks) == 1
-    assert restored_store.chunks[0].chunk_id == "s3-c1"
+    # Load from mock S3 with persistent target_dir
+    with tempfile.TemporaryDirectory() as destdir:
+        dest_path = Path(destdir)
+        restored_store = FAISSVectorStore(dimension=1024)
+        restored_store.load_from_s3(
+            s3_client=mock_s3,
+            bucket=bucket,
+            prefix="faiss_index",
+            expected_model_id="mock-v1",
+            target_dir=dest_path,
+        )
+        assert len(restored_store.chunks) == 1
+        assert restored_store.chunks[0].chunk_id == "s3-c1"
+        # Verify files persisted in target_dir for warm starts
+        assert (dest_path / "chunks.json").exists()
+        assert (dest_path / "vectors.npy").exists()
+
+
+def test_bm25_index_and_hybrid_search():
+    """Validates that BM25 hybrid search boosts exact error code tokens to rank 1."""
+    from src.vector_store import BM25Index
+    bm25 = BM25Index()
+    docs = [
+        "General troubleshooting steps for cluster network policies and ingress",
+        "Container terminated with Exit Code 137 due to OOMKilled memory limit exceeded",
+        "PostgreSQL Patroni failover handling and DCS consensus split-brain",
+    ]
+    bm25.index_documents(docs)
+
+    results = bm25.search("Exit Code 137", top_k=2)
+    assert len(results) > 0
+    top_idx, top_score = results[0]
+    assert top_idx == 1
+    assert top_score > 0.0
+
+    # Verify serialization roundtrip
+    bm25_data = bm25.to_dict()
+    restored_bm25 = BM25Index.from_dict(bm25_data)
+    restored_results = restored_bm25.search("Exit Code 137", top_k=2)
+    assert len(restored_results) == len(results)
+    assert restored_results[0][0] == results[0][0]
+
+    # Test integrated hybrid search in FAISSVectorStore
+    provider = MockEmbeddingProvider(dimension=1024)
+    store = FAISSVectorStore(dimension=1024)
+    chunks = [
+        DocumentChunk(chunk_id=f"c-{i}", source_file=f"doc_{i}.md", section_title=f"Sec {i}", content=doc)
+        for i, doc in enumerate(docs)
+    ]
+    store.add_documents(chunks, provider.embed_batch(docs))
+
+    # Search with query_text for hybrid boost
+    q_vec = provider.embed_text("Exit Code 137")
+    hybrid_res = store.similarity_search(q_vec, top_k=1, query_text="Exit Code 137")
+    assert len(hybrid_res) == 1
+    assert hybrid_res[0][0].chunk_id == "c-1"
+    assert "Exit Code 137" in hybrid_res[0][0].content
+
+
+def test_vector_store_safe_npy_serialization():
+    """Validates that vector matrices serialize safely without pickle."""
+    provider = MockEmbeddingProvider(dimension=1024)
+    store = FAISSVectorStore(dimension=1024)
+    chunk = DocumentChunk(chunk_id="npy-1", source_file="t.md", section_title="T", content="Testing npy save")
+    store.add_documents([chunk], provider.embed_batch([chunk.content]))
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        store.save_local(tmpdir, embedding_model_id="mock")
+        # Ensure chunks.json, index_metadata.json, safe vectors.npy, and pre-computed bm25_index.json exist
+        assert (Path(tmpdir) / "chunks.json").exists()
+        assert (Path(tmpdir) / "index_metadata.json").exists()
+        assert (Path(tmpdir) / "vectors.npy").exists()
+        assert (Path(tmpdir) / "bm25_index.json").exists()
+
+        # Load back into clean store
+        new_store = FAISSVectorStore(dimension=1024)
+        new_store.load_local(tmpdir, expected_model_id="mock")
+        assert len(new_store.chunks) == 1
+        assert new_store.chunks[0].chunk_id == "npy-1"
+        assert new_store.bm25.num_docs == 1
+
 

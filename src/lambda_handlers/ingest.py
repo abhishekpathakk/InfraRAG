@@ -22,6 +22,19 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     logger.info("Starting InfraRAG Ingestion Handler...")
 
     try:
+        # Safeguard: Bulk ingestion of 800+ documents cannot complete within Lambda 60s ceiling
+        if os.environ.get("AWS_LAMBDA_FUNCTION_NAME") and not settings.USE_MOCK_BEDROCK:
+            single_file = event.get("file_path") or event.get("s3_key")
+            if not single_file:
+                return {
+                    "statusCode": 400,
+                    "headers": {"Content-Type": "application/json"},
+                    "body": json.dumps({
+                        "status": "error",
+                        "message": "Bulk corpus indexing cannot run synchronously inside Lambda due to the 60s execution ceiling. Run 'python scripts/build_live_index.py' offline, or provide 'file_path' for incremental ingestion.",
+                    }),
+                }
+
         # Determine source of runbooks (S3 or local data directory)
         bucket_name = os.environ.get("S3_BUCKET_NAME", settings.S3_BUCKET_NAME)
         chain = RAGChain()

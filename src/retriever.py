@@ -49,11 +49,12 @@ class Retriever:
         # 1. Embed query
         query_vector = self.embedding_provider.embed_text(query)
 
-        # 2. Similarity search in vector store with type filter
+        # 2. Similarity search in vector store with type filter and query text for hybrid ranking
         matches = self.vector_store.similarity_search(
             query_embedding=query_vector,
             top_k=k,
             type_filter=type_filter,
+            query_text=query,
         )
 
         latency_ms = (time.perf_counter() - start_time) * 1000.0

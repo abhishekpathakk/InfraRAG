@@ -41,3 +41,9 @@ variable "use_mock_bedrock" {
   default     = "true"
 }
 
+variable "lambda_layers" {
+  description = "Optional list of Lambda Layer ARNs (e.g. AWS-managed NumPy/SciPy layer)"
+  type        = list(string)
+  default     = []
+}
+

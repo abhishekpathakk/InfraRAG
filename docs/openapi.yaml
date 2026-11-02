@@ -1,0 +1,234 @@
+openapi: 3.1.0
+info:
+  title: InfraRAG API
+  description: Serverless Autonomous DevOps & SRE Incident Runbook Assistant
+  version: 1.0.0
+  contact:
+    name: InfraRAG Core Team
+    url: https://github.com/infrarag
+servers:
+  - url: https://{api-id}.execute-api.{region}.amazonaws.com
+    description: Production API Gateway HTTP API v2 (Zero-Idle Free Tier)
+    variables:
+      api-id:
+        default: infrarag-api
+      region:
+        default: ap-south-1
+  - url: http://localhost:8000
+    description: Local Offline Development Server (100% Free Mock Bedrock)
+
+paths:
+  /ask:
+    post:
+      summary: Query Runbooks & Generate Grounded Answer
+      description: |
+        Performs hybrid dense (Titan v2 / FAISS) and sparse (Okapi BM25) retrieval over incident runbooks,
+        synthesizes grounded answers via AWS Bedrock Nova Micro, and provides source citations and latency telemetry.
+      operationId: askQuestion
+      security:
+        - ApiKeyAuth: []
+        - {}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AskRequest'
+            example:
+              question: "What causes container Exit Code 137 in Kubernetes?"
+              type_filter: "internal"
+      responses:
+        '200':
+          description: Grounded incident triage answer with verified citations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AskResponse'
+        '400':
+          description: Malformed request, missing question, or question length exceeded (>1000 chars)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - missing or invalid x-api-key header when authentication is enforced
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Service Unavailable - vector store index missing or uninitialized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /ingest:
+    post:
+      summary: Incremental Runbook Ingestion
+      description: |
+        Ingests a single runbook Markdown document into the vector index and updates S3 persistence.
+        Bulk indexing across hundreds of files is restricted to offline builds (scripts/build_live_index.py)
+        to prevent Lambda 60s execution timeout ceiling breaches.
+      operationId: ingestRunbook
+      security:
+        - ApiKeyAuth: []
+        - {}
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestRequest'
+      responses:
+        '200':
+          description: Ingestion complete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestResponse'
+        '400':
+          description: Synchronous bulk indexing rejected; use offline live indexer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Pre-shared API key matching INFRARAG_API_KEY environment variable.
+
+  schemas:
+    AskRequest:
+      type: object
+      required:
+        - question
+      properties:
+        question:
+          type: string
+          description: Technical incident or infrastructure troubleshooting question
+          maxLength: 1000
+          example: "What causes container Exit Code 137 in Kubernetes?"
+        type_filter:
+          type: string
+          enum: [internal, public]
+          nullable: true
+          description: Optional corpus partition filter
+
+    Citation:
+      type: object
+      required:
+        - source_file
+        - section_title
+        - chunk_id
+        - relevance_score
+      properties:
+        source_file:
+          type: string
+          example: "kubernetes_oom_killed.md"
+        section_title:
+          type: string
+          example: "Exit Code 137"
+        chunk_id:
+          type: string
+          example: "kubernetes_oom_killed.md-c1"
+        relevance_score:
+          type: number
+          format: float
+          example: 0.892
+        source:
+          type: string
+          example: "internal"
+        path:
+          type: string
+          example: "data/internal/kubernetes_oom_killed.md"
+        type:
+          type: string
+          example: "internal"
+
+    TelemetryMetrics:
+      type: object
+      properties:
+        retrieval_latency_ms:
+          type: number
+          format: float
+          example: 6.8
+        generation_latency_ms:
+          type: number
+          format: float
+          example: 0.2
+        total_latency_ms:
+          type: number
+          format: float
+          example: 7.0
+        input_tokens:
+          type: integer
+          example: 412
+        output_tokens:
+          type: integer
+          example: 85
+        estimated_cost_usd:
+          type: number
+          format: float
+          example: 0.00002
+
+    AskResponse:
+      type: object
+      required:
+        - query
+        - answer
+        - citations
+        - confidence
+        - metrics
+      properties:
+        query:
+          type: string
+        answer:
+          type: string
+          description: Factually grounded markdown response with strict inline citations
+        citations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Citation'
+        confidence:
+          type: string
+          enum: [high, low]
+        metrics:
+          $ref: '#/components/schemas/TelemetryMetrics'
+
+    IngestRequest:
+      type: object
+      properties:
+        file_path:
+          type: string
+          example: "data/internal/kubernetes_crashloopbackoff.md"
+        s3_key:
+          type: string
+          example: "runbooks/k8s.md"
+
+    IngestResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        total_chunks:
+          type: integer
+          example: 12
+        latency_ms:
+          type: number
+          example: 450.2
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: "Unauthorized: Missing or invalid API key"
+

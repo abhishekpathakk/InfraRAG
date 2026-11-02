@@ -18,6 +18,8 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT_DIR))
 
+from src.config import settings  # noqa: E402
+
 
 def print_banner(msg: str):
     print("\n" + "=" * 60)
@@ -59,17 +61,20 @@ def main():
     if args.check_cost:
         return
 
-    # Check Runbooks
-    runbook_dir = ROOT_DIR / "data" / "runbooks"
-    runbooks = list(runbook_dir.glob("*.md")) if runbook_dir.exists() else []
-    print(f"\n📚 Runbooks discovered in {runbook_dir.relative_to(ROOT_DIR)}: {len(runbooks)} files")
-    for rb in runbooks:
-        print(f"   - {rb.name} ({rb.stat().st_size} bytes)")
+    # Check Runbooks across data directory
+    data_dir = settings.DATA_DIR
+    runbooks = [f for f in data_dir.glob("**/*.md") if f.is_file() and not f.name.startswith(".")] if data_dir.exists() else []
+    print(f"\n📚 Runbooks discovered in {data_dir.relative_to(ROOT_DIR)}: {len(runbooks)} files")
+    internal_count = sum(1 for r in runbooks if "internal" in r.parts)
+    public_count = sum(1 for r in runbooks if "public" in r.parts)
+    print(f"   - Internal runbooks: {internal_count}")
+    print(f"   - Public corpus docs: {public_count}")
 
     # Prefer .venv binaries if available
     venv_bin = ROOT_DIR / ".venv" / "bin"
     python_cmd = str(venv_bin / "python") if (venv_bin / "python").exists() else sys.executable
     ruff_cmd = str(venv_bin / "ruff") if (venv_bin / "ruff").exists() else "ruff"
+    mypy_cmd = str(venv_bin / "mypy") if (venv_bin / "mypy").exists() else "mypy"
     pytest_cmd = str(venv_bin / "pytest") if (venv_bin / "pytest").exists() else "pytest"
 
     # Run linter if ruff is available
@@ -78,6 +83,13 @@ def main():
         lint_ok = run_cmd([ruff_cmd, "check", "."], "Ruff Linter Check")
     except FileNotFoundError:
         print("⚠️  Ruff not installed in current environment; skipping linter check.")
+
+    # Run static type checker if mypy is available
+    mypy_ok = True
+    try:
+        mypy_ok = run_cmd([mypy_cmd, "src/"], "Mypy Static Type Check")
+    except FileNotFoundError:
+        print("⚠️  Mypy not installed in current environment; skipping static type check.")
 
     # Run tests if pytest is available
     test_ok = True
@@ -101,7 +113,7 @@ def main():
             eval_ok = False
 
     print_banner("Loop Engineer Run Summary")
-    if lint_ok and test_ok and eval_ok:
+    if lint_ok and mypy_ok and test_ok and eval_ok:
         print("🎉 ALL CHECKS PASSED! Ready for deployment / showcase.")
         sys.exit(0)
     else:

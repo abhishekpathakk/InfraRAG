@@ -211,6 +211,7 @@ resource "aws_lambda_function" "ingest" {
   source_code_hash = fileexists("${path.module}/build/lambda_payload.zip") ? filebase64sha256("${path.module}/build/lambda_payload.zip") : null
   timeout          = 60
   memory_size      = 1024
+  layers           = var.lambda_layers
 
   environment {
     variables = {
@@ -232,6 +233,7 @@ resource "aws_lambda_function" "ask" {
   source_code_hash = fileexists("${path.module}/build/lambda_payload.zip") ? filebase64sha256("${path.module}/build/lambda_payload.zip") : null
   timeout          = 30
   memory_size      = 1024
+  layers           = var.lambda_layers
 
   environment {
     variables = {

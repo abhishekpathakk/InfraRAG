@@ -71,3 +71,25 @@ def test_ask_handler_auth_and_validation():
             "body": json.dumps({"question": "a" * 1005}),
         }, None)
         assert res["statusCode"] == 400
+
+
+def test_ask_handler_empty_index_503():
+    """Tests that handler returns 503 when vector index is empty."""
+    from unittest.mock import MagicMock
+    mock_chain = MagicMock()
+    mock_chain.vector_store.chunks = []
+
+    with patch.object(ask, "get_cached_chain", return_value=mock_chain):
+        res = ask.handler({"body": json.dumps({"question": "Any question?"})}, None)
+        assert res["statusCode"] == 503
+        body = json.loads(res["body"])
+        assert "Service Unavailable" in body["error"]
+
+
+def test_ask_handler_fail_closed_auth():
+    """Tests that REQUIRE_API_KEY=true fails closed when no key is configured."""
+    with patch.dict("os.environ", {"REQUIRE_API_KEY": "true"}, clear=False):
+        # Even with no INFRARAG_API_KEY set, it must reject requests (fail-closed)
+        res = ask.handler({"body": json.dumps({"question": "test"})}, None)
+        assert res["statusCode"] == 401
+

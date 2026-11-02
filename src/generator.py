@@ -139,11 +139,11 @@ class MockLLMProvider(BaseLLMProvider):
             "do", "does", "during", "which", "who", "why", "when", "can", "should", "be",
             "i", "are", "me", "my", "we", "our", "you", "your", "it", "its", "they", "them",
             "their", "this", "that", "these", "those", "with", "from", "at", "by", "on", "as",
+            "was", "were", "had", "has", "have", "been",
         }
         q_words = set(re.findall(r"\w+", query.lower())) - stopwords
 
-
-        min_overlap = 2 if len(q_words) >= 4 else 1
+        min_overlap = 3 if len(q_words) >= 6 else (2 if len(q_words) >= 4 else 1)
 
         # Rank candidate sentences/code lines across retrieved chunks
         # Split on newlines or sentence boundaries (avoiding decimals like 75.0 or hostnames like istio.io)
@@ -166,7 +166,7 @@ class MockLLMProvider(BaseLLMProvider):
         candidate_snippets.sort(key=lambda x: x[0], reverse=True)
 
         if candidate_snippets:
-            top_lines = []
+            top_lines: list[str] = []
             seen = set()
             for ov, s, c in candidate_snippets:
                 if s not in seen and len(top_lines) < 3:

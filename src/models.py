@@ -46,7 +46,7 @@ except ImportError:
     import dataclasses
 
     @dataclasses.dataclass
-    class DocumentChunk:
+    class DocumentChunk:  # type: ignore[no-redef]
         chunk_id: str
         source_file: str
         content: str
@@ -61,7 +61,7 @@ except ImportError:
             return dataclasses.asdict(self)
 
     @dataclasses.dataclass
-    class Citation:
+    class Citation:  # type: ignore[no-redef]
         source_file: str
         section_title: str
         chunk_id: str
@@ -74,7 +74,7 @@ except ImportError:
             return dataclasses.asdict(self)
 
     @dataclasses.dataclass
-    class RAGResponse:
+    class RAGResponse:  # type: ignore[no-redef]
         query: str
         answer: str
         citations: list[Citation] = dataclasses.field(default_factory=list)

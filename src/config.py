@@ -6,6 +6,7 @@ Supports pydantic-settings when available, with standard library os.environ fall
 
 import os
 from pathlib import Path
+from typing import Any
 
 try:
     from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -44,7 +45,7 @@ try:
             "anthropic.claude-3-haiku-20240307-v1:0": {"input_per_1k": 0.00025, "output_per_1k": 0.00125},
         }
 
-    settings = Settings()
+    settings: Any = Settings()
 
 except ImportError:
     class StandaloneSettings:

@@ -78,16 +78,25 @@ def embed_chunks_with_checkpoint(
     If a run is interrupted by Bedrock rate limits or network issues,
     it automatically resumes from the saved checkpoint.
     """
-    import pickle
+    import json
 
     cached_embeddings: dict[str, list[float]] = {}
-    if checkpoint_file.exists():
+    json_checkpoint = checkpoint_file.with_suffix(".json")
+    if json_checkpoint.exists():
         try:
+            with open(json_checkpoint, "r", encoding="utf-8") as f:
+                cached_embeddings = json.load(f)
+            console.print(f"[bold green]Resuming from JSON checkpoint: {len(cached_embeddings)} chunks already embedded.[/bold green]")
+        except Exception as e:
+            console.print(f"[yellow]Warning: Could not read JSON checkpoint ({e}), trying legacy fallback.[/yellow]")
+    elif checkpoint_file.exists():
+        try:
+            import pickle
             with open(checkpoint_file, "rb") as f:
                 cached_embeddings = pickle.load(f)
-            console.print(f"[bold green]Resuming from checkpoint: {len(cached_embeddings)} chunks already embedded.[/bold green]")
+            console.print(f"[bold green]Resuming from legacy pickle checkpoint: {len(cached_embeddings)} chunks already embedded.[/bold green]")
         except Exception as e:
-            console.print(f"[yellow]Warning: Could not read checkpoint ({e}), starting fresh.[/yellow]")
+            console.print(f"[yellow]Warning: Could not read legacy checkpoint ({e}), starting fresh.[/yellow]")
 
     pending_indices = [i for i, c in enumerate(chunks) if c.chunk_id not in cached_embeddings]
 
@@ -121,14 +130,14 @@ def embed_chunks_with_checkpoint(
                     progress.advance(task)
                     completed_count += 1
 
-                    # Save checkpoint every 100 chunks
+                    # Save checkpoint safely as JSON every 100 chunks
                     if completed_count % 100 == 0:
-                        with open(checkpoint_file, "wb") as f:
-                            pickle.dump(cached_embeddings, f)
+                        with open(json_checkpoint, "w", encoding="utf-8") as f:
+                            json.dump(cached_embeddings, f)
 
         # Final checkpoint save for pending batch
-        with open(checkpoint_file, "wb") as f:
-            pickle.dump(cached_embeddings, f)
+        with open(json_checkpoint, "w", encoding="utf-8") as f:
+            json.dump(cached_embeddings, f)
 
     # Return vectors in exact original chunk order
     return [cached_embeddings[c.chunk_id] for c in chunks]
@@ -168,7 +177,7 @@ def main():
         return
 
     # 3. Embed chunks with checkpoint support
-    checkpoint_file = args.output_dir / "embedding_checkpoint.pkl"
+    checkpoint_file = args.output_dir / "embedding_checkpoint.json"
     embeddings = embed_chunks_with_checkpoint(
         chunks=chunks,
         provider=provider,

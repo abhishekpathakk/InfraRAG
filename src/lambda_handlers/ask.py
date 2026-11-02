@@ -39,8 +39,10 @@ def get_cached_chain() -> RAGChain:
     # If warm cache in /tmp exists, load it
     if (tmp_path / "chunks.json").exists():
         chain.vector_store.load_local(tmp_path, expected_model_id=expected_model)
+    elif settings.CACHE_DIR and (settings.CACHE_DIR / "chunks.json").exists():
+        chain.vector_store.load_local(settings.CACHE_DIR, expected_model_id=expected_model)
     elif not settings.USE_MOCK_BEDROCK and bucket_name:
-        # Download from S3 into /tmp
+        # Download from S3 into persistent /tmp cache for warm-start reuse
         import boto3
         s3 = boto3.client("s3", region_name=settings.AWS_REGION)
         chain.vector_store.load_from_s3(
@@ -48,9 +50,15 @@ def get_cached_chain() -> RAGChain:
             bucket=bucket_name,
             prefix="faiss_index",
             expected_model_id=expected_model,
+            target_dir=tmp_path,
         )
     else:
-        # Ingest local runbooks on cold start
+        # Decouple query path: if running in Lambda container, fail fast instead of multi-minute ingestion
+        if os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+            logger.error("Vector index missing in /tmp, cache dir, and S3. Cold-start ingestion aborted.")
+            return chain
+
+        # Ingest local runbooks on cold start in local development environment
         chain.ingest_directory(settings.DATA_DIR)
         chain.vector_store.save_local(tmp_path, embedding_model_id=expected_model)
 
@@ -62,12 +70,13 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     logger.info(f"Received query event: {event.get('rawPath', '')}")
 
     try:
-        # 1. API Key Authentication (fail-closed if expected key is configured)
+        # 1. API Key Authentication (fail-closed if expected key or REQUIRE_API_KEY is configured)
         expected_key = os.environ.get("INFRARAG_API_KEY")
-        if expected_key:
+        require_auth = os.environ.get("REQUIRE_API_KEY", "false").lower() == "true" or bool(expected_key)
+        if require_auth:
             headers = event.get("headers") or {}
             client_key = headers.get("x-api-key") or headers.get("X-API-KEY") or ""
-            if not hmac.compare_digest(client_key, expected_key):
+            if not expected_key or not hmac.compare_digest(client_key, expected_key):
                 return {
                     "statusCode": 401,
                     "headers": {"Content-Type": "application/json"},
@@ -113,6 +122,12 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
                 }
 
         chain = get_cached_chain()
+        if not chain.vector_store.chunks:
+            return {
+                "statusCode": 503,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({"error": "Service Unavailable: Vector index not loaded or empty."}),
+            }
         response = chain.answer_question(question_str, type_filter=type_filter)
 
         return {
