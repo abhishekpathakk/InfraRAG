@@ -105,9 +105,12 @@ def main():
     # Run evaluation benchmark if requested
     eval_ok = True
     eval_script = ROOT_DIR / "evaluation" / "evaluate.py"
+    sync_script = ROOT_DIR / "scripts" / "sync_readme_metrics.py"
     if eval_script.exists():
         try:
             eval_ok = run_cmd([python_cmd, str(eval_script)], "Evaluation Benchmark (Hit-rate & Faithfulness)")
+            if eval_ok and sync_script.exists():
+                run_cmd([python_cmd, str(sync_script)], "Sync README Benchmark Tables")
         except Exception as e:
             print(f"⚠️  Evaluation failed to run: {e}")
             eval_ok = False

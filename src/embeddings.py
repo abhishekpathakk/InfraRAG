@@ -72,7 +72,6 @@ class MockEmbeddingProvider(BaseEmbeddingProvider):
             "disk_pressure": [
                 "diskpressure", "ephemeral-storage", "imagefs", "nodefs",
                 "evictionhard", "kubelet eviction", "disk pressure", "nodediskpressure",
-                "hard disk eviction", "node storage", "eviction threshold", "eviction thresholds",
             ],
             "ingress_504": [
                 "504", "gateway timeout", "proxy-read-timeout", "proxy-connect-timeout",
@@ -97,15 +96,6 @@ class MockEmbeddingProvider(BaseEmbeddingProvider):
             "gitlab_sre": [
                 "teleport", "tsh db", "patroni", "patronictl", "cloudsqldatabasedown",
                 "connect_to_database_console_via_teleport", "patroni failover",
-            ],
-            "autoscaling": [
-                "hpa", "horizontalpodautoscaler", "metrics-server", "custom metric", "scaling", "autoscaler",
-            ],
-            "coredns": [
-                "coredns", "servfail", "dns query", "resolv.conf", "kube-dns", "ndots", "query timeout",
-            ],
-            "redis": [
-                "redis", "maxmemory", "maxmemory-policy", "volatile-lru", "allkeys-lru", "eviction limits",
             ],
         }
 
@@ -136,8 +126,8 @@ class MockEmbeddingProvider(BaseEmbeddingProvider):
         for bucket_start, patterns in self._compiled_clusters:
             for pat in patterns:
                 if pat.search(normalized_text):
-                    for b in range(bucket_start, bucket_start + 50):
-                        vec[b % self._dim] += 15.0
+                    for b in range(bucket_start, bucket_start + 65):
+                        vec[b] += 15.0
 
         # L2-normalize vector so ||v|| = 1.0
         norm = sum(x * x for x in vec) ** 0.5

@@ -411,24 +411,31 @@ class FAISSVectorStore(BaseVectorStore):
         vec_pkl = path / "vectors.pkl"
         vec_json = path / "vectors.json"
 
+        loaded_vectors = False
         if self._has_faiss and index_file.exists():
             self._index = self.faiss.read_index(str(index_file))
-        elif HAS_NUMPY and vec_npy.exists():
+            loaded_vectors = True
+
+        if HAS_NUMPY and vec_npy.exists():
             mat = np.load(str(vec_npy), allow_pickle=False)
             self._matrix = mat
             self._vectors = mat.tolist()
-        elif vec_pkl.exists():
+            loaded_vectors = True
+        elif vec_pkl.exists() and not loaded_vectors:
             # Backward-compatibility fallback for legacy pickle files
             with open(vec_pkl, "rb") as f:
                 self._vectors = pickle.load(f)
             if HAS_NUMPY and self._vectors:
                 self._matrix = np.array(self._vectors, dtype=np.float32)
-        elif vec_json.exists():
+            loaded_vectors = True
+        elif vec_json.exists() and not loaded_vectors:
             with open(vec_json, "r", encoding="utf-8") as f:
                 self._vectors = json.load(f)
             if HAS_NUMPY and self._vectors:
                 self._matrix = np.array(self._vectors, dtype=np.float32)
-        elif index_file.exists() and not self._has_faiss:
+            loaded_vectors = True
+
+        if not loaded_vectors and index_file.exists() and not self._has_faiss:
             raise RuntimeError(
                 f"Found FAISS index at {index_file}, but 'faiss-cpu' is not installed in the current environment "
                 f"and no fallback 'vectors.npy' exists. Please install faiss-cpu or regenerate the index."

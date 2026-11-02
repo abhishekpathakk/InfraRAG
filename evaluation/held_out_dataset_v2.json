@@ -1,0 +1,177 @@
+[
+  {
+    "id": "v2-heldout-01",
+    "query": "Kubernetes worker node status shows NodeDiskPressure and kubelet starts evicting pods. Which threshold triggers this?",
+    "target_source_file": "kubernetes_node_disk_pressure.md",
+    "expected_answer_keywords": ["evictionhard", "imagefs", "nodefs", "diskpressure"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-heldout-02",
+    "query": "How do you recover a container failing with Exit Code 139 during container startup?",
+    "target_source_file": "kubernetes_crashloopbackoff.md",
+    "expected_answer_keywords": ["exit code 139", "segfault", "core dump", "crashloopbackoff"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-heldout-03",
+    "query": "Istio Envoy logs display 503 UF flags when communicating with payment-service. What is the root cause?",
+    "target_source_file": "istio_503_service_unavailable.md",
+    "expected_answer_keywords": ["503", "uf", "upstream", "connection failure", "envoy"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-heldout-04",
+    "query": "Docker build fails with no space left on device on CI runner. How to safely clean up overlay2 build cache?",
+    "target_source_file": "docker_daemon_out_of_space.md",
+    "expected_answer_keywords": ["docker system prune", "overlay2", "build cache", "dangling"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-heldout-05",
+    "query": "What kubectl command should you run to inspect previous logs of an OOMKilled container?",
+    "target_source_file": "kubernetes_oom_killed.md",
+    "expected_answer_keywords": ["kubectl logs", "--previous", "exit code 137", "oomkilled"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-heldout-06",
+    "query": "AWS Network Load Balancer target group marks all backend EC2 instances as Unhealthy. How to diagnose?",
+    "target_source_file": "aws_network_load_balancer_unhealthy_hosts.md",
+    "expected_answer_keywords": ["target.failedhealthchecks", "nlb", "health check", "security group"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-heldout-07",
+    "query": "NGINX Ingress controller returns 504 Gateway Timeout while waiting for microservice response. Which ingress annotations fix this?",
+    "target_source_file": "kubernetes_ingress_504_gateway_timeout.md",
+    "expected_answer_keywords": ["504", "proxy-read-timeout", "proxy-connect-timeout", "gateway timeout"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-heldout-08",
+    "query": "Connecting to an Istio service with STRICT mTLS enabled from outside the mesh fails SSL handshake. How to resolve?",
+    "target_source_file": "istio_mtls_strict_failures.md",
+    "expected_answer_keywords": ["peerauthentication", "strict", "permissive", "portlevelmtls", "mtls"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-heldout-09",
+    "query": "How to debug a distroless or scratched container without a shell using ephemeral debug containers?",
+    "target_source_file": "kubernetes_crashloopbackoff.md",
+    "expected_answer_keywords": ["kubectl debug", "ephemeral-containers", "target"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-heldout-10",
+    "query": "PostgreSQL Patroni leader switchover failed and cluster consensus reports split-brain. How to verify node state?",
+    "target_source_file": "gitlab_connect_to_database_console_via_teleport.md",
+    "expected_answer_keywords": ["patronictl", "teleport", "tsh db", "patroni"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-heldout-11",
+    "query": "Envoy proxy returns 503 UO. What circuit breaking threshold was exceeded?",
+    "target_source_file": "istio_503_service_unavailable.md",
+    "expected_answer_keywords": ["uo", "upstream overflow", "circuit breaker", "maxconnections"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-heldout-12",
+    "query": "What JVM options ensure that container memory limits are respected by the JVM heap?",
+    "target_source_file": "kubernetes_oom_killed.md",
+    "expected_answer_keywords": ["-xx:maxrampercentage", "cgroup", "heap", "memory limit"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-heldout-13",
+    "query": "Docker daemon on worker node fails to start because /var/lib/docker inode exhaustion occurred. How to check inodes?",
+    "target_source_file": "docker_daemon_out_of_space.md",
+    "expected_answer_keywords": ["df -i", "inodes", "overlay2", "docker prune"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-heldout-14",
+    "query": "Kubernetes liveness probe failed repeatedly resulting in container restart loop. How to view probe failure events?",
+    "target_source_file": "kubernetes_crashloopbackoff.md",
+    "expected_answer_keywords": ["kubectl describe pod", "liveness probe", "events", "unhealthy"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-heldout-15",
+    "query": "AWS NLB health checks fail because kube-proxy or NodePort is rejecting traffic on target instances. How to troubleshoot?",
+    "target_source_file": "aws_network_load_balancer_unhealthy_hosts.md",
+    "expected_answer_keywords": ["nlb", "nodeport", "health check", "target group"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-heldout-16",
+    "query": "How does setting imageMinimumGCAge and imageGCHighThresholdPercent prevent kubelet disk eviction churn?",
+    "target_source_file": "kubernetes_node_disk_pressure.md",
+    "expected_answer_keywords": ["imagegchighthresholdpercent", "imageminimumgcage", "eviction", "kubelet"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-heldout-17",
+    "query": "What tool validates Istio DestinationRule and VirtualService configurations against the mesh before deployment?",
+    "target_source_file": "istio_503_service_unavailable.md",
+    "expected_answer_keywords": ["istioctl analyze", "virtualservice", "destinationrule"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-heldout-18",
+    "query": "How to connect securely to a production database console via Teleport without exposing database credentials?",
+    "target_source_file": "gitlab_connect_to_database_console_via_teleport.md",
+    "expected_answer_keywords": ["teleport", "tsh db connect", "tsh login"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-heldout-19",
+    "query": "What is the consequence of setting PeerAuthentication to STRICT in the istio-system namespace without DestinationRules?",
+    "target_source_file": "istio_mtls_strict_failures.md",
+    "expected_answer_keywords": ["strict", "mtls", "peerauthentication", "503"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-heldout-20",
+    "query": "Kubernetes node reports MemoryPressure condition. How does kubelet decide which pod QoS tier to evict first?",
+    "target_source_file": "kubernetes_oom_killed.md",
+    "expected_answer_keywords": ["besteffort", "burstable", "guaranteed", "qos", "eviction"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-heldout-21",
+    "query": "What CSS Flexbox property controls how flex items wrap onto multiple lines?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  },
+  {
+    "id": "v2-heldout-22",
+    "query": "How do you calculate sourdough bread hydration percentage based on flour and water weight?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  },
+  {
+    "id": "v2-heldout-23",
+    "query": "Explain the difference between SwiftUI ViewBuilder and UIKit UIViewController lifecycle.",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  },
+  {
+    "id": "v2-heldout-24",
+    "query": "What is Shor's algorithm and how does quantum computing impact RSA public key cryptography?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  },
+  {
+    "id": "v2-heldout-25",
+    "query": "Which players should I start at running back in PPR fantasy football scoring this week?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  }
+]

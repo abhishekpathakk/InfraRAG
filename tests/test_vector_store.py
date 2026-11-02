@@ -71,7 +71,7 @@ def test_vector_store_save_and_load():
         new_store.load_local(tmpdir, expected_model_id="mock-v1")
         assert len(new_store.chunks) == 1
         assert new_store.chunks[0].chunk_id == "c-save-1"
-        assert getattr(new_store, "_matrix", None) is not None
+        assert getattr(new_store, "_index", None) is not None or getattr(new_store, "_matrix", None) is not None
 
         # Verify search works identically
         q_vec = provider.embed_text("Testing serialization")
@@ -122,8 +122,8 @@ def test_vector_store_load_local_parity_and_fast_latency():
         loaded_store = FAISSVectorStore(dimension=1024)
         loaded_store.load_local(tmpdir, expected_model_id="mock-test")
 
-        # 1. Verify cached matrix is allocated
-        assert getattr(loaded_store, "_matrix", None) is not None
+        # 1. Verify index or cached matrix is allocated
+        assert getattr(loaded_store, "_index", None) is not None or getattr(loaded_store, "_matrix", None) is not None
 
         # 2. Verify identical Top-K ordering and scores
         loaded_results = loaded_store.similarity_search(query_vec, top_k=5)

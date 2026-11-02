@@ -25,3 +25,8 @@ You are operating as the **InfraRAG Loop Engineer** in pair-programming mode wit
    - Clean, readable Python 3.12 with type hints and Pydantic models.
    - Comprehensive tests for chunking, vector indexing, retrieval, and LLM prompt enforcement.
    - No hardcoded secrets or AWS keys.
+
+4. **Evaluation Integrity & Frozen Datasets Invariant**:
+   - No changes to evaluation datasets, ground-truth labels, or retrieval vocabulary/mock clusters after a freeze tag has been cut without cutting a new git tag and adding an explicit changelog entry.
+   - All held-out validation suites must be evaluated blind; first-run results must be reported as-is without post-hoc cluster tuning or cherry-picking.
+   - Benchmark tables in documentation must be synchronized programmatically from `evaluation/eval_report.json` via `scripts/sync_readme_metrics.py`.

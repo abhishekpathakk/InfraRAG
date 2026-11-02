@@ -816,6 +816,59 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
    - *Trade-off:* Adds a lockfile to git that requires synchronization when adding dependencies.
    - *Rationale:* Eliminates CI runner flakes, reduces dependency resolution time to milliseconds, and guarantees reproducible microVM builds.
 
+---
+
+## Phase 21: Evaluation Integrity Remediation, Goodhart's Law RCA, and Blind Benchmark Suite
+
+### 1. What We Did
+1. **Remediated Post-Freeze Leakage & Restored Tagged State**:
+   - Reverted post-freeze keyword cluster additions (`autoscaling`, `coredns`, `redis`) in [`src/embeddings.py`](src/embeddings.py) back to tag `v1.0.0-eval-frozen`.
+   - Restored [`evaluation/held_out_dataset.json`](evaluation/held_out_dataset.json) to tag state (reverted `heldout-16` dual-label change).
+   - Re-evaluated the true baseline: Tagged Held-Out Top-1 is **75.0%** (15/20), MRR **0.792**.
+2. **Authored Brand-New Blind Held-Out Suite (v2.0)**:
+   - Created [`evaluation/held_out_dataset_v2.json`](evaluation/held_out_dataset_v2.json) with 25 unseen operational incident questions (20 in-domain, 5 out-of-domain negative queries).
+   - Evaluated blind on first run without inspecting misses or altering retrieval code: **Top-1 Hit-Rate: 70.0%** (14/20), **MRR: 0.700**, **Out-of-Domain Refusal: 100.0%**.
+3. **Built Dedicated Titan v2 Indexer Script**:
+   - Authored [`scripts/build_titan_index.py`](scripts/build_titan_index.py) to generate production neural embeddings via `BedrockTitanEmbeddingProvider` in `us-west-2`.
+   - Documented quota behavior and on-demand throttling boundaries.
+4. **Automated Documentation Metric Synchronization**:
+   - Authored [`scripts/sync_readme_metrics.py`](scripts/sync_readme_metrics.py) and integrated it into [`scripts/loop_engineer.py`](scripts/loop_engineer.py). README benchmark tables now update directly from [`evaluation/eval_report.json`](evaluation/eval_report.json) on every evaluation run.
+5. **Added Known Limitations & Immutable Governance Directive**:
+   - Added a "Known Limitations" section in [`README.md`](README.md) detailing mock mode defaults, extractive vs. generative synthesis, and synthetic vector space vs. neural embeddings.
+   - Added Directive #4 in [`AGENTS.md`](AGENTS.md) barring modifications to evaluation datasets, ground-truth labels, or retrieval vocabularies post-freeze without an explicit git tag and changelog.
+6. **Remediated `_matrix` Assertion Failure**:
+   - Fixed `load_local()` in [`src/vector_store.py`](src/vector_store.py) and assertions in [`tests/test_vector_store.py`](tests/test_vector_store.py) to cleanly support environments with or without native `faiss-cpu`.
+
+### 2. Concepts Learned
+- **Goodhart's Law in AI Evaluation:** *"When a measure becomes a target, it ceases to be a good measure."* Optimizing mock keyword clusters to satisfy an arbitrary evaluation score destroys generalization and produces illusory performance metrics.
+  - *One-line analogy:* Giving students the exact test questions the night before an exam and then bragging about a 100% pass rate.
+- **Single Source of Truth for Documentation:** Hand-transcribing benchmark numbers into documentation inevitably causes documentation drift. Metrics tables must be generated programmatically from the test artifact (`eval_report.json`).
+  - *One-line analogy:* Syncing bank transactions directly from ledger software rather than copying amounts onto paper sticky notes.
+
+### 3. Issues Faced & Autonomous Fixes Applied
+
+| Issue / Friction Point | Root Cause | Fix Applied | Autonomous Prevention Rule |
+| :--- | :--- | :--- | :--- |
+| **Post-Freeze Evaluation Leakage** | Mock embedding clusters were expanded after freeze tag `v1.0.0-eval-frozen` based on held-out error analysis. | Reverted `src/embeddings.py` and `held_out_dataset.json` to tagged commit; created blind `held_out_dataset_v2.json`. | Directive #4 in `AGENTS.md`: Frozen datasets and retrieval vocabularies are immutable without a new tag and changelog. |
+| **`_matrix` Test Failure in Native FAISS Environments** | `load_local()` only populated `_matrix` on the non-FAISS fallback branch, causing `assert getattr(store, "_matrix", None) is not None` to fail when `faiss-cpu` was installed. | Ensured `vectors.npy` loads `_matrix` regardless of FAISS, and updated test assertion to verify `_index is not None or _matrix is not None`. | Test assertions must check interface readiness (`_index` or `_matrix`), not private internal branch state. |
+| **README Metric Drift** | README reported static latency and accuracy numbers that differed from `eval_report.json`. | Built `scripts/sync_readme_metrics.py` integrated into `loop_engineer.py`. | Never hand-edit metric markdown tables; synchronize from machine-readable JSON outputs. |
+
+### 4. Measurable Achievements
+- **Golden Benchmark:** 85.0% Top-1 Hit Rate, 0.867 MRR, 100% Refusal.
+- **Tagged Baseline (v1.0.0-eval-frozen):** 75.0% Top-1 Hit Rate, 0.792 MRR (honest tagged state).
+- **Blind Held-Out Suite (v2.0):** 70.0% Top-1 Hit Rate, 0.700 MRR (unseen, untuned first run).
+- **Test Suite:** 17/17 tests passing in **0.10s**.
+- **AWS Spend:** **$0.00**.
+
+### 5. Architectural Decisions & Trade-Offs
+1. **Automated Markdown Table Synchronization**:
+   - *Trade-off:* Evaluation script modifies `README.md` if metrics change.
+   - *Rationale:* Completely eliminates stale or deceptive documentation claims.
+2. **Explicit "Known Limitations" Disclosure**:
+   - *Trade-off:* Transparently reveals where mock mode deviates from production AWS Bedrock behavior.
+   - *Rationale:* Establishes production credibility and honest engineering standards.
+
+
 
 
 

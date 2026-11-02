@@ -107,7 +107,7 @@
   {
     "id": "heldout-16",
     "query": "What triggers container Exit Code 137 in Kubernetes and how does memory limit configuration mitigate it?",
-    "target_source_file": ["kubernetes_oom_killed.md", "OrbitContainerOOMKilled.md"],
+    "target_source_file": "kubernetes_oom_killed.md",
     "expected_answer_keywords": ["oomkilled", "exit code 137", "memory", "limits", "cgroup"],
     "is_in_domain": true
   },

@@ -183,6 +183,7 @@ def evaluate_dataset(chain: RAGChain, dataset_path: Path, title: str) -> dict[st
 def run_evaluation() -> dict:
     golden_path = settings.BASE_DIR / "evaluation" / "golden_dataset.json"
     heldout_path = settings.BASE_DIR / "evaluation" / "held_out_dataset.json"
+    heldout_v2_path = settings.BASE_DIR / "evaluation" / "held_out_dataset_v2.json"
 
     console.print("[bold cyan]Initializing InfraRAG Engine & Indexing Runbooks...[/bold cyan]")
     chain = RAGChain()
@@ -199,16 +200,25 @@ def run_evaluation() -> dict:
     heldout_summary = evaluate_dataset(
         chain=chain,
         dataset_path=heldout_path,
-        title="2. InfraRAG Frozen Held-Out Validation (25 Unseen Incident Scenarios)",
+        title="2. InfraRAG Tagged Held-Out Baseline (v1.0.0-eval-frozen, 25 Scenarios)",
     )
 
+    heldout_v2_summary = None
+    if heldout_v2_path.exists():
+        heldout_v2_summary = evaluate_dataset(
+            chain=chain,
+            dataset_path=heldout_v2_path,
+            title="3. InfraRAG New Blind Held-Out Validation (v2.0, 25 Unseen Scenarios)",
+        )
 
     report_path = settings.BASE_DIR / "evaluation" / "eval_report.json"
-    full_report = {
+    full_report: dict[str, Any] = {
         "indexed_chunks": len(chain.vector_store.chunks),
         "golden_benchmark": golden_summary,
         "held_out_validation": heldout_summary,
     }
+    if heldout_v2_summary:
+        full_report["new_blind_held_out_v2"] = heldout_v2_summary
 
     with open(report_path, "w", encoding="utf-8") as f:
         json.dump(full_report, f, indent=2)
