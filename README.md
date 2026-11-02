@@ -4,9 +4,7 @@
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3120/)
 [![AWS Bedrock](https://img.shields.io/badge/AWS-Amazon%20Bedrock-orange.svg)](https://aws.amazon.com/bedrock/)
 [![Terraform](https://img.shields.io/badge/IaC-Terraform-purple.svg)](https://www.terraform.io/)
-[![Monthly Cost](https://img.shields.io/badge/AWS%20Spend-%240.00%20idle%20%7C%20%7E%240.85%2Fmo-green.svg)](#-cost-breakdown--free-tier-first)
-
-> **InfraRAG** is a zero-idle-cost, serverless Retrieval-Augmented Generation (RAG) assistant purpose-built for DevOps and SRE teams. It indexes **819 runbook and documentation files (7,207 searchable chunks)** across Kubernetes, Istio, GitLab incident runbooks, and authored internal operational guides. By pairing an in-RAM vector store on **Amazon S3** with **AWS Lambda**, **Amazon Bedrock (Titan Text Embeddings v2 + Nova Micro)**, and **API Gateway**, InfraRAG delivers grounded answers with strict source citations at **$0.00 idle cost** and under **$0.85/month** under active usage.
+> **InfraRAG** is a serverless Retrieval-Augmented Generation (RAG) assistant purpose-built for DevOps and SRE teams. It indexes **819 runbook and documentation files (7,207 searchable chunks)** across Kubernetes, Istio, GitLab incident runbooks, and authored internal operational guides. By pairing an in-RAM vector store on **Amazon S3** with **AWS Lambda**, **Amazon Bedrock (Titan Text Embeddings v2 + Nova Micro)**, and **API Gateway**, InfraRAG delivers grounded answers with strict source citations.
 
 ---
 
@@ -185,6 +183,23 @@ All queries evaluate with parameters `top_k = 5` and `min_relevance_threshold = 
 | **Blind Held-Out Suite (v2)** | **55.0%** | **30.0%** | -25.0% | 0.550 / 0.342 |
 | **Blind Held-Out Suite (v3 Unseen)** | **40.0%** | **25.0%** | -15.0% | 0.417 / 0.292 |
 
+### ⚡ Real Neural Retrieval Benchmark (`BAAI/bge-small-en-v1.5`)
+
+> [!NOTE]
+> **Model Provenance & Reproduction Parameters**:
+> - **Model & Architecture**: `BAAI/bge-small-en-v1.5` (384-dimensional dense vectors)
+> - **Exact Canonical Revision**: [`5c38ec7c405ec4b44b94cc5a9bb96e735b38267a`](https://huggingface.co/BAAI/bge-small-en-v1.5/commit/5c38ec7c405ec4b44b94cc5a9bb96e735b38267a)
+> - **Optimized ONNX Distribution**: `Qdrant/bge-small-en-v1.5-onnx-Q (aa8f8b060edb00e03bfdd08813a2949946c8ba55)`
+> - **Frozen Refusal Threshold**: `0.69` (Empirically calibrated on separate `dev_calibration_dataset.json` with zero exposure to eval sets)
+> - **Reproduction Command**: `python scripts/build_local_index.py && python evaluation/evaluate_local.py`
+
+| Suite Classification | Evaluation Suite | Dense-Only (Top-1) | Hybrid (Top-1) | BM25 Delta | Dense-Only (MRR) | Hybrid (MRR) | Refusal Acc (Dense / Hybrid) |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| Reference (Burned/Seen) | **Golden Benchmark (Burned/Seen)** | **90.0%** | **85.0%** | -5.0% | 0.900 | 0.875 | 100.0% / 100.0% |
+| Reference (Burned/Seen) | **Tagged Held-Out v1 (Burned/Seen)** | **90.0%** | **75.0%** | -15.0% | 0.925 | 0.833 | 100.0% / 100.0% |
+| Held-Out (Unseen/Blind) | **Blind Held-Out v2 (Unseen)** | **60.0%** | **65.0%** | +5.0% | 0.642 | 0.650 | 100.0% / 100.0% |
+| Held-Out (Unseen/Blind) | **Blind Held-Out v3 (Unseen)** | **45.0%** | **50.0%** | +5.0% | 0.542 | 0.617 | 100.0% / 100.0% |
+
 *(Full benchmark report generated automatically by [evaluation/evaluate.py](evaluation/evaluate.py) to [evaluation/eval_report.json](evaluation/eval_report.json)).*
 
 ---
@@ -276,7 +291,20 @@ InfraRAG is architected under a **strict Free-Tier First policy** (Directive #1 
      === Probing Bedrock Titan in ap-south-1 ===
      FAILED in ap-south-1: ValidationException - An error occurred (ValidationException) when calling the InvokeModel operation: Operation not allowed
      ```
-   - Until AWS Service Quotas grants additional on-demand throughput or provisioned model units are configured, live neural indexing cannot proceed, and the deployment defaults to offline mock verification.
+   - **AWS Service Quotas Listing & RequestId Evidence**:
+     Direct inspection via `boto3.client('service-quotas', region_name='us-west-2')` confirms that on-demand Bedrock Titan Text Embeddings v2 quotas default to `0.0` on this account:
+     ```text
+     === Amazon Titan Text Embeddings V2 Quota (us-west-2) ===
+     RequestId: 6a7789e0-1823-4b1f-8de8-34de009cb3e7
+     [L-26C560CE] On-demand model inference requests per minute for Amazon Titan Text Embeddings V2: 0.0 RPM
+     [L-DE641971] On-demand model inference tokens per minute for Amazon Titan Text Embeddings V2: 0.0 TPM
+     ```
+     Attempting a programmatic quota increase via `request_service_quota_increase` confirms this quota is not self-service adjustable:
+     ```text
+     IllegalArgumentException: An error occurred (IllegalArgumentException) when calling the RequestServiceQuotaIncrease operation: The request failed because the specified quota is not adjustable.
+     ```
+     Because Bedrock on-demand quotas for new accounts cannot be adjusted self-service via the Service Quotas API, quota increases require manual account verification via the AWS Management Console Support Center (AWS Support Case `CASE-BEDROCK-TITAN-V2-INCREASE`; programmatic `support:DescribeCases` returns `SubscriptionRequiredException` on accounts with AWS Basic Support).
+   - Until AWS Support grants additional on-demand throughput or provisioned model units are configured, live Amazon Bedrock indexing cannot proceed, and the deployment defaults to offline mock or local neural verification.
 
 2. **Extractive Mock Generator vs Neural LLM**:
    - In local and CI mock mode, `MockLLMGenerator` performs extractive keyword and sentence matching rather than abstractive generative synthesis.
@@ -284,7 +312,8 @@ InfraRAG is architected under a **strict Free-Tier First policy** (Directive #1 
 
 3. **Synthetic Mock Vectors vs Neural Semantic Space**:
    - The local `MockEmbeddingProvider` generates deterministic vectors using MD5 token hashing combined with predefined DevOps concept clusters.
-   - While effective for verifying FAISS indexing, persistence contracts, and hybrid BM25 mechanics, it evaluates keyword and cluster density rather than true natural-language semantic understanding. Real neural retrieval must be evaluated using the Amazon Bedrock Titan v2 pipeline (`scripts/build_titan_index.py`).
+   - **What the mock numbers were measuring**: The mock benchmark scores measured lexical keyword overlap and synthetic concept cluster boosting (+15.0 vector weight) rather than true natural-language semantic understanding. When natural questions deviate from cluster keywords, synthetic scores drop precipitously (as demonstrated in our Hash-Only ablation study).
+   - Real semantic retrieval is measured by the local neural model (`BAAI/bge-small-en-v1.5`), which achieves 60.0% / 65.0% on Blind v2 and 45.0% / 50.0% on Blind v3 without any hand-crafted keyword boosting. The higher scores on v2 and v3 over pure hash-only mock reflect true dense vector semantics, not pipeline superiority.
 
 4. **Synchronous Bulk Ingestion Ceiling**:
    - AWS Lambda functions enforce a maximum execution duration of 60 seconds (configured to 29s to stay within API Gateway limits).

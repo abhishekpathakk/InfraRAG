@@ -36,6 +36,7 @@ class Retriever:
         query: str,
         top_k: int | None = None,
         type_filter: str | None = None,
+        hybrid: bool = True,
     ) -> tuple[list[tuple[DocumentChunk, float]], float]:
         """
         Retrieves top-k relevant chunks for a user query, optionally filtered by type.
@@ -54,7 +55,7 @@ class Retriever:
             query_embedding=query_vector,
             top_k=k,
             type_filter=type_filter,
-            query_text=query,
+            query_text=query if hybrid else None,
         )
 
         latency_ms = (time.perf_counter() - start_time) * 1000.0

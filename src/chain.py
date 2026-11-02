@@ -33,15 +33,20 @@ class RAGChain:
         chunk_size: int = settings.CHUNK_SIZE,
         chunk_overlap: int = settings.CHUNK_OVERLAP,
         top_k: int = settings.TOP_K,
+        min_relevance_threshold: float | None = None,
     ):
         self.embedding_provider = embedding_provider or get_embedding_provider()
         self.vector_store = vector_store or FAISSVectorStore(dimension=self.embedding_provider.dimension)
         self.llm_provider = llm_provider or get_llm_provider()
         self.chunker = MarkdownChunker(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+        self.min_relevance_threshold = (
+            min_relevance_threshold if min_relevance_threshold is not None else settings.MIN_RELEVANCE_THRESHOLD
+        )
         self.retriever = Retriever(
             vector_store=self.vector_store,
             embedding_provider=self.embedding_provider,
             top_k=top_k,
+            min_relevance_threshold=self.min_relevance_threshold,
         )
 
     def ingest_directory(
@@ -90,7 +95,12 @@ class RAGChain:
 
         return len(all_chunks)
 
-    def answer_question(self, query: str, type_filter: str | None = None) -> RAGResponse:
+    def answer_question(
+        self,
+        query: str,
+        type_filter: str | None = None,
+        hybrid: bool = True,
+    ) -> RAGResponse:
         """
         Executes end-to-end query answering with grounded citations, optional type filtering, and observability metrics.
         """
@@ -100,10 +110,11 @@ class RAGChain:
         matched_chunks, retrieval_latency_ms = self.retriever.retrieve(
             query=query,
             type_filter=type_filter,
+            hybrid=hybrid,
         )
 
         # 2. Check relevance threshold: short-circuit before LLM generation if below threshold
-        min_threshold = settings.MIN_RELEVANCE_THRESHOLD
+        min_threshold = self.min_relevance_threshold
         if not matched_chunks or matched_chunks[0][1] < min_threshold:
             total_latency_ms = (time.perf_counter() - total_start) * 1000.0
             return RAGResponse(

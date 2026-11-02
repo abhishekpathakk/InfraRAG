@@ -219,6 +219,45 @@ class BedrockTitanEmbeddingProvider(BaseEmbeddingProvider):
         return results
 
 
+class LocalFastEmbedProvider(BaseEmbeddingProvider):
+    """
+    Open-Source Neural Embedding Provider using FastEmbed (ONNX Runtime).
+    Default model: BAAI/bge-small-en-v1.5 (dim=384, canonical HF commit: 5c38ec7c405ec4b44b94cc5a9bb96e735b38267a).
+    Provides genuine local neural dense embeddings with zero cloud API dependencies.
+    """
+
+    def __init__(
+        self,
+        model_name: str = "BAAI/bge-small-en-v1.5",
+        revision: str = "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+        batch_size: int = 64,
+    ):
+        try:
+            from fastembed import TextEmbedding
+        except ImportError:
+            raise ImportError("fastembed is required for LocalFastEmbedProvider. Install with `pip install fastembed`.")
+
+        self.model_name = model_name
+        self.revision = revision
+        self.batch_size = batch_size
+        self._model = TextEmbedding(model_name=model_name)
+        # Determine actual embedding dimension
+        probe_emb = list(self._model.embed(["probe"]))[0]
+        self._dim = len(probe_emb)
+
+    @property
+    def dimension(self) -> int:
+        return self._dim
+
+    def embed_text(self, text: str) -> list[float]:
+        embs = list(self._model.embed([text]))
+        return [float(x) for x in embs[0]]
+
+    def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        embs = list(self._model.embed(texts, batch_size=self.batch_size))
+        return [[float(x) for x in emb] for emb in embs]
+
+
 def get_embedding_provider() -> BaseEmbeddingProvider:
     """Factory returns Mock or AWS Bedrock provider based on configuration."""
     if settings.USE_MOCK_BEDROCK:

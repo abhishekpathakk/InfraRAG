@@ -1,0 +1,108 @@
+[
+  {
+    "id": "dev-01",
+    "query": "What does it mean when Patroni delayed replica lag exceeds 10 hours and how should it be addressed?",
+    "target_source_file": "PatroniDelayedReplicaLagOutOfBand.md",
+    "expected_answer_keywords": ["patroni", "replica", "replay", "wal", "recovery_min_apply_delay"],
+    "is_in_domain": true
+  },
+  {
+    "id": "dev-02",
+    "query": "How to prevent database automatic shutdown when transaction ID wraparound saturation alert fires in PostgreSQL?",
+    "target_source_file": "pg_xid_wraparound_alert.md",
+    "expected_answer_keywords": ["wraparound", "autovacuum", "relfrozenxid", "vacuum"],
+    "is_in_domain": true
+  },
+  {
+    "id": "dev-03",
+    "query": "What triggers sidekiq_queueing apdex violation alerts for high-urgency jobs?",
+    "target_source_file": "sidekiq-queueing-apdex.md",
+    "expected_answer_keywords": ["sidekiq", "urgency", "apdex", "queueing"],
+    "is_in_domain": true
+  },
+  {
+    "id": "dev-04",
+    "query": "Why does GitalyShardWeightsAssignerFailed alert trigger and what is the risk if weights remain stale?",
+    "target_source_file": "GitalyShardWeightsAssignerFailed.md",
+    "expected_answer_keywords": ["gitaly", "weights", "assigner", "shard"],
+    "is_in_domain": true
+  },
+  {
+    "id": "dev-05",
+    "query": "How do you diagnose version drift when GitLabZonalComponentVersionsOutOfSync alert fires across clusters?",
+    "target_source_file": "GitLabZonalComponentVersionsOutOfSync.md",
+    "expected_answer_keywords": ["zonal", "version", "drift", "deploy"],
+    "is_in_domain": true
+  },
+  {
+    "id": "dev-06",
+    "query": "What is the backup and restore strategy for the Pulp service database and object storage?",
+    "target_source_file": "backup-restore.md",
+    "expected_answer_keywords": ["pulp", "backup", "cloudsql", "gcs"],
+    "is_in_domain": true
+  },
+  {
+    "id": "dev-07",
+    "query": "How are repository storage shard paths and weights configured in gitlab.rb?",
+    "target_source_file": "storage-sharding.md",
+    "expected_answer_keywords": ["sharding", "git_data_dirs", "gitaly"],
+    "is_in_domain": true
+  },
+  {
+    "id": "dev-08",
+    "query": "How to terminate very old PostgreSQL transactions to allow autovacuum to complete during wraparound risk?",
+    "target_source_file": "pg_xid_wraparound_alert.md",
+    "expected_answer_keywords": ["pg_terminate_backend", "transactions", "autovacuum"],
+    "is_in_domain": true
+  },
+  {
+    "id": "dev-09",
+    "query": "What is the acceptable replay delay window for Patroni delayed standby replicas?",
+    "target_source_file": "PatroniDelayedReplicaLagOutOfBand.md",
+    "expected_answer_keywords": ["8 hours", "recovery_min_apply_delay", "standby"],
+    "is_in_domain": true
+  },
+  {
+    "id": "dev-10",
+    "query": "Where are Sidekiq job urgency execution targets defined in GitLab codebase?",
+    "target_source_file": "sidekiq-queueing-apdex.md",
+    "expected_answer_keywords": ["SidekiqSlis", "urgency", "target"],
+    "is_in_domain": true
+  },
+  {
+    "id": "dev-11",
+    "query": "What are the orbital characteristics and atmosphere composition of Jupiter's moon Europa?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  },
+  {
+    "id": "dev-12",
+    "query": "How do you cultivate sourdough starter using whole rye flour and room temperature fermentation?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  },
+  {
+    "id": "dev-13",
+    "query": "What caused the late Devonian mass extinction in Earth geological history?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  },
+  {
+    "id": "dev-14",
+    "query": "What are the essential knots and sail trim techniques required for tacking a sloop into the wind?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  },
+  {
+    "id": "dev-15",
+    "query": "What poetic meters and rhyming schemes were standard in Shakespearean sonnets?",
+    "target_source_file": "OUT_OF_DOMAIN",
+    "expected_answer_keywords": ["REFUSAL"],
+    "is_in_domain": false
+  }
+]
+

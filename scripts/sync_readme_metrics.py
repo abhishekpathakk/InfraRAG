@@ -12,6 +12,7 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parent.parent
 README_PATH = ROOT_DIR / "README.md"
 REPORT_PATH = ROOT_DIR / "evaluation" / "eval_report.json"
+LOCAL_REPORT_PATH = ROOT_DIR / "evaluation" / "eval_report_local.json"
 
 
 def format_table_row(name: str, score: str, target: str, status: str, notes: str) -> str:
@@ -238,6 +239,43 @@ def generate_tables(report: dict) -> str:
             lines.append(f"| **Blind Held-Out Suite (v2)** | **{heldout_v2.get('top1_hit_rate_pct', 0.0)}%** | **{v2_abl.get('top1_hit_rate_pct', 0.0)}%** | -{heldout_v2.get('top1_hit_rate_pct', 0.0) - v2_abl.get('top1_hit_rate_pct', 0.0):.1f}% | {heldout_v2.get('mrr', 0.0):.3f} / {v2_abl.get('mrr', 0.0):.3f} |")
         if v3_abl and heldout_v3:
             lines.append(f"| **Blind Held-Out Suite (v3 Unseen)** | **{heldout_v3.get('top1_hit_rate_pct', 0.0)}%** | **{v3_abl.get('top1_hit_rate_pct', 0.0)}%** | -{heldout_v3.get('top1_hit_rate_pct', 0.0) - v3_abl.get('top1_hit_rate_pct', 0.0):.1f}% | {heldout_v3.get('mrr', 0.0):.3f} / {v3_abl.get('mrr', 0.0):.3f} |")
+        lines.append("")
+
+    if LOCAL_REPORT_PATH.exists():
+        with open(LOCAL_REPORT_PATH, "r", encoding="utf-8") as f:
+            local_rep = json.load(f)
+        dense = local_rep.get("dense_only_evaluations", {})
+        hybrid = local_rep.get("hybrid_evaluations", {})
+
+        lines.append("### ⚡ Real Neural Retrieval Benchmark (`BAAI/bge-small-en-v1.5`)")
+        lines.append("")
+        lines.append("> [!NOTE]")
+        lines.append("> **Model Provenance & Reproduction Parameters**:")
+        lines.append(f"> - **Model & Architecture**: `{local_rep.get('model_name')}` (384-dimensional dense vectors)")
+        lines.append(f"> - **Exact Canonical Revision**: [`{local_rep.get('canonical_commit_sha')}`](https://huggingface.co/BAAI/bge-small-en-v1.5/commit/{local_rep.get('canonical_commit_sha')})")
+        lines.append(f"> - **Optimized ONNX Distribution**: `{local_rep.get('onnx_distribution')}`")
+        lines.append(f"> - **Frozen Refusal Threshold**: `{local_rep.get('frozen_refusal_threshold')}` (Empirically calibrated on separate `dev_calibration_dataset.json` with zero exposure to eval sets)")
+        lines.append("> - **Reproduction Command**: `python scripts/build_local_index.py && python evaluation/evaluate_local.py`")
+        lines.append("")
+        lines.append("| Suite Classification | Evaluation Suite | Dense-Only (Top-1) | Hybrid (Top-1) | BM25 Delta | Dense-Only (MRR) | Hybrid (MRR) | Refusal Acc (Dense / Hybrid) |")
+        lines.append("| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |")
+
+        suite_order = [
+            ("Reference (Burned/Seen)", "Golden Benchmark (Burned/Seen)"),
+            ("Reference (Burned/Seen)", "Tagged Held-Out v1 (Burned/Seen)"),
+            ("Held-Out (Unseen/Blind)", "Blind Held-Out v2 (Unseen)"),
+            ("Held-Out (Unseen/Blind)", "Blind Held-Out v3 (Unseen)"),
+        ]
+
+        for classification, name in suite_order:
+            d = dense.get(name, {})
+            h = hybrid.get(name, {})
+            if d and h:
+                delta = h.get("top1_hit_rate_pct", 0.0) - d.get("top1_hit_rate_pct", 0.0)
+                delta_str = f"+{delta:.1f}%" if delta > 0 else f"{delta:.1f}%"
+                lines.append(
+                    f"| {classification} | **{name}** | **{d.get('top1_hit_rate_pct', 0.0)}%** | **{h.get('top1_hit_rate_pct', 0.0)}%** | {delta_str} | {d.get('mrr', 0.0):.3f} | {h.get('mrr', 0.0):.3f} | {d.get('out_domain_refusal_pct', 0.0)}% / {h.get('out_domain_refusal_pct', 0.0)}% |"
+                )
         lines.append("")
 
     return "\n".join(lines)
