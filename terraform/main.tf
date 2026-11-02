@@ -82,9 +82,9 @@ resource "aws_iam_policy" "lambda_ingest_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "S3BucketList"
-        Effect = "Allow"
-        Action = ["s3:ListBucket"]
+        Sid      = "S3BucketList"
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
         Resource = [aws_s3_bucket.storage.arn]
       },
       {

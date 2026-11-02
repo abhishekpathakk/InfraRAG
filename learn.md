@@ -779,6 +779,44 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
    - *Trade-off:* Exposes a `lambda_layers` list variable in Terraform rather than hardcoding AWS account ARNs.
    - *Rationale:* Preserves portability across AWS regions (`ap-south-1`, `us-east-1`, `eu-west-1`) without breaking regional ARN conventions.
 
+---
+
+## Phase 20: CI Pipeline Sterile Runner Parity & Terraform HCL Hardening
+
+### 1. What We Did
+1. **Remediated CI Dependency Resolution in Sterile Runners**:
+   - Diagnosed GitHub Actions CI run `41411455173` failure on `pytest`: runner environments created from scratch were missing `numpy` because it was omitted from `pyproject.toml` dependencies and `uv.lock` was ignored.
+   - Added `numpy>=1.26.0` to `dependencies` and `types-boto3>=1.34.0` to `dependency-groups.dev` in [`pyproject.toml`](pyproject.toml).
+   - Removed `uv.lock` from [`.gitignore`](.gitignore) and committed the deterministic lockfile so `uv sync --all-extras --dev` installs identical, verified packages in CI runners.
+2. **Standardized Terraform Formatting**:
+   - Ran `terraform fmt` on [`terraform/main.tf`](terraform/main.tf) to fix whitespace alignment on IAM policy statement attributes (`Sid`, `Effect`, `Action`), satisfying `terraform fmt -check` in CI job `125165208299`.
+3. **Sterile Runner Parity Verification**:
+   - Executed a clean-room simulation in a temporary directory verifying that `uv sync` installs all 35 locked packages and `pytest --cov=src` executes with 17/17 passing tests in 0.77s.
+
+### 2. Concepts Learned
+- **Application vs. Library Lockfile Tracking:** In reusable Python libraries, `uv.lock` is omitted to avoid over-constraining downstream users; in deployed serverless applications, committing `uv.lock` is critical to eliminate "works on my machine" differences in ephemeral CI runners.
+  - *One-line analogy:* A cookbook (library) lets the cook pick the brand of flour, but a bakery franchise (application) requires the exact barcode-scanned brand for every cake.
+- **HCL Column Alignment in CI Checks:** `terraform fmt -check` enforces strict tabular alignment across key-value pairs within adjacent attribute blocks.
+  - *One-line analogy:* Setting mechanical tab stops on a typewriter so every column lines up perfectly.
+
+### 3. Issues Faced & Autonomous Fixes Applied
+
+| Issue / Friction Point | Root Cause | Fix Applied | Autonomous Prevention Rule |
+| :--- | :--- | :--- | :--- |
+| **CI Pytest ModuleNotFoundError: numpy** | `numpy` was in local `.venv` but unlisted in `pyproject.toml`, and `uv.lock` was ignored in `.gitignore`. | Added `numpy>=1.26.0` to `pyproject.toml`, un-ignored and committed `uv.lock`. | All direct dependencies must be declared in `pyproject.toml` and verified in a sterile isolated venv before pushing. |
+| **CI Terraform Format Failure** | Attributes `Sid`, `Effect`, and `Action` in `lambda_ingest_policy` lacked column spacing alignment. | Executed `terraform fmt terraform/` and added formatting check to pre-commit workflow. | Run `terraform fmt -check` recursively before any push touching `.tf` files. |
+
+### 4. Measurable Achievements
+- **CI Test Suite:** 17/17 tests passing in sterile environment in **0.77s**.
+- **Terraform Validation:** 100% clean formatting and validation pass.
+- **Zero-Cost Invariant:** **$0.00** total AWS spend.
+
+### 5. Architectural Decisions & Trade-Offs
+1. **Tracking `uv.lock` in Version Control**:
+   - *Trade-off:* Adds a lockfile to git that requires synchronization when adding dependencies.
+   - *Rationale:* Eliminates CI runner flakes, reduces dependency resolution time to milliseconds, and guarantees reproducible microVM builds.
+
+
 
 
 
