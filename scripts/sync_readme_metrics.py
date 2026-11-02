@@ -22,9 +22,10 @@ def generate_tables(report: dict) -> str:
     golden = report.get("golden_benchmark", {})
     heldout = report.get("held_out_validation", {})
     heldout_v2 = report.get("new_blind_held_out_v2", {})
+    ablation = report.get("ablation_study", {})
 
     lines = []
-    lines.append("### 1. Primary Golden Benchmark (25 Incident Queries)")
+    lines.append("### 1. Primary Golden Benchmark (Synthetic Mock Baseline, Keyword-Bucket Dependent)")
     lines.append("")
     lines.append("| Metric Dimension | Score / Count | Internal Target | Status | Operational Notes |")
     lines.append("| :--- | :---: | :---: | :---: | :--- |")
@@ -72,7 +73,7 @@ def generate_tables(report: dict) -> str:
     ))
     lines.append("")
 
-    lines.append("### 2. Tagged Held-Out Baseline (v1.0.0-eval-frozen, 25 Scenarios)")
+    lines.append("### 2. Tagged Held-Out Baseline (v1.0.0-eval-frozen, Keyword-Bucket Dependent)")
     lines.append("")
     lines.append("| Metric Dimension | Score / Count | Internal Target | Status | Operational Notes |")
     lines.append("| :--- | :---: | :---: | :---: | :--- |")
@@ -121,7 +122,7 @@ def generate_tables(report: dict) -> str:
     lines.append("")
 
     if heldout_v2:
-        lines.append("### 3. New Blind Held-Out Validation (v2.0, 25 Unseen Scenarios)")
+        lines.append("### 3. Blind Held-Out Validation (v2.0, Keyword-Bucket Dependent)")
         lines.append("")
         lines.append("| Metric Dimension | Score / Count | Internal Target | Status | Operational Notes |")
         lines.append("| :--- | :---: | :---: | :---: | :--- |")
@@ -130,14 +131,14 @@ def generate_tables(report: dict) -> str:
             f"{heldout_v2.get('top1_hit_rate_pct', 0.0)}% ({int(heldout_v2.get('top1_hit_rate_pct', 0.0)*heldout_v2.get('in_domain_total', 20)/100)}/{heldout_v2.get('in_domain_total', 20)})",
             ">= 80.0%",
             "PASS" if heldout_v2.get('top1_hit_rate_pct', 0.0) >= 80.0 else "REVIEW",
-            "True blind first-run result on brand-new operational scenarios",
+            "Natural incident symptom phrasing without cluster keywords",
         ))
         lines.append(format_table_row(
             "Retrieval Top-5 Hit-Rate",
             f"{heldout_v2.get('top5_hit_rate_pct', 0.0)}% ({int(heldout_v2.get('top5_hit_rate_pct', 0.0)*heldout_v2.get('in_domain_total', 20)/100)}/{heldout_v2.get('in_domain_total', 20)})",
             ">= 90.0%",
             "PASS" if heldout_v2.get('top5_hit_rate_pct', 0.0) >= 90.0 else "BASELINE",
-            "First-run top-5 presence without keyword bucket tuning",
+            "First-run top-5 presence reported as-is",
         ))
         lines.append(format_table_row(
             "Mean Reciprocal Rank (MRR)",
@@ -158,7 +159,7 @@ def generate_tables(report: dict) -> str:
             f"{heldout_v2.get('out_domain_refusal_pct', 0.0)}% ({heldout_v2.get('out_domain_total', 5)}/{heldout_v2.get('out_domain_total', 5)})",
             "100.0%",
             "PASS" if heldout_v2.get('out_domain_refusal_pct', 0.0) >= 100.0 else "FAIL",
-            "100% strict refusal on out-of-domain queries (CSS, sourdough, etc.)",
+            "100% strict refusal on out-of-domain queries",
         ))
         lines.append(format_table_row(
             "Average Total Query Latency",
@@ -167,6 +168,23 @@ def generate_tables(report: dict) -> str:
             "PASS",
             f"In-RAM retrieval: {heldout_v2.get('avg_retrieval_ms', 0.0):.2f}ms",
         ))
+        lines.append("")
+
+    if ablation:
+        g_abl = ablation.get("golden_hash_only", {})
+        h_abl = ablation.get("held_out_hash_only", {})
+        v2_abl = ablation.get("held_out_v2_hash_only", {})
+        lines.append("### 🔬 Keyword-Bucket vs. Hash-Only Ablation Study")
+        lines.append("")
+        lines.append("> [!WARNING]")
+        lines.append("> **Synthetic Vector Sensitivity**: The table below isolates the impact of hand-written keyword cluster boosting (+15.0 vector weight) versus pure deterministic MD5 token hashing. It demonstrates that mock vector performance is heavily dependent on keyword buckets and does not reflect dense neural embedding semantics.")
+        lines.append("")
+        lines.append("| Evaluation Suite | With Keyword Clusters (Mock Boost) | Hash-Only (No Clusters) | Top-1 Delta | MRR (Clusters / Hash-Only) |")
+        lines.append("| :--- | :---: | :---: | :---: | :---: |")
+        lines.append(f"| **Primary Golden Benchmark** | **{golden.get('top1_hit_rate_pct', 0.0)}%** | **{g_abl.get('top1_hit_rate_pct', 0.0)}%** | -{golden.get('top1_hit_rate_pct', 0.0) - g_abl.get('top1_hit_rate_pct', 0.0):.1f}% | {golden.get('mrr', 0.0):.3f} / {g_abl.get('mrr', 0.0):.3f} |")
+        lines.append(f"| **Tagged Held-Out Baseline (v1)** | **{heldout.get('top1_hit_rate_pct', 0.0)}%** | **{h_abl.get('top1_hit_rate_pct', 0.0)}%** | -{heldout.get('top1_hit_rate_pct', 0.0) - h_abl.get('top1_hit_rate_pct', 0.0):.1f}% | {heldout.get('mrr', 0.0):.3f} / {h_abl.get('mrr', 0.0):.3f} |")
+        if v2_abl and heldout_v2:
+            lines.append(f"| **Blind Held-Out Suite (v2)** | **{heldout_v2.get('top1_hit_rate_pct', 0.0)}%** | **{v2_abl.get('top1_hit_rate_pct', 0.0)}%** | -{heldout_v2.get('top1_hit_rate_pct', 0.0) - v2_abl.get('top1_hit_rate_pct', 0.0):.1f}% | {heldout_v2.get('mrr', 0.0):.3f} / {v2_abl.get('mrr', 0.0):.3f} |")
         lines.append("")
 
     return "\n".join(lines)
@@ -202,3 +220,4 @@ def sync_readme() -> None:
 
 if __name__ == "__main__":
     sync_readme()
+

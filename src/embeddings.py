@@ -47,8 +47,9 @@ class MockEmbeddingProvider(BaseEmbeddingProvider):
     Works with numpy or pure Python standard library.
     """
 
-    def __init__(self, dimension: int = 1024):
+    def __init__(self, dimension: int = 1024, use_clusters: bool = True):
         self._dim = dimension
+        self.use_clusters = use_clusters
         self._concept_clusters = {
             "memory": [
                 "oomkilled", "exit code 137", "sigkill", "memorypressure", "ram", "heap",
@@ -123,11 +124,12 @@ class MockEmbeddingProvider(BaseEmbeddingProvider):
             seed = int(hashlib.md5(token.encode("utf-8")).hexdigest(), 16) % self._dim
             vec[seed] += 0.3
 
-        for bucket_start, patterns in self._compiled_clusters:
-            for pat in patterns:
-                if pat.search(normalized_text):
-                    for b in range(bucket_start, bucket_start + 65):
-                        vec[b] += 15.0
+        if self.use_clusters:
+            for bucket_start, patterns in self._compiled_clusters:
+                for pat in patterns:
+                    if pat.search(normalized_text):
+                        for b in range(bucket_start, bucket_start + 65):
+                            vec[b] += 15.0
 
         # L2-normalize vector so ||v|| = 1.0
         norm = sum(x * x for x in vec) ** 0.5

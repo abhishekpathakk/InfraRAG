@@ -1,5 +1,6 @@
 {
   "indexed_chunks": 7207,
+  "headline_label": "Synthetic Mock Baseline (Keyword-Bucket Dependent)",
   "golden_benchmark": {
     "dataset": "golden_dataset.json",
     "total_queries": 25,
@@ -10,8 +11,8 @@
     "mrr": 0.867,
     "in_domain_grounded_pct": 50.0,
     "out_domain_refusal_pct": 100.0,
-    "avg_latency_ms": 6.89,
-    "avg_retrieval_ms": 6.76,
+    "avg_latency_ms": 6.09,
+    "avg_retrieval_ms": 5.98,
     "results": [
       {
         "id": 1,
@@ -39,7 +40,7 @@
             "type": "public"
           }
         ],
-        "latency_ms": 11.03
+        "latency_ms": 9.5
       },
       {
         "id": 2,
@@ -58,7 +59,7 @@
             "type": "public"
           }
         ],
-        "latency_ms": 5.84
+        "latency_ms": 5.35
       },
       {
         "id": 3,
@@ -86,7 +87,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 7.83
+        "latency_ms": 7.08
       },
       {
         "id": 4,
@@ -123,7 +124,7 @@
             "type": "public"
           }
         ],
-        "latency_ms": 8.68
+        "latency_ms": 7.37
       },
       {
         "id": 5,
@@ -132,7 +133,7 @@
         "retrieval_rank": 1,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 7.76
+        "latency_ms": 7.17
       },
       {
         "id": 6,
@@ -160,7 +161,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 7.49
+        "latency_ms": 6.62
       },
       {
         "id": 7,
@@ -179,7 +180,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 6.47
+        "latency_ms": 6.08
       },
       {
         "id": 8,
@@ -188,7 +189,7 @@
         "retrieval_rank": 1,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 7.54
+        "latency_ms": 6.45
       },
       {
         "id": 9,
@@ -207,7 +208,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 5.59
+        "latency_ms": 5.19
       },
       {
         "id": 10,
@@ -244,7 +245,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 7.83
+        "latency_ms": 6.06
       },
       {
         "id": 11,
@@ -253,7 +254,7 @@
         "retrieval_rank": 1,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 7.87
+        "latency_ms": 5.95
       },
       {
         "id": 12,
@@ -262,7 +263,7 @@
         "retrieval_rank": 1,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 6.2
+        "latency_ms": 5.92
       },
       {
         "id": 13,
@@ -271,7 +272,7 @@
         "retrieval_rank": 1,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 9.58
+        "latency_ms": 6.83
       },
       {
         "id": 14,
@@ -299,7 +300,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 8.15
+        "latency_ms": 7.96
       },
       {
         "id": 15,
@@ -318,7 +319,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 8.44
+        "latency_ms": 7.7
       },
       {
         "id": 16,
@@ -337,7 +338,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 6.89
+        "latency_ms": 6.46
       },
       {
         "id": 17,
@@ -365,7 +366,7 @@
             "type": "public"
           }
         ],
-        "latency_ms": 7.93
+        "latency_ms": 7.06
       },
       {
         "id": 18,
@@ -384,7 +385,7 @@
             "type": "public"
           }
         ],
-        "latency_ms": 8.1
+        "latency_ms": 7.52
       },
       {
         "id": 19,
@@ -393,7 +394,7 @@
         "retrieval_rank": 1,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 8.65
+        "latency_ms": 7.6
       },
       {
         "id": 20,
@@ -402,7 +403,7 @@
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 9.06
+        "latency_ms": 8.44
       },
       {
         "id": 21,
@@ -411,7 +412,7 @@
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 2.09
+        "latency_ms": 1.86
       },
       {
         "id": 22,
@@ -420,7 +421,7 @@
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 0.99
+        "latency_ms": 0.95
       },
       {
         "id": 23,
@@ -429,7 +430,7 @@
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 2.84
+        "latency_ms": 2.41
       },
       {
         "id": 24,
@@ -438,7 +439,7 @@
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 4.38
+        "latency_ms": 4.15
       },
       {
         "id": 25,
@@ -447,7 +448,7 @@
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 5.07
+        "latency_ms": 4.62
       }
     ]
   },
@@ -461,8 +462,8 @@
     "mrr": 0.792,
     "in_domain_grounded_pct": 55.0,
     "out_domain_refusal_pct": 100.0,
-    "avg_latency_ms": 6.65,
-    "avg_retrieval_ms": 6.53,
+    "avg_latency_ms": 6.21,
+    "avg_retrieval_ms": 6.09,
     "results": [
       {
         "id": "heldout-01",
@@ -481,7 +482,7 @@
             "type": "public"
           }
         ],
-        "latency_ms": 7.84
+        "latency_ms": 6.89
       },
       {
         "id": "heldout-02",
@@ -490,7 +491,7 @@
         "retrieval_rank": 1,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 4.83
+        "latency_ms": 4.77
       },
       {
         "id": "heldout-03",
@@ -499,7 +500,7 @@
         "retrieval_rank": 3,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 6.49
+        "latency_ms": 6.0
       },
       {
         "id": "heldout-04",
@@ -508,7 +509,7 @@
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 7.69
+        "latency_ms": 7.08
       },
       {
         "id": "heldout-05",
@@ -517,7 +518,7 @@
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 5.68
+        "latency_ms": 5.81
       },
       {
         "id": "heldout-06",
@@ -545,7 +546,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 8.04
+        "latency_ms": 7.44
       },
       {
         "id": "heldout-07",
@@ -573,7 +574,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 7.22
+        "latency_ms": 6.78
       },
       {
         "id": "heldout-08",
@@ -582,7 +583,7 @@
         "retrieval_rank": 1,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 7.1
+        "latency_ms": 6.72
       },
       {
         "id": "heldout-09",
@@ -610,7 +611,7 @@
             "type": "public"
           }
         ],
-        "latency_ms": 6.83
+        "latency_ms": 6.81
       },
       {
         "id": "heldout-10",
@@ -628,7 +629,7 @@
         "retrieval_rank": 1,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 9.06
+        "latency_ms": 8.38
       },
       {
         "id": "heldout-12",
@@ -656,7 +657,7 @@
             "type": "public"
           }
         ],
-        "latency_ms": 8.61
+        "latency_ms": 8.05
       },
       {
         "id": "heldout-13",
@@ -665,7 +666,7 @@
         "retrieval_rank": 2,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 7.12
+        "latency_ms": 6.71
       },
       {
         "id": "heldout-14",
@@ -684,7 +685,7 @@
             "type": "public"
           }
         ],
-        "latency_ms": 7.88
+        "latency_ms": 7.07
       },
       {
         "id": "heldout-15",
@@ -693,7 +694,7 @@
         "retrieval_rank": 1,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 7.52
+        "latency_ms": 6.94
       },
       {
         "id": "heldout-16",
@@ -712,7 +713,7 @@
             "type": "public"
           }
         ],
-        "latency_ms": 8.49
+        "latency_ms": 7.83
       },
       {
         "id": "heldout-17",
@@ -731,7 +732,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 7.67
+        "latency_ms": 7.07
       },
       {
         "id": "heldout-18",
@@ -759,7 +760,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 6.89
+        "latency_ms": 6.55
       },
       {
         "id": "heldout-19",
@@ -787,7 +788,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 9.24
+        "latency_ms": 8.51
       },
       {
         "id": "heldout-20",
@@ -806,7 +807,7 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 8.81
+        "latency_ms": 7.98
       },
       {
         "id": "heldout-21",
@@ -815,7 +816,7 @@
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 2.15
+        "latency_ms": 1.88
       },
       {
         "id": "heldout-22",
@@ -824,7 +825,7 @@
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 5.48
+        "latency_ms": 4.72
       },
       {
         "id": "heldout-23",
@@ -833,7 +834,7 @@
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 3.63
+        "latency_ms": 3.52
       },
       {
         "id": "heldout-24",
@@ -842,7 +843,7 @@
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 3.59
+        "latency_ms": 3.42
       },
       {
         "id": "heldout-25",
@@ -851,77 +852,894 @@
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 1.97
+        "latency_ms": 1.78
       }
     ]
+  },
+  "ablation_study": {
+    "golden_hash_only": {
+      "dataset": "golden_dataset.json",
+      "total_queries": 25,
+      "in_domain_total": 20,
+      "out_domain_total": 5,
+      "top1_hit_rate_pct": 10.0,
+      "top5_hit_rate_pct": 20.0,
+      "mrr": 0.133,
+      "in_domain_grounded_pct": 0.0,
+      "out_domain_refusal_pct": 100.0,
+      "avg_latency_ms": 5.9,
+      "avg_retrieval_ms": 5.85,
+      "results": [
+        {
+          "id": 1,
+          "question": "What is the immediate command to check logs of a crashed container instance in Kubernetes?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 9.25
+        },
+        {
+          "id": 2,
+          "question": "What does Exit Code 137 signify in a Kubernetes container termination?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 4.97
+        },
+        {
+          "id": 3,
+          "question": "In Istio, what do the Envoy response flags UF and UC indicate during a 503 error?",
+          "is_in_domain": true,
+          "retrieval_rank": 3,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 6.69
+        },
+        {
+          "id": 4,
+          "question": "How can legacy pods without an Istio sidecar connect to a STRICT mTLS service?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 7.07
+        },
+        {
+          "id": 5,
+          "question": "What JVM argument should be set to prevent OOMKilled errors in containerized Java apps?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 7.0
+        },
+        {
+          "id": 6,
+          "question": "What does Envoy response flag UO mean in an Istio access log?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 6.29
+        },
+        {
+          "id": 7,
+          "question": "What is the command to verify pod rollout status after applying a patch?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 5.91
+        },
+        {
+          "id": 8,
+          "question": "What Kubernetes resource specifies ISTIO_MUTUAL TLS mode for client sidecars?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 6.17
+        },
+        {
+          "id": 9,
+          "question": "What exit code is associated with a segmentation fault in Kubernetes?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 5.18
+        },
+        {
+          "id": 10,
+          "question": "Which command displays node memory pressure conditions in Kubernetes?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 5.94
+        },
+        {
+          "id": 11,
+          "question": "What command checks the synchronization status between istiod and Envoy proxies?",
+          "is_in_domain": true,
+          "retrieval_rank": 3,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 5.79
+        },
+        {
+          "id": 12,
+          "question": "How do you inspect the active TLS certificates in an Istio client proxy?",
+          "is_in_domain": true,
+          "retrieval_rank": 1,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 5.77
+        },
+        {
+          "id": 13,
+          "question": "What conditions trigger NodeDiskPressure and container evictions on a Kubernetes worker node?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 6.58
+        },
+        {
+          "id": 14,
+          "question": "What Nginx ingress annotation should be tuned to resolve 504 Gateway Timeout on long-running APIs?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 7.63
+        },
+        {
+          "id": 15,
+          "question": "What command cleans up dangling Docker images and build caches when root partition is full?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 7.52
+        },
+        {
+          "id": 16,
+          "question": "Why do AWS Network Load Balancer target instances register as Target.FailedHealthChecks?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 6.21
+        },
+        {
+          "id": 17,
+          "question": "How do ephemeral containers troubleshoot a running pod in Kubernetes without restarting it?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 6.71
+        },
+        {
+          "id": 18,
+          "question": "What tool and command inspects CRI container runtime status directly on a Kubernetes node?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 7.24
+        },
+        {
+          "id": 19,
+          "question": "What istioctl command analyzes cluster resources for configuration errors and best practices?",
+          "is_in_domain": true,
+          "retrieval_rank": 1,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 7.45
+        },
+        {
+          "id": 20,
+          "question": "How do you inspect database connection failures and failovers using Teleport in GitLab SRE runbooks?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 8.21
+        },
+        {
+          "id": 21,
+          "question": "How do I bake a triple chocolate fudge brownie cake?",
+          "is_in_domain": false,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 1.84
+        },
+        {
+          "id": 22,
+          "question": "What is the capital city of Australia?",
+          "is_in_domain": false,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 0.96
+        },
+        {
+          "id": 23,
+          "question": "Who won the FIFA World Cup in 1998?",
+          "is_in_domain": false,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 2.39
+        },
+        {
+          "id": 24,
+          "question": "What are the tiebreaker scoring rules in a professional tennis match?",
+          "is_in_domain": false,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 4.23
+        },
+        {
+          "id": 25,
+          "question": "What is the current live stock price of Apple Inc.?",
+          "is_in_domain": false,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 4.42
+        }
+      ]
+    },
+    "held_out_hash_only": {
+      "dataset": "held_out_dataset.json",
+      "total_queries": 25,
+      "in_domain_total": 20,
+      "out_domain_total": 5,
+      "top1_hit_rate_pct": 45.0,
+      "top5_hit_rate_pct": 55.0,
+      "mrr": 0.483,
+      "in_domain_grounded_pct": 15.0,
+      "out_domain_refusal_pct": 100.0,
+      "avg_latency_ms": 6.3,
+      "avg_retrieval_ms": 6.2,
+      "results": [
+        {
+          "id": "heldout-01",
+          "question": "How does PodDisruptionBudget protect high availability workloads during voluntary node drains?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 7.07
+        },
+        {
+          "id": "heldout-02",
+          "question": "What causes MountVolume.SetUp failed for PersistentVolumeClaim in Kubernetes pods?",
+          "is_in_domain": true,
+          "retrieval_rank": 1,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 4.75
+        },
+        {
+          "id": "heldout-03",
+          "question": "How do you diagnose CoreDNS query timeout and SERVFAIL responses in a Kubernetes cluster?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 6.14
+        },
+        {
+          "id": "heldout-04",
+          "question": "What kubelet settings govern hard disk eviction when node storage exceeds thresholds?",
+          "is_in_domain": true,
+          "retrieval_rank": 1,
+          "answer": "NodeDiskPressure` occurs when the Kubelet detects that available disk space or inodes on the root filesystem (or the image filesystem) falls below configured eviction thresholds (default: available disk < 15% or free inodes < 5%). When triggered: 1 [kubernetes_node_disk_pressure.md#kubernetes_node_disk_pressure.md-c0] bash kubectl debug node/<node-name> -it --image=busybox -- df -h ``` Check disk utilization on `/var/lib/kubelet`, `/var/lib/containerd`, and `/var/log`. [kubernetes_node_disk_pressure.md#kubernetes_node_disk_pressure.md-c2]",
+          "citations": [
+            {
+              "source_file": "kubernetes_node_disk_pressure.md",
+              "section_title": "Overview & Symptoms",
+              "chunk_id": "kubernetes_node_disk_pressure.md-c0",
+              "relevance_score": 0.378,
+              "source": "kubernetes",
+              "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/kubernetes_node_disk_pressure.md",
+              "type": "internal"
+            },
+            {
+              "source_file": "kubernetes_node_disk_pressure.md",
+              "section_title": "2. Inspect Node Storage Utilization via SSH or Debug Pod",
+              "chunk_id": "kubernetes_node_disk_pressure.md-c2",
+              "relevance_score": 0.3157,
+              "source": "kubernetes",
+              "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/kubernetes_node_disk_pressure.md",
+              "type": "internal"
+            }
+          ],
+          "latency_ms": 7.15
+        },
+        {
+          "id": "heldout-05",
+          "question": "Why does a HorizontalPodAutoscaler fail to scale when custom metric metrics-server is unavailable?",
+          "is_in_domain": true,
+          "retrieval_rank": 1,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 5.73
+        },
+        {
+          "id": "heldout-06",
+          "question": "What causes Envoy proxy to return 503 NR (No Route) in Istio service mesh?",
+          "is_in_domain": true,
+          "retrieval_rank": 3,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 7.49
+        },
+        {
+          "id": "heldout-07",
+          "question": "How do you resolve upstream connection termination 503 UC errors between Istio proxies?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 6.76
+        },
+        {
+          "id": "heldout-08",
+          "question": "How do you configure PeerAuthentication to enforce STRICT mutual TLS across all mesh workloads?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 6.68
+        },
+        {
+          "id": "heldout-09",
+          "question": "How do you verify proxy synchronization status using istioctl proxy-status command?",
+          "is_in_domain": true,
+          "retrieval_rank": 3,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 6.79
+        },
+        {
+          "id": "heldout-10",
+          "question": "What parameters in Istio DestinationRule configure outlier detection for circuit breaking?",
+          "is_in_domain": true,
+          "retrieval_rank": 1,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 6.29
+        },
+        {
+          "id": "heldout-11",
+          "question": "What steps must an on-call SRE follow when Patroni PostgreSQL cluster initiates automatic failover?",
+          "is_in_domain": true,
+          "retrieval_rank": 1,
+          "answer": "Who is impacted depends on the cluster and the node's role: - A **leader** down on `patroni` (main) or `patroni-ci` affects nearly all customers until failover completes [PatroniIsDown.md#PatroniIsDown.md-c4]",
+          "citations": [
+            {
+              "source_file": "PatroniIsDown.md",
+              "section_title": "Severities",
+              "chunk_id": "PatroniIsDown.md-c4",
+              "relevance_score": 0.2769,
+              "source": "gitlab",
+              "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/PatroniIsDown.md",
+              "type": "public"
+            }
+          ],
+          "latency_ms": 8.86
+        },
+        {
+          "id": "heldout-12",
+          "question": "How do you triage high queue execution latency for Sidekiq background jobs in GitLab production?",
+          "is_in_domain": true,
+          "retrieval_rank": 1,
+          "answer": "Defer execution of all jobs of that class, using either: - Chatops: ```shell /chatops gitlab run feature set run_sidekiq_jobs_Example::SlowWorker false --ignore-feature-flag-consistency-check --ignore-production-check ``` - Rails console: ```ruby Feature.disable(:\"run_sidekiq_jobs_Example::SlowWorker\") ``` The above action will cause sidekiq workers to defer (rather than execute) all jobs of that class, including jobs currently waiting in the queue [disabling-a-worker.md#disabling-a-worker.md-c0] Defer execution of all jobs of that class, using either: - Chatops: This should be run in the `#production` ```shell /chatops gitlab run feature set run_sidekiq_jobs_Example::SlowWorker false --ignore-feature-flag-consistency-check --ignore-production-check ``` - On the production rails node run the following to start the rails console: ```shell sudo gitlab-rails console ``` After it starts, run: ```ruby Feature.disable(:\"run_sidekiq_jobs_Example::SlowWorker\") ``` The action will cause sidekiq workers to defer (rather than execute) all jobs of that class, including jobs currently waiting in the queue [SidekiqQueueTooLarge.md#SidekiqQueueTooLarge.md-c8] The [sidekiq: Worker Detail dashboard](https://dashboards.gitlab.net/d/sidekiq-worker-detail/sidekiq3a-worker-detail) may be helpful in checking a worker's enqueue rate, queue size, and summed execution time spent in shared dependencies like the DB [disabling-a-worker.md#disabling-a-worker.md-c0]",
+          "citations": [
+            {
+              "source_file": "disabling-a-worker.md",
+              "section_title": "Incident Quick Reference",
+              "chunk_id": "disabling-a-worker.md-c0",
+              "relevance_score": 0.4323,
+              "source": "gitlab",
+              "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/disabling-a-worker.md",
+              "type": "public"
+            },
+            {
+              "source_file": "SidekiqQueueTooLarge.md",
+              "section_title": "How to disable a worker",
+              "chunk_id": "SidekiqQueueTooLarge.md-c8",
+              "relevance_score": 0.3794,
+              "source": "gitlab",
+              "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/SidekiqQueueTooLarge.md",
+              "type": "public"
+            }
+          ],
+          "latency_ms": 8.36
+        },
+        {
+          "id": "heldout-13",
+          "question": "What actions should be taken when Redis memory usage reaches maxmemory-policy eviction limits?",
+          "is_in_domain": true,
+          "retrieval_rank": 1,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 6.82
+        },
+        {
+          "id": "heldout-14",
+          "question": "How do you troubleshoot Gitaly cgroup cpu throttle and thread contention alerts in GitLab?",
+          "is_in_domain": true,
+          "retrieval_rank": 1,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 7.15
+        },
+        {
+          "id": "heldout-15",
+          "question": "What remediation steps apply when Alertmanager fails to dispatch PagerDuty incident notifications?",
+          "is_in_domain": true,
+          "retrieval_rank": 1,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 7.36
+        },
+        {
+          "id": "heldout-16",
+          "question": "What triggers container Exit Code 137 in Kubernetes and how does memory limit configuration mitigate it?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 7.9
+        },
+        {
+          "id": "heldout-17",
+          "question": "What diagnostic command displays previous container logs when a pod crashes in CrashLoopBackOff?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 7.11
+        },
+        {
+          "id": "heldout-18",
+          "question": "How do you increase proxy-read-timeout in ingress-nginx to resolve 504 Gateway Timeout errors?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 6.32
+        },
+        {
+          "id": "heldout-19",
+          "question": "What docker command prunes unused build cache, stopped containers, and dangling layers to recover disk?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 8.75
+        },
+        {
+          "id": "heldout-20",
+          "question": "Why do AWS Network Load Balancer target groups mark backend EC2 instances as unhealthy?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 8.15
+        },
+        {
+          "id": "heldout-21",
+          "question": "How do you bake a triple chocolate fudge brownie cake with vanilla frosting?",
+          "is_in_domain": false,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 1.82
+        },
+        {
+          "id": "heldout-22",
+          "question": "What was the final match score in the 2022 FIFA World Cup final in Qatar?",
+          "is_in_domain": false,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 4.82
+        },
+        {
+          "id": "heldout-23",
+          "question": "What is the current stock market ticker and market capitalization of Apple Inc?",
+          "is_in_domain": false,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 3.71
+        },
+        {
+          "id": "heldout-24",
+          "question": "What are the tiebreaker and deuce rules in a professional tennis tournament match?",
+          "is_in_domain": false,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 3.6
+        },
+        {
+          "id": "heldout-25",
+          "question": "What is the capital city and official currency of Australia?",
+          "is_in_domain": false,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 1.95
+        }
+      ]
+    },
+    "held_out_v2_hash_only": {
+      "dataset": "held_out_dataset_v2.json",
+      "total_queries": 25,
+      "in_domain_total": 20,
+      "out_domain_total": 5,
+      "top1_hit_rate_pct": 5.0,
+      "top5_hit_rate_pct": 10.0,
+      "mrr": 0.075,
+      "in_domain_grounded_pct": 10.0,
+      "out_domain_refusal_pct": 100.0,
+      "avg_latency_ms": 6.92,
+      "avg_retrieval_ms": 6.87,
+      "results": [
+        {
+          "id": "v2-blind-01",
+          "question": "Workload pods are getting terminated by kubelet on worker nodes with reason Evicted due to local disk volume exhaustion.",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 9.92
+        },
+        {
+          "id": "v2-blind-02",
+          "question": "Java application process in container dies silently with no stacktrace recorded in standard out.",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 6.95
+        },
+        {
+          "id": "v2-blind-03",
+          "question": "Microservice gateway receives HTTP 503 errors when calling the billing service mesh upstream.",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 7.59
+        },
+        {
+          "id": "v2-blind-04",
+          "question": "Pods in staging namespace cannot reach production database after security team applied mutual TLS policy.",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "[Mutual TLS](/docs/concepts/security/#mutual-tls-authentication) provides the basis for much of Istio's security posture [index.md#index.md-c8] Below explains various properties mutual TLS provides for the security posture of Istio. [index.md#index.md-c8] Istio will [automatically](/docs/ops/configuration/traffic-management/tls-configuration/#auto-mtls) encrypt traffic using [Mutual TLS](/docs/concepts/security/#mutual-tls-authentication) whenever possible [index.md#index.md-c1]",
+          "citations": [
+            {
+              "source_file": "index.md",
+              "section_title": "Mutual TLS Properties",
+              "chunk_id": "index.md-c8",
+              "relevance_score": 0.3453,
+              "source": "istio",
+              "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/istio/deployment/security-model/index.md",
+              "type": "public"
+            },
+            {
+              "source_file": "index.md",
+              "section_title": "Mutual TLS",
+              "chunk_id": "index.md-c1",
+              "relevance_score": 0.3326,
+              "source": "istio",
+              "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/istio/best-practices/security/index.md",
+              "type": "public"
+            }
+          ],
+          "latency_ms": 9.39
+        },
+        {
+          "id": "v2-blind-05",
+          "question": "CI agent disk usage reaches 100% due to uncollected container build layers.",
+          "is_in_domain": true,
+          "retrieval_rank": 2,
+          "answer": "To conserve space on Gitaly shards, we stop placing repositories in shards that are over space-utilized above certain percentage (currently 80%). However, due to organic growth in the existing repositories, disk utilization can still rise up and potentially reach 100%. To counteract this, we have a capacity warning ([example](https://gitlab.com/gitlab-com/gl-infra/capacity-planning-trackers/gitlab-com/-/work_items/2450)) that is triggered whenever the projected disk space utilization is going to exceed a certain threshold [partial-storage-rebalancing.md#partial-storage-rebalancing.md-c0]",
+          "citations": [
+            {
+              "source_file": "partial-storage-rebalancing.md",
+              "section_title": "Partial Gitaly Storage Rebalancing",
+              "chunk_id": "partial-storage-rebalancing.md-c0",
+              "relevance_score": 0.3118,
+              "source": "gitlab",
+              "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/partial-storage-rebalancing.md",
+              "type": "public"
+            }
+          ],
+          "latency_ms": 7.75
+        },
+        {
+          "id": "v2-blind-06",
+          "question": "Clients report periodic HTTP 504 while downloading large report exports through ingress.",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 7.26
+        },
+        {
+          "id": "v2-blind-07",
+          "question": "AWS Network Load Balancer drops traffic to target instances following maintenance update.",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 8.25
+        },
+        {
+          "id": "v2-blind-08",
+          "question": "Newly deployed pod keeps cycling through termination before passing initial readiness checks.",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 7.54
+        },
+        {
+          "id": "v2-blind-09",
+          "question": "How to inspect ephemeral container state when main container does not contain bash or sh utilities?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 7.45
+        },
+        {
+          "id": "v2-blind-10",
+          "question": "Database administrator needs console access to PostgreSQL primary node via secure bastion.",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "For more information: <https://github.com/cybertec-postgresql/pgwatch2> Execute on the primary from the source cluster the following sql, connecting with `gitlab-psql`: ```sql create role pgwatch2 login password $pgwatch2_pwd; grant pg_monitor TO pgwatch2; grant select on table pg_stat_replication to pgwatch2; grant select on table pg_stat_activity to pgwatch2; grant execute on function pg_stat_file(text) to pgwatch2; grant execute on function pg_ls_dir(text) to pgwatch2; grant connect on database gitlabhq_production to pgwatch2; grant usage on schema public to pgwatch2; if pg_wait_sampling extension is used: GRANT EXECUTE ON FUNCTION pg_wait_sampling_reset_profile() TO pgwatch2; ``` Execute locally, the redirect of the Netdata dashboard port (19999) via SSH to the local port 3000: ``` ssh -fNTML 3000:localhost:3000 pgwatch-01-sv-db-benchmarking.c.gitlab-db-benchmarking.internal ``` The URL to access in the browser: ``` http://127.0.0.1:3000/ [provisioning_bench_env.md#provisioning_bench_env.md-c14] Use [Database Access via Teleport](../teleport/Connect_to_Database_Console_via_Teleport.md). Read-only access to non-production databases does not require an access request. [staging-environment.md#staging-environment.md-c5] Advertise via DNS to database clients how to connect to a primary or replica database [patroni-consul-postgres-pgbouncer-interactions.md#patroni-consul-postgres-pgbouncer-interactions.md-c19]",
+          "citations": [
+            {
+              "source_file": "staging-environment.md",
+              "section_title": "Run a psql console in staging environment",
+              "chunk_id": "staging-environment.md-c5",
+              "relevance_score": 0.4238,
+              "source": "gitlab",
+              "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/staging-environment.md",
+              "type": "public"
+            },
+            {
+              "source_file": "provisioning_bench_env.md",
+              "section_title": "How to setup PGWatch 2.0",
+              "chunk_id": "provisioning_bench_env.md-c14",
+              "relevance_score": 0.3613,
+              "source": "gitlab",
+              "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/provisioning_bench_env.md",
+              "type": "public"
+            },
+            {
+              "source_file": "patroni-consul-postgres-pgbouncer-interactions.md",
+              "section_title": "What is Consul's purpose?",
+              "chunk_id": "patroni-consul-postgres-pgbouncer-interactions.md-c19",
+              "relevance_score": 0.3599,
+              "source": "gitlab",
+              "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/patroni-consul-postgres-pgbouncer-interactions.md",
+              "type": "public"
+            }
+          ],
+          "latency_ms": 8.63
+        },
+        {
+          "id": "v2-blind-11",
+          "question": "Which kubelet eviction flags configure garbage collection thresholds for unused container images?",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 7.28
+        },
+        {
+          "id": "v2-blind-12",
+          "question": "Client TLS handshake fails with SSL routines:ssl3_read_bytes:tlsv1 alert internal error in service mesh.",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 8.24
+        },
+        {
+          "id": "v2-blind-13",
+          "question": "Envoy proxy downstream connection resets when backend service circuit breaker trips.",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 7.4
+        },
+        {
+          "id": "v2-blind-14",
+          "question": "Container filesystem becomes read-only because root partition inode count is 100% full.",
+          "is_in_domain": true,
+          "retrieval_rank": 1,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 7.63
+        },
+        {
+          "id": "v2-blind-15",
+          "question": "Application receives SIGKILL signal from operating system kernel under high memory allocation.",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 7.42
+        },
+        {
+          "id": "v2-blind-16",
+          "question": "Network load balancer target group displays Target.FailedHealthChecks metric increase in CloudWatch.",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 7.42
+        },
+        {
+          "id": "v2-blind-17",
+          "question": "Command to view standard output of a prior failed instance of a crashing pod.",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 7.36
+        },
+        {
+          "id": "v2-blind-18",
+          "question": "Setting upstream proxy timeouts in NGINX ingress resource to prevent gateway cutoff.",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 7.7
+        },
+        {
+          "id": "v2-blind-19",
+          "question": "Configuring JVM memory limits to avoid container cgroup kill.",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 6.55
+        },
+        {
+          "id": "v2-blind-20",
+          "question": "Validating mesh routing rules and sidecar proxy injection before deploying canary release.",
+          "is_in_domain": true,
+          "retrieval_rank": null,
+          "answer": "Envoy proxies are deployed as sidecars to services, logically augmenting the services with Envoy\u2019s many built-in features, for example: * Dynamic service discovery * Load balancing * TLS termination * HTTP/2 and gRPC proxies * Circuit breakers * Health checks * Staged rollouts with %-based traffic split * Fault injection * Rich metrics This sidecar deployment allows Istio to enforce policy decisions and extract rich telemetry which can be sent to monitoring systems to provide information about the behavior of the entire mesh [index.md#index.md-c2] [Automatic sidecar injection fails if the Kubernetes API server has proxy settings] [index.md#index.md-c6] When the Kubernetes API server includes proxy settings such as: {{< text yaml >}} env: - name: http_proxy value: http://proxy-wsa.esl.foo.com:80 - name: https_proxy value: http://proxy-wsa.esl.foo.com:80 - name: no_proxy value: 127.0.0.1,localhost,dockerhub.foo.com,devhub-docker.foo.com,10.84.100.125,10.84.100.126,10.84.100.127 {{< /text >}} With these settings, Sidecar injection fails [index.md#index.md-c6]",
+          "citations": [
+            {
+              "source_file": "index.md",
+              "section_title": "Envoy",
+              "chunk_id": "index.md-c2",
+              "relevance_score": 0.351,
+              "source": "istio",
+              "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/istio/deployment/architecture/index.md",
+              "type": "public"
+            },
+            {
+              "source_file": "index.md",
+              "section_title": "Automatic sidecar injection fails if the Kubernetes API server has proxy settings",
+              "chunk_id": "index.md-c6",
+              "relevance_score": 0.3298,
+              "source": "istio",
+              "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/istio/common-problems/injection/index.md",
+              "type": "public"
+            }
+          ],
+          "latency_ms": 7.57
+        },
+        {
+          "id": "v2-blind-21",
+          "question": "What is the recommended recipe for New York style sourdough pizza dough?",
+          "is_in_domain": false,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 4.61
+        },
+        {
+          "id": "v2-blind-22",
+          "question": "How to implement drag and drop gesture recognizers in SwiftUI?",
+          "is_in_domain": false,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 3.12
+        },
+        {
+          "id": "v2-blind-23",
+          "question": "What are the rules for infield fly in Major League Baseball?",
+          "is_in_domain": false,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 2.57
+        },
+        {
+          "id": "v2-blind-24",
+          "question": "Explanation of quantum teleportation protocol using Bell states.",
+          "is_in_domain": false,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 4.05
+        },
+        {
+          "id": "v2-blind-25",
+          "question": "How to tune a six-string acoustic guitar to drop D tuning?",
+          "is_in_domain": false,
+          "retrieval_rank": null,
+          "answer": "I don't know based on the provided runbooks.",
+          "citations": [],
+          "latency_ms": 3.31
+        }
+      ]
+    }
   },
   "new_blind_held_out_v2": {
     "dataset": "held_out_dataset_v2.json",
     "total_queries": 25,
     "in_domain_total": 20,
     "out_domain_total": 5,
-    "top1_hit_rate_pct": 70.0,
-    "top5_hit_rate_pct": 70.0,
-    "mrr": 0.7,
-    "in_domain_grounded_pct": 60.0,
+    "top1_hit_rate_pct": 55.0,
+    "top5_hit_rate_pct": 55.0,
+    "mrr": 0.55,
+    "in_domain_grounded_pct": 55.0,
     "out_domain_refusal_pct": 100.0,
-    "avg_latency_ms": 7.87,
-    "avg_retrieval_ms": 7.78,
+    "avg_latency_ms": 7.07,
+    "avg_retrieval_ms": 6.97,
     "results": [
       {
-        "id": "v2-heldout-01",
-        "question": "Kubernetes worker node status shows NodeDiskPressure and kubelet starts evicting pods. Which threshold triggers this?",
+        "id": "v2-blind-01",
+        "question": "Workload pods are getting terminated by kubelet on worker nodes with reason Evicted due to local disk volume exhaustion.",
         "is_in_domain": true,
-        "retrieval_rank": 1,
-        "answer": "The Kubelet immediately refuses to schedule new pods on the affected node [kubernetes_node_disk_pressure.md#kubernetes_node_disk_pressure.md-c0] The Kubelet begins evicting active non-critical (BestEffort, then Burstable) pods to prevent kernel panic [kubernetes_node_disk_pressure.md#kubernetes_node_disk_pressure.md-c0] Pods enter `Evicted` status with the reason `The node was low on resource: ephemeral-storage`. [kubernetes_node_disk_pressure.md#kubernetes_node_disk_pressure.md-c0]",
-        "citations": [
-          {
-            "source_file": "kubernetes_node_disk_pressure.md",
-            "section_title": "Overview & Symptoms",
-            "chunk_id": "kubernetes_node_disk_pressure.md-c0",
-            "relevance_score": 1.0,
-            "source": "kubernetes",
-            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/kubernetes_node_disk_pressure.md",
-            "type": "internal"
-          }
-        ],
-        "latency_ms": 9.24
+        "retrieval_rank": null,
+        "answer": "I don't know based on the provided runbooks.",
+        "citations": [],
+        "latency_ms": 9.88
       },
       {
-        "id": "v2-heldout-02",
-        "question": "How do you recover a container failing with Exit Code 139 during container startup?",
+        "id": "v2-blind-02",
+        "question": "Java application process in container dies silently with no stacktrace recorded in standard out.",
         "is_in_domain": true,
-        "retrieval_rank": 1,
-        "answer": "[Exit Code 139 (Segmentation Fault)] [kubernetes_crashloopbackoff.md#kubernetes_crashloopbackoff.md-c8]",
-        "citations": [
-          {
-            "source_file": "kubernetes_crashloopbackoff.md",
-            "section_title": "Exit Code 139 (Segmentation Fault)",
-            "chunk_id": "kubernetes_crashloopbackoff.md-c8",
-            "relevance_score": 1.0,
-            "source": "kubernetes",
-            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/kubernetes_crashloopbackoff.md",
-            "type": "internal"
-          }
-        ],
-        "latency_ms": 6.53
+        "retrieval_rank": null,
+        "answer": "I don't know based on the provided runbooks.",
+        "citations": [],
+        "latency_ms": 6.88
       },
       {
-        "id": "v2-heldout-03",
-        "question": "Istio Envoy logs display 503 UF flags when communicating with payment-service. What is the root cause?",
+        "id": "v2-blind-03",
+        "question": "Microservice gateway receives HTTP 503 errors when calling the billing service mesh upstream.",
         "is_in_domain": true,
         "retrieval_rank": 1,
-        "answer": "kubectl logs <client-pod> -c istio-proxy -n <namespace> | grep -E '503|UF|UC|UO|NR' [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c2] In an Istio service mesh, HTTP 503 errors typically originate from the Envoy sidecar proxy rather than the upstream application [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c0] Envoy attaches response flags to its access logs that pinpoint the exact failure reason: - `UF` = Upstream Connection Failure - `UC` = Upstream Connection Termination - `UO` = Upstream Overflow (circuit breaker tripped) - `NR` = No Route configured [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c0]",
+        "answer": "In an Istio service mesh, HTTP 503 errors typically originate from the Envoy sidecar proxy rather than the upstream application [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c0]",
         "citations": [
-          {
-            "source_file": "istio_503_service_unavailable.md",
-            "section_title": "Check Envoy access logs for response flags",
-            "chunk_id": "istio_503_service_unavailable.md-c2",
-            "relevance_score": 1.0,
-            "source": "istio",
-            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/istio_503_service_unavailable.md",
-            "type": "internal"
-          },
           {
             "source_file": "istio_503_service_unavailable.md",
             "section_title": "1. Overview",
@@ -932,80 +1750,62 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 7.88
+        "latency_ms": 7.55
       },
       {
-        "id": "v2-heldout-04",
-        "question": "Docker build fails with no space left on device on CI runner. How to safely clean up overlay2 build cache?",
-        "is_in_domain": true,
-        "retrieval_rank": 1,
-        "answer": "[Deep build cache purge (often reclaims 10GB - 50GB in CI hosts)] [docker_daemon_out_of_space.md#docker_daemon_out_of_space.md-c7]",
-        "citations": [
-          {
-            "source_file": "docker_daemon_out_of_space.md",
-            "section_title": "Deep build cache purge (often reclaims 10GB - 50GB in CI hosts)",
-            "chunk_id": "docker_daemon_out_of_space.md-c7",
-            "relevance_score": 1.0,
-            "source": "internal",
-            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/docker_daemon_out_of_space.md",
-            "type": "internal"
-          }
-        ],
-        "latency_ms": 10.16
-      },
-      {
-        "id": "v2-heldout-05",
-        "question": "What kubectl command should you run to inspect previous logs of an OOMKilled container?",
+        "id": "v2-blind-04",
+        "question": "Pods in staging namespace cannot reach production database after security team applied mutual TLS policy.",
         "is_in_domain": true,
         "retrieval_rank": null,
-        "answer": "I don't know based on the provided runbooks.",
-        "citations": [],
-        "latency_ms": 7.26
-      },
-      {
-        "id": "v2-heldout-06",
-        "question": "AWS Network Load Balancer target group marks all backend EC2 instances as Unhealthy. How to diagnose?",
-        "is_in_domain": true,
-        "retrieval_rank": 1,
-        "answer": "When traffic arrives at an AWS Application Load Balancer (ALB) or Network Load Balancer (NLB), target instances or container IPs in the Target Group fail health checks and are marked `Unhealthy`. - **Client sees:** `HTTP 502 Bad Gateway` (ALB) or connection resets / TCP RST (NLB). - **Target Group Console displays:** `Target.FailedHealthChecks` or `HealthCheck.Unhealthy`. - **Impact:** Entire availability zones or backend services become unreachable. [aws_network_load_balancer_unhealthy_hosts.md#aws_network_load_balancer_unhealthy_hosts.md-c0] Check Target Group Health via AWS CLI] [aws_network_load_balancer_unhealthy_hosts.md#aws_network_load_balancer_unhealthy_hosts.md-c1] bash aws elbv2 describe-target-health \\ --target-group-arn <target-group-arn> \\ --query \"TargetHealthDescriptions[].{Target:Target.Id,Port:Target.Port,State:TargetHealth.State,Reason:TargetHealth.Reason,Description:TargetHealth.Description}\" \\ --output table [aws_network_load_balancer_unhealthy_hosts.md#aws_network_load_balancer_unhealthy_hosts.md-c1]",
+        "answer": "An hourly Kubernetes CronJob named `vault-raft-snapshot` in the `vault` namespace calls `vault operator raft snapshot save` and uploads the `.snap` file to GCS: - Production (`ops` env): `gs://gitlab-vault-production-vault-raft-snapshots/` - Staging (`pre` env): `gs://gitlab-vault-staging-vault-raft-snapshots/` The CronJob and Job pods are defined in [`services/vault/values-extras.yaml`](https://gitlab.com/gitlab-com/gl-infra/argocd/apps/-/blob/main/services/vault/values-extras.yaml) in the `argocd/apps` project. [VaultRaftSnapshot.md#VaultRaftSnapshot.md-c1] [Mutual TLS](/docs/concepts/security/#mutual-tls-authentication) provides the basis for much of Istio's security posture [index.md#index.md-c8] Below explains various properties mutual TLS provides for the security posture of Istio. [index.md#index.md-c8]",
         "citations": [
           {
-            "source_file": "aws_network_load_balancer_unhealthy_hosts.md",
-            "section_title": "Overview & Symptoms",
-            "chunk_id": "aws_network_load_balancer_unhealthy_hosts.md-c0",
-            "relevance_score": 1.0,
-            "source": "internal",
-            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/aws_network_load_balancer_unhealthy_hosts.md",
-            "type": "internal"
+            "source_file": "index.md",
+            "section_title": "Mutual TLS Properties",
+            "chunk_id": "index.md-c8",
+            "relevance_score": 0.3453,
+            "source": "istio",
+            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/istio/deployment/security-model/index.md",
+            "type": "public"
           },
           {
-            "source_file": "aws_network_load_balancer_unhealthy_hosts.md",
-            "section_title": "1. Check Target Group Health via AWS CLI",
-            "chunk_id": "aws_network_load_balancer_unhealthy_hosts.md-c1",
-            "relevance_score": 1.0,
-            "source": "internal",
-            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/aws_network_load_balancer_unhealthy_hosts.md",
-            "type": "internal"
+            "source_file": "VaultRaftSnapshot.md",
+            "section_title": "Overview",
+            "chunk_id": "VaultRaftSnapshot.md-c1",
+            "relevance_score": 0.3304,
+            "source": "gitlab",
+            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/VaultRaftSnapshot.md",
+            "type": "public"
           }
         ],
-        "latency_ms": 11.13
+        "latency_ms": 9.21
       },
       {
-        "id": "v2-heldout-07",
-        "question": "NGINX Ingress controller returns 504 Gateway Timeout while waiting for microservice response. Which ingress annotations fix this?",
+        "id": "v2-blind-05",
+        "question": "CI agent disk usage reaches 100% due to uncollected container build layers.",
         "is_in_domain": true,
-        "retrieval_rank": 1,
-        "answer": "HTTP 504 Gateway Timeout occurs when an edge proxy or Kubernetes Ingress Controller (Nginx Ingress, AWS Load Balancer Controller / ALB, Traefik) fails to receive a timely response from an upstream backend service pod within the configured timeout window [kubernetes_ingress_504_gateway_timeout.md#kubernetes_ingress_504_gateway_timeout.md-c0] Client sees:** `504 Gateway Time-out` - **Ingress Controller log shows:** `upstream timed out (110: Connection timed out) while reading response header from upstream` - **Impact:** Failed API transactions, degraded user checkout/request flows, and customer-facing incident alerts. [kubernetes_ingress_504_gateway_timeout.md#kubernetes_ingress_504_gateway_timeout.md-c0] Heavy database queries, slow external API calls, or garbage collection pauses exceed the default 60-second Nginx `proxy-read-timeout`. - **Immediate Fix:** Add timeout annotations to the Ingress resource: ```yaml metadata: annotations: nginx.ingress.kubernetes.io/proxy-connect-timeout: \"15\" nginx.ingress.kubernetes.io/proxy-read-timeout: \"180\" nginx.ingress.kubernetes.io/proxy-send-timeout: \"180\" ``` For AWS ALB Ingress: ```yaml metadata: annotations: alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=180 [kubernetes_ingress_504_gateway_timeout.md#kubernetes_ingress_504_gateway_timeout.md-c6]",
+        "retrieval_rank": null,
+        "answer": "To conserve space on Gitaly shards, we stop placing repositories in shards that are over space-utilized above certain percentage (currently 80%). However, due to organic growth in the existing repositories, disk utilization can still rise up and potentially reach 100%. To counteract this, we have a capacity warning ([example](https://gitlab.com/gitlab-com/gl-infra/capacity-planning-trackers/gitlab-com/-/work_items/2450)) that is triggered whenever the projected disk space utilization is going to exceed a certain threshold [partial-storage-rebalancing.md#partial-storage-rebalancing.md-c0]",
         "citations": [
           {
-            "source_file": "kubernetes_ingress_504_gateway_timeout.md",
-            "section_title": "Scenario A: Backend Processing Exceeds Ingress Timeout Window",
-            "chunk_id": "kubernetes_ingress_504_gateway_timeout.md-c6",
-            "relevance_score": 1.0,
-            "source": "kubernetes",
-            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/kubernetes_ingress_504_gateway_timeout.md",
-            "type": "internal"
-          },
+            "source_file": "partial-storage-rebalancing.md",
+            "section_title": "Partial Gitaly Storage Rebalancing",
+            "chunk_id": "partial-storage-rebalancing.md-c0",
+            "relevance_score": 0.3118,
+            "source": "gitlab",
+            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/partial-storage-rebalancing.md",
+            "type": "public"
+          }
+        ],
+        "latency_ms": 7.77
+      },
+      {
+        "id": "v2-blind-06",
+        "question": "Clients report periodic HTTP 504 while downloading large report exports through ingress.",
+        "is_in_domain": true,
+        "retrieval_rank": 1,
+        "answer": "HTTP 504 Gateway Timeout occurs when an edge proxy or Kubernetes Ingress Controller (Nginx Ingress, AWS Load Balancer Controller / ALB, Traefik) fails to receive a timely response from an upstream backend service pod within the configured timeout window [kubernetes_ingress_504_gateway_timeout.md#kubernetes_ingress_504_gateway_timeout.md-c0] Client sees:** `504 Gateway Time-out` - **Ingress Controller log shows:** `upstream timed out (110: Connection timed out) while reading response header from upstream` - **Impact:** Failed API transactions, degraded user checkout/request flows, and customer-facing incident alerts. [kubernetes_ingress_504_gateway_timeout.md#kubernetes_ingress_504_gateway_timeout.md-c0]",
+        "citations": [
           {
             "source_file": "kubernetes_ingress_504_gateway_timeout.md",
             "section_title": "Overview & Symptoms",
@@ -1016,144 +1816,14 @@
             "type": "internal"
           }
         ],
-        "latency_ms": 9.14
+        "latency_ms": 7.36
       },
       {
-        "id": "v2-heldout-08",
-        "question": "Connecting to an Istio service with STRICT mTLS enabled from outside the mesh fails SSL handshake. How to resolve?",
+        "id": "v2-blind-07",
+        "question": "AWS Network Load Balancer drops traffic to target instances following maintenance update.",
         "is_in_domain": true,
         "retrieval_rank": 1,
-        "answer": "When an Istio namespace or workload is configured with `PeerAuthentication` in `STRICT` mode, any client connecting over plain unencrypted TCP/HTTP without an authenticated mTLS certificate handshake will be immediately rejected with TCP connection reset or `connection termination`. [istio_mtls_strict_failures.md#istio_mtls_strict_failures.md-c0] By default, Istio will accept mTLS and non-mTLS traffic (often called \"permissive mode\"). Users can opt-in to strict enforcement by writing `PeerAuthentication` or `AuthorizationPolicy` rules requiring mTLS [index.md#index.md-c11]",
-        "citations": [
-          {
-            "source_file": "istio_mtls_strict_failures.md",
-            "section_title": "1. Overview",
-            "chunk_id": "istio_mtls_strict_failures.md-c0",
-            "relevance_score": 1.0,
-            "source": "istio",
-            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/istio_mtls_strict_failures.md",
-            "type": "internal"
-          },
-          {
-            "source_file": "index.md",
-            "section_title": "Server mTLS",
-            "chunk_id": "index.md-c11",
-            "relevance_score": 1.0,
-            "source": "istio",
-            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/istio/deployment/security-model/index.md",
-            "type": "public"
-          }
-        ],
-        "latency_ms": 9.23
-      },
-      {
-        "id": "v2-heldout-09",
-        "question": "How to debug a distroless or scratched container without a shell using ephemeral debug containers?",
-        "is_in_domain": true,
-        "retrieval_rank": null,
-        "answer": "I don't know based on the provided runbooks.",
-        "citations": [],
-        "latency_ms": 7.47
-      },
-      {
-        "id": "v2-heldout-10",
-        "question": "PostgreSQL Patroni leader switchover failed and cluster consensus reports split-brain. How to verify node state?",
-        "is_in_domain": true,
-        "retrieval_rank": null,
-        "answer": "Execute ``` gitlab-patronictl list ``` In the output, the leader node of the new standby cluster should have its `Role` defined as `Standby Leader`, the `TL` (timeline) should match the TL from the source cluster, and all replicas `State` should be `running`, which mean that they are replicating/streaming from their sources. [build_cluster_from_snapshot.md#build_cluster_from_snapshot.md-c9] [Verify the members in the cluster and find the erroneus leader] [PostgresSplitBrain.md#PostgresSplitBrain.md-c9]",
-        "citations": [
-          {
-            "source_file": "PostgresSplitBrain.md",
-            "section_title": "Verify the members in the cluster and find the erroneus leader",
-            "chunk_id": "PostgresSplitBrain.md-c9",
-            "relevance_score": 1.0,
-            "source": "gitlab",
-            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/PostgresSplitBrain.md",
-            "type": "public"
-          },
-          {
-            "source_file": "build_cluster_from_snapshot.md",
-            "section_title": "5.4.2. <a name='CheckReplicationstatus'></a>Check Replication status",
-            "chunk_id": "build_cluster_from_snapshot.md-c9",
-            "relevance_score": 1.0,
-            "source": "gitlab",
-            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/build_cluster_from_snapshot.md",
-            "type": "public"
-          }
-        ],
-        "latency_ms": 9.82
-      },
-      {
-        "id": "v2-heldout-11",
-        "question": "Envoy proxy returns 503 UO. What circuit breaking threshold was exceeded?",
-        "is_in_domain": true,
-        "retrieval_rank": 1,
-        "answer": "kubectl logs <client-pod> -c istio-proxy -n <namespace> | grep -E '503|UF|UC|UO|NR' [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c2] In an Istio service mesh, HTTP 503 errors typically originate from the Envoy sidecar proxy rather than the upstream application [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c0] Envoy attaches response flags to its access logs that pinpoint the exact failure reason: - `UF` = Upstream Connection Failure - `UC` = Upstream Connection Termination - `UO` = Upstream Overflow (circuit breaker tripped) - `NR` = No Route configured [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c0]",
-        "citations": [
-          {
-            "source_file": "istio_503_service_unavailable.md",
-            "section_title": "Check Envoy access logs for response flags",
-            "chunk_id": "istio_503_service_unavailable.md-c2",
-            "relevance_score": 1.0,
-            "source": "istio",
-            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/istio_503_service_unavailable.md",
-            "type": "internal"
-          },
-          {
-            "source_file": "istio_503_service_unavailable.md",
-            "section_title": "1. Overview",
-            "chunk_id": "istio_503_service_unavailable.md-c0",
-            "relevance_score": 1.0,
-            "source": "istio",
-            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/istio_503_service_unavailable.md",
-            "type": "internal"
-          }
-        ],
-        "latency_ms": 7.09
-      },
-      {
-        "id": "v2-heldout-12",
-        "question": "What JVM options ensure that container memory limits are respected by the JVM heap?",
-        "is_in_domain": true,
-        "retrieval_rank": 1,
-        "answer": "I don't know based on the provided runbooks.",
-        "citations": [],
-        "latency_ms": 7.13
-      },
-      {
-        "id": "v2-heldout-13",
-        "question": "Docker daemon on worker node fails to start because /var/lib/docker inode exhaustion occurred. How to check inodes?",
-        "is_in_domain": true,
-        "retrieval_rank": 1,
-        "answer": "df -h /var/lib/docker [docker_daemon_out_of_space.md#docker_daemon_out_of_space.md-c2]",
-        "citations": [
-          {
-            "source_file": "docker_daemon_out_of_space.md",
-            "section_title": "Check block space usage",
-            "chunk_id": "docker_daemon_out_of_space.md-c2",
-            "relevance_score": 1.0,
-            "source": "internal",
-            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/docker_daemon_out_of_space.md",
-            "type": "internal"
-          }
-        ],
-        "latency_ms": 10.6
-      },
-      {
-        "id": "v2-heldout-14",
-        "question": "Kubernetes liveness probe failed repeatedly resulting in container restart loop. How to view probe failure events?",
-        "is_in_domain": true,
-        "retrieval_rank": 1,
-        "answer": "I don't know based on the provided runbooks.",
-        "citations": [],
-        "latency_ms": 9.65
-      },
-      {
-        "id": "v2-heldout-15",
-        "question": "AWS NLB health checks fail because kube-proxy or NodePort is rejecting traffic on target instances. How to troubleshoot?",
-        "is_in_domain": true,
-        "retrieval_rank": 1,
-        "answer": "When traffic arrives at an AWS Application Load Balancer (ALB) or Network Load Balancer (NLB), target instances or container IPs in the Target Group fail health checks and are marked `Unhealthy`. - **Client sees:** `HTTP 502 Bad Gateway` (ALB) or connection resets / TCP RST (NLB). - **Target Group Console displays:** `Target.FailedHealthChecks` or `HealthCheck.Unhealthy`. - **Impact:** Entire availability zones or backend services become unreachable. [aws_network_load_balancer_unhealthy_hosts.md#aws_network_load_balancer_unhealthy_hosts.md-c0] Check Target Group Health via AWS CLI] [aws_network_load_balancer_unhealthy_hosts.md#aws_network_load_balancer_unhealthy_hosts.md-c1] bash aws elbv2 describe-target-health \\ --target-group-arn <target-group-arn> \\ --query \"TargetHealthDescriptions[].{Target:Target.Id,Port:Target.Port,State:TargetHealth.State,Reason:TargetHealth.Reason,Description:TargetHealth.Description}\" \\ --output table [aws_network_load_balancer_unhealthy_hosts.md#aws_network_load_balancer_unhealthy_hosts.md-c1]",
+        "answer": "When traffic arrives at an AWS Application Load Balancer (ALB) or Network Load Balancer (NLB), target instances or container IPs in the Target Group fail health checks and are marked `Unhealthy`. - **Client sees:** `HTTP 502 Bad Gateway` (ALB) or connection resets / TCP RST (NLB). - **Target Group Console displays:** `Target.FailedHealthChecks` or `HealthCheck.Unhealthy`. - **Impact:** Entire availability zones or backend services become unreachable. [aws_network_load_balancer_unhealthy_hosts.md#aws_network_load_balancer_unhealthy_hosts.md-c0] Immediate Fix:** Update Target Group health check path: ```bash aws elbv2 modify-target-group \\ --target-group-arn <target-group-arn> \\ --health-check-path \"/healthz\" \\ --matcher \"HttpCode=200,204\" [aws_network_load_balancer_unhealthy_hosts.md#aws_network_load_balancer_unhealthy_hosts.md-c6]",
         "citations": [
           {
             "source_file": "aws_network_load_balancer_unhealthy_hosts.md",
@@ -1166,110 +1836,167 @@
           },
           {
             "source_file": "aws_network_load_balancer_unhealthy_hosts.md",
-            "section_title": "1. Check Target Group Health via AWS CLI",
-            "chunk_id": "aws_network_load_balancer_unhealthy_hosts.md-c1",
+            "section_title": "Scenario B: Application Health Check Path Mismatch (404 Not Found)",
+            "chunk_id": "aws_network_load_balancer_unhealthy_hosts.md-c6",
             "relevance_score": 1.0,
             "source": "internal",
             "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/aws_network_load_balancer_unhealthy_hosts.md",
             "type": "internal"
           }
         ],
-        "latency_ms": 9.7
+        "latency_ms": 8.26
       },
       {
-        "id": "v2-heldout-16",
-        "question": "How does setting imageMinimumGCAge and imageGCHighThresholdPercent prevent kubelet disk eviction churn?",
+        "id": "v2-blind-08",
+        "question": "Newly deployed pod keeps cycling through termination before passing initial readiness checks.",
         "is_in_domain": true,
-        "retrieval_rank": null,
+        "retrieval_rank": 1,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 5.71
+        "latency_ms": 7.55
       },
       {
-        "id": "v2-heldout-17",
-        "question": "What tool validates Istio DestinationRule and VirtualService configurations against the mesh before deployment?",
+        "id": "v2-blind-09",
+        "question": "How to inspect ephemeral container state when main container does not contain bash or sh utilities?",
         "is_in_domain": true,
         "retrieval_rank": null,
-        "answer": "I don't know based on the provided runbooks.",
-        "citations": [],
-        "latency_ms": 6.71
-      },
-      {
-        "id": "v2-heldout-18",
-        "question": "How to connect securely to a production database console via Teleport without exposing database credentials?",
-        "is_in_domain": true,
-        "retrieval_rank": null,
-        "answer": "Use [Database Access via Teleport](../teleport/Connect_to_Database_Console_via_Teleport.md). Read-only access to non-production databases does not require an access request. [staging-environment.md#staging-environment.md-c5] You can use Teleport to: * [Access the Rails console](./Connect_to_Rails_Console_via_Teleport.md) * [Access a database](./Connect_to_Database_Console_via_Teleport.md) * [Access a host via SSH](./ssh_access.md) * [Approve an access request](./teleport_approval_workflow.md) (if you've been granted an approver role) [getting_access.md#getting_access.md-c8]",
+        "answer": "sh crictl ps -a # get container ID CONTAINER_PID=$( crictl inspect <container-id> | jq -r .info.pid ) [k8s-operations.md#k8s-operations.md-c22]",
         "citations": [
           {
-            "source_file": "staging-environment.md",
-            "section_title": "Run a psql console in staging environment",
-            "chunk_id": "staging-environment.md-c5",
+            "source_file": "k8s-operations.md",
+            "section_title": "Run a command in the pod's network namespace",
+            "chunk_id": "k8s-operations.md-c22",
             "relevance_score": 1.0,
             "source": "gitlab",
-            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/staging-environment.md",
-            "type": "public"
-          },
-          {
-            "source_file": "getting_access.md",
-            "section_title": "Next steps",
-            "chunk_id": "getting_access.md-c8",
-            "relevance_score": 1.0,
-            "source": "gitlab",
-            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/getting_access.md",
+            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/k8s-operations.md",
             "type": "public"
           }
         ],
-        "latency_ms": 9.9
+        "latency_ms": 7.52
       },
       {
-        "id": "v2-heldout-19",
-        "question": "What is the consequence of setting PeerAuthentication to STRICT in the istio-system namespace without DestinationRules?",
+        "id": "v2-blind-10",
+        "question": "Database administrator needs console access to PostgreSQL primary node via secure bastion.",
+        "is_in_domain": true,
+        "retrieval_rank": null,
+        "answer": "For more information: <https://github.com/cybertec-postgresql/pgwatch2> Execute on the primary from the source cluster the following sql, connecting with `gitlab-psql`: ```sql create role pgwatch2 login password $pgwatch2_pwd; grant pg_monitor TO pgwatch2; grant select on table pg_stat_replication to pgwatch2; grant select on table pg_stat_activity to pgwatch2; grant execute on function pg_stat_file(text) to pgwatch2; grant execute on function pg_ls_dir(text) to pgwatch2; grant connect on database gitlabhq_production to pgwatch2; grant usage on schema public to pgwatch2; if pg_wait_sampling extension is used: GRANT EXECUTE ON FUNCTION pg_wait_sampling_reset_profile() TO pgwatch2; ``` Execute locally, the redirect of the Netdata dashboard port (19999) via SSH to the local port 3000: ``` ssh -fNTML 3000:localhost:3000 pgwatch-01-sv-db-benchmarking.c.gitlab-db-benchmarking.internal ``` The URL to access in the browser: ``` http://127.0.0.1:3000/ [provisioning_bench_env.md#provisioning_bench_env.md-c14] After this ansible-playbook, we expect to split the traffic related to CI to the target database cluster: Path: `/db-migration/db-sharding/` Command: `export ENVIRONMENT=db-benchmarking; ansible-playbook -i inventory/db-benchmarking.yml playbooks/upgrade_to_sharding.yml` Resumed output: ``` Thursday 02 September 2021 14:05:57 +0000 (0:00:01.174) 0:00:39.225 **** =============================================================================== Gathering Facts --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 14.55s [Execution (5/8)] Ensure the newly promoted Primary Target database is discoverable by DNS ------------------------------------------------------------------------------------------------------------------------------------- 3.78s [Intermediate-check (3/4)] Check if Primary Target LSN caught up with Primary Source LSN --------------------------------------------------------------------------------------------------------------------------------------- 2.18s [Execution (4/8)] Promote database on replica ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 1.99s [Execution (3/8)] Update database config in the secondary pgbouncer cluster ---------------------------------------------------------------------------------------------------------------------------------------------------- 1.89s [Execution (7/8)] Ensure the Primary Target is not in recovery mode ------------------------------------------------------------------------------------------------------------------------------------------------------------ 1.70s [Execution (1/8)] Stop all traffic from the secondary pgbouncer cluster -------------------------------------------------------------------------------------------------------------------------------------------------------- 1.67s [Execution (2/8)] Stop Chef client to prevent unexpected changes during the process -------------------------------------------------------------------------------------------------------------------------------------------- 1.67s [Intermediate-check (2/4)] Get LSN from the Primary Target --------------------------------------------------------------------------------------------------------------------------------------------------------------------- 1.59s [Execution (6/8)] Check if the Primary Target database is ready ---------------------------------------------------------------------------------------------------------------------------------------------------------------- 1.59s [Intermediate-check (1/4)] Get LSN from the Primary Source --------------------------------------------------------------------------------------------------------------------------------------------------------------------- 1.40s [Pre-check (1/2)] Check PostgreSQL streaming replication lag is lower than 5MB ------------------------------------------------------------------------------------------------------------------------------------------------- 1.40s [Pre-check (2/2)] Check if PostgreSQL streaming replication lag is smaller than 5MB before proceeding -------------------------------------------------------------------------------------------------------------------------- 1.39s [Intermediate-check (4/4)] Show Source and Target Primary LSN ------------------------------------------------------------------------------------------------------------------------------------------------------------------ 1.22s [Execution (8/8)] Restore all traffic on the secondary pgbouncer cluster ------------------------------------------------------------------------------------------------------------------------------------------------------- 1.17s [provisioning_bench_env.md#provisioning_bench_env.md-c18] There is a dedicated server for console access named `console-01-sv-gprd.c.gitlab-production.internal`, with an alias `gprd-console`. You can also get a rails or psql console directly via `ssh YOURUSER-rails@gprd-console` or `ssh YOURUSER-db@gprd-console`. See [granting rails or db access](../uncategorized/granting-rails-or-db-access.md) for more information on how to request console access. [gprd-bastions.md#gprd-bastions.md-c1]",
+        "citations": [
+          {
+            "source_file": "provisioning_bench_env.md",
+            "section_title": "How to setup PGWatch 2.0",
+            "chunk_id": "provisioning_bench_env.md-c14",
+            "relevance_score": 0.3613,
+            "source": "gitlab",
+            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/provisioning_bench_env.md",
+            "type": "public"
+          },
+          {
+            "source_file": "provisioning_bench_env.md",
+            "section_title": "How to execute the switchover or the activity that will be tested",
+            "chunk_id": "provisioning_bench_env.md-c18",
+            "relevance_score": 0.3563,
+            "source": "gitlab",
+            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/provisioning_bench_env.md",
+            "type": "public"
+          },
+          {
+            "source_file": "gprd-bastions.md",
+            "section_title": "Console access",
+            "chunk_id": "gprd-bastions.md-c1",
+            "relevance_score": 0.3332,
+            "source": "gitlab",
+            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/gitlab/gprd-bastions.md",
+            "type": "public"
+          }
+        ],
+        "latency_ms": 8.77
+      },
+      {
+        "id": "v2-blind-11",
+        "question": "Which kubelet eviction flags configure garbage collection thresholds for unused container images?",
         "is_in_domain": true,
         "retrieval_rank": 1,
-        "answer": "When an Istio namespace or workload is configured with `PeerAuthentication` in `STRICT` mode, any client connecting over plain unencrypted TCP/HTTP without an authenticated mTLS certificate handshake will be immediately rejected with TCP connection reset or `connection termination`. [istio_mtls_strict_failures.md#istio_mtls_strict_failures.md-c0] {{< text yaml >}} apiVersion: security.istio.io/v1 kind: PeerAuthentication metadata: name: default namespace: foo spec: mtls: mode: STRICT --- apiVersion: security.istio.io/v1 kind: AuthorizationPolicy metadata: name: foo-isolation namespace: foo spec: action: ALLOW rules: - from: - source: namespaces: [\"foo\"] {{< /text >}} [index.md#index.md-c3] By default, Istio will accept mTLS and non-mTLS traffic (often called \"permissive mode\"). Users can opt-in to strict enforcement by writing `PeerAuthentication` or `AuthorizationPolicy` rules requiring mTLS [index.md#index.md-c11]",
+        "answer": "Configure Kubelet Eviction Thresholds in `kubelet-config.yaml`:** ```yaml evictionHard: nodefs.available: \"10%\" nodefs.inodesFree: \"5%\" imagefs.available: \"15%\" ``` 3 [kubernetes_node_disk_pressure.md#kubernetes_node_disk_pressure.md-c10] NodeDiskPressure` occurs when the Kubelet detects that available disk space or inodes on the root filesystem (or the image filesystem) falls below configured eviction thresholds (default: available disk < 15% or free inodes < 5%). When triggered: 1 [kubernetes_node_disk_pressure.md#kubernetes_node_disk_pressure.md-c0]",
+        "citations": [
+          {
+            "source_file": "kubernetes_node_disk_pressure.md",
+            "section_title": "Overview & Symptoms",
+            "chunk_id": "kubernetes_node_disk_pressure.md-c0",
+            "relevance_score": 1.0,
+            "source": "kubernetes",
+            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/kubernetes_node_disk_pressure.md",
+            "type": "internal"
+          },
+          {
+            "source_file": "kubernetes_node_disk_pressure.md",
+            "section_title": "Permanent Resolution & Best Practices",
+            "chunk_id": "kubernetes_node_disk_pressure.md-c10",
+            "relevance_score": 1.0,
+            "source": "kubernetes",
+            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/kubernetes_node_disk_pressure.md",
+            "type": "internal"
+          }
+        ],
+        "latency_ms": 7.35
+      },
+      {
+        "id": "v2-blind-12",
+        "question": "Client TLS handshake fails with SSL routines:ssl3_read_bytes:tlsv1 alert internal error in service mesh.",
+        "is_in_domain": true,
+        "retrieval_rank": 1,
+        "answer": "Symptom:** Client has a sidecar, but traffic fails because the client does not initiate TLS handshake [istio_mtls_strict_failures.md#istio_mtls_strict_failures.md-c6]",
         "citations": [
           {
             "source_file": "istio_mtls_strict_failures.md",
-            "section_title": "1. Overview",
-            "chunk_id": "istio_mtls_strict_failures.md-c0",
+            "section_title": "Missing DestinationRule for cross-namespace or egress traffic",
+            "chunk_id": "istio_mtls_strict_failures.md-c6",
             "relevance_score": 1.0,
             "source": "istio",
             "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/istio_mtls_strict_failures.md",
             "type": "internal"
-          },
-          {
-            "source_file": "index.md",
-            "section_title": "Server mTLS",
-            "chunk_id": "index.md-c11",
-            "relevance_score": 1.0,
-            "source": "istio",
-            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/istio/deployment/security-model/index.md",
-            "type": "public"
-          },
-          {
-            "source_file": "index.md",
-            "section_title": "Namespace isolation",
-            "chunk_id": "index.md-c3",
-            "relevance_score": 1.0,
-            "source": "istio",
-            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/istio/configuration/security/security-policy-examples/index.md",
-            "type": "public"
           }
         ],
-        "latency_ms": 7.07
+        "latency_ms": 8.33
       },
       {
-        "id": "v2-heldout-20",
-        "question": "Kubernetes node reports MemoryPressure condition. How does kubelet decide which pod QoS tier to evict first?",
+        "id": "v2-blind-13",
+        "question": "Envoy proxy downstream connection resets when backend service circuit breaker trips.",
         "is_in_domain": true,
         "retrieval_rank": 1,
-        "answer": "Symptom:** Node condition shows `MemoryPressure: True`. Pods with `BestEffort` or `Burstable` QoS classes are evicted with `The node was low on resource: memory`. - **Fix:** Configure Kubernetes Horizontal Pod Autoscaler (HPA) or cluster autoscaler to scale out nodes, and always define explicit `requests` and `limits` to guarantee `Guaranteed` QoS for critical workloads. [kubernetes_oom_killed.md#kubernetes_oom_killed.md-c6] It uses the Pod's QoS class to decide which cgroup settings to apply, but it does not change how Pods are classified [pod-qos.md#pod-qos.md-c8]",
+        "answer": "Envoy attaches response flags to its access logs that pinpoint the exact failure reason: - `UF` = Upstream Connection Failure - `UC` = Upstream Connection Termination - `UO` = Upstream Overflow (circuit breaker tripped) - `NR` = No Route configured [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c0] In an Istio service mesh, HTTP 503 errors typically originate from the Envoy sidecar proxy rather than the upstream application [istio_503_service_unavailable.md#istio_503_service_unavailable.md-c0]",
+        "citations": [
+          {
+            "source_file": "istio_503_service_unavailable.md",
+            "section_title": "1. Overview",
+            "chunk_id": "istio_503_service_unavailable.md-c0",
+            "relevance_score": 1.0,
+            "source": "istio",
+            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/istio_503_service_unavailable.md",
+            "type": "internal"
+          }
+        ],
+        "latency_ms": 7.45
+      },
+      {
+        "id": "v2-blind-14",
+        "question": "Container filesystem becomes read-only because root partition inode count is 100% full.",
+        "is_in_domain": true,
+        "retrieval_rank": 1,
+        "answer": "I don't know based on the provided runbooks.",
+        "citations": [],
+        "latency_ms": 7.56
+      },
+      {
+        "id": "v2-blind-15",
+        "question": "Application receives SIGKILL signal from operating system kernel under high memory allocation.",
+        "is_in_domain": true,
+        "retrieval_rank": 1,
+        "answer": "The Linux kernel Out-Of-Memory (cgroup) killer terminates the highest-badness container process with signal 9 (`SIGKILL`, exit code `128 + 9 = 137`). [kubernetes_oom_killed.md#kubernetes_oom_killed.md-c0] Kernel 5.9 or higher is recommended because `memory.high` throttling on older kernels can trigger a known [livelock bug](https://lore.kernel.org/all/20200710012662.GA29679@chep.ntu.edu.tw/). If the `MemoryQoS` feature gate is enabled on an older kernel, the kubelet logs a warning at startup. [pod-qos.md#pod-qos.md-c12]",
         "citations": [
           {
             "source_file": "kubernetes_oom_killed.md",
-            "section_title": "Scenario B: Node-Level Eviction",
-            "chunk_id": "kubernetes_oom_killed.md-c6",
+            "section_title": "1. Overview",
+            "chunk_id": "kubernetes_oom_killed.md-c0",
             "relevance_score": 1.0,
             "source": "kubernetes",
             "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/kubernetes_oom_killed.md",
@@ -1277,60 +2004,125 @@
           },
           {
             "source_file": "pod-qos.md",
-            "section_title": "Memory QoS with cgroup v2",
-            "chunk_id": "pod-qos.md-c8",
+            "section_title": "System requirements",
+            "chunk_id": "pod-qos.md-c12",
             "relevance_score": 1.0,
             "source": "kubernetes",
             "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/public/kubernetes/pod-qos.md",
             "type": "public"
           }
         ],
-        "latency_ms": 9.99
+        "latency_ms": 7.42
       },
       {
-        "id": "v2-heldout-21",
-        "question": "What CSS Flexbox property controls how flex items wrap onto multiple lines?",
+        "id": "v2-blind-16",
+        "question": "Network load balancer target group displays Target.FailedHealthChecks metric increase in CloudWatch.",
+        "is_in_domain": true,
+        "retrieval_rank": 1,
+        "answer": "When traffic arrives at an AWS Application Load Balancer (ALB) or Network Load Balancer (NLB), target instances or container IPs in the Target Group fail health checks and are marked `Unhealthy`. - **Client sees:** `HTTP 502 Bad Gateway` (ALB) or connection resets / TCP RST (NLB). - **Target Group Console displays:** `Target.FailedHealthChecks` or `HealthCheck.Unhealthy`. - **Impact:** Entire availability zones or backend services become unreachable. [aws_network_load_balancer_unhealthy_hosts.md#aws_network_load_balancer_unhealthy_hosts.md-c0]",
+        "citations": [
+          {
+            "source_file": "aws_network_load_balancer_unhealthy_hosts.md",
+            "section_title": "Overview & Symptoms",
+            "chunk_id": "aws_network_load_balancer_unhealthy_hosts.md-c0",
+            "relevance_score": 1.0,
+            "source": "internal",
+            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/aws_network_load_balancer_unhealthy_hosts.md",
+            "type": "internal"
+          }
+        ],
+        "latency_ms": 7.38
+      },
+      {
+        "id": "v2-blind-17",
+        "question": "Command to view standard output of a prior failed instance of a crashing pod.",
+        "is_in_domain": true,
+        "retrieval_rank": null,
+        "answer": "I don't know based on the provided runbooks.",
+        "citations": [],
+        "latency_ms": 7.32
+      },
+      {
+        "id": "v2-blind-18",
+        "question": "Setting upstream proxy timeouts in NGINX ingress resource to prevent gateway cutoff.",
+        "is_in_domain": true,
+        "retrieval_rank": null,
+        "answer": "I don't know based on the provided runbooks.",
+        "citations": [],
+        "latency_ms": 8.06
+      },
+      {
+        "id": "v2-blind-19",
+        "question": "Configuring JVM memory limits to avoid container cgroup kill.",
+        "is_in_domain": true,
+        "retrieval_rank": 1,
+        "answer": "The Linux kernel Out-Of-Memory (cgroup) killer terminates the highest-badness container process with signal 9 (`SIGKILL`, exit code `128 + 9 = 137`). [kubernetes_oom_killed.md#kubernetes_oom_killed.md-c0]",
+        "citations": [
+          {
+            "source_file": "kubernetes_oom_killed.md",
+            "section_title": "1. Overview",
+            "chunk_id": "kubernetes_oom_killed.md-c0",
+            "relevance_score": 1.0,
+            "source": "kubernetes",
+            "path": "/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/kubernetes_oom_killed.md",
+            "type": "internal"
+          }
+        ],
+        "latency_ms": 7.32
+      },
+      {
+        "id": "v2-blind-20",
+        "question": "Validating mesh routing rules and sidecar proxy injection before deploying canary release.",
+        "is_in_domain": true,
+        "retrieval_rank": null,
+        "answer": "I don't know based on the provided runbooks.",
+        "citations": [],
+        "latency_ms": 8.35
+      },
+      {
+        "id": "v2-blind-21",
+        "question": "What is the recommended recipe for New York style sourdough pizza dough?",
         "is_in_domain": false,
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 5.87
+        "latency_ms": 5.16
       },
       {
-        "id": "v2-heldout-22",
-        "question": "How do you calculate sourdough bread hydration percentage based on flour and water weight?",
+        "id": "v2-blind-22",
+        "question": "How to implement drag and drop gesture recognizers in SwiftUI?",
         "is_in_domain": false,
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 4.86
+        "latency_ms": 3.36
       },
       {
-        "id": "v2-heldout-23",
-        "question": "Explain the difference between SwiftUI ViewBuilder and UIKit UIViewController lifecycle.",
+        "id": "v2-blind-23",
+        "question": "What are the rules for infield fly in Major League Baseball?",
         "is_in_domain": false,
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 3.61
+        "latency_ms": 2.8
       },
       {
-        "id": "v2-heldout-24",
-        "question": "What is Shor's algorithm and how does quantum computing impact RSA public key cryptography?",
+        "id": "v2-blind-24",
+        "question": "Explanation of quantum teleportation protocol using Bell states.",
         "is_in_domain": false,
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 5.89
+        "latency_ms": 4.55
       },
       {
-        "id": "v2-heldout-25",
-        "question": "Which players should I start at running back in PPR fantasy football scoring this week?",
+        "id": "v2-blind-25",
+        "question": "How to tune a six-string acoustic guitar to drop D tuning?",
         "is_in_domain": false,
         "retrieval_rank": null,
         "answer": "I don't know based on the provided runbooks.",
         "citations": [],
-        "latency_ms": 5.15
+        "latency_ms": 3.65
       }
     ]
   }

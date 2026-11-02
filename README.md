@@ -129,7 +129,7 @@ All queries evaluate with parameters `top_k = 5` and `min_relevance_threshold = 
 > - **Out-of-Domain Refusal**: Evaluates strict fallback to *"I don't know based on the provided runbooks."* when queries fall outside the runbook corpus.
 > - **Sub-Millisecond In-RAM Retrieval**: With pre-allocated contiguous float matrices, vector search over 7,207 chunks completes in **~0.64ms**, well within sub-5ms SLA.
 
-### 1. Primary Golden Benchmark (25 Incident Queries)
+### 1. Primary Golden Benchmark (Synthetic Mock Baseline, Keyword-Bucket Dependent)
 
 | Metric Dimension | Score / Count | Internal Target | Status | Operational Notes |
 | :--- | :---: | :---: | :---: | :--- |
@@ -138,9 +138,9 @@ All queries evaluate with parameters `top_k = 5` and `min_relevance_threshold = 
 | **Mean Reciprocal Rank (MRR)** | **0.867** | >= 0.850 | **PASS** | High ranking density near rank 1 |
 | **In-Domain Keyword Recall** | **50.0%** | >= 60.0% (Prod Target) | **BASELINE (Mock)** | Extractive mock baseline (in-domain denominator) |
 | **Out-of-Domain Refusal Accuracy** | **100.0% (5/5)** | 100.0% | **PASS** | Strict refusal on non-SRE topics (cake, FIFA, tennis, stocks) |
-| **Average Total Query Latency** | **6.89 ms** | < 2500 ms | **PASS** | In-RAM vector search (6.76ms) |
+| **Average Total Query Latency** | **6.09 ms** | < 2500 ms | **PASS** | In-RAM vector search (5.98ms) |
 
-### 2. Tagged Held-Out Baseline (v1.0.0-eval-frozen, 25 Scenarios)
+### 2. Tagged Held-Out Baseline (v1.0.0-eval-frozen, Keyword-Bucket Dependent)
 
 | Metric Dimension | Score / Count | Internal Target | Status | Operational Notes |
 | :--- | :---: | :---: | :---: | :--- |
@@ -149,18 +149,29 @@ All queries evaluate with parameters `top_k = 5` and `min_relevance_threshold = 
 | **Mean Reciprocal Rank (MRR)** | **0.792** | >= 0.850 | **BASELINE** | Tagged-state MRR without post-freeze adjustments |
 | **In-Domain Keyword Recall** | **55.0%** | >= 60.0% (Prod Target) | **BASELINE (Mock)** | Multi-sentence extraction with verified citations |
 | **Out-of-Domain Refusal Accuracy** | **100.0% (5/5)** | 100.0% | **PASS** | 100% refusal preserved on unseen negative queries |
-| **Average Total Query Latency** | **6.65 ms** | < 2500 ms | **PASS** | In-RAM retrieval: 6.53ms |
+| **Average Total Query Latency** | **6.21 ms** | < 2500 ms | **PASS** | In-RAM retrieval: 6.09ms |
 
-### 3. New Blind Held-Out Validation (v2.0, 25 Unseen Scenarios)
+### 3. Blind Held-Out Validation (v2.0, Keyword-Bucket Dependent)
 
 | Metric Dimension | Score / Count | Internal Target | Status | Operational Notes |
 | :--- | :---: | :---: | :---: | :--- |
-| **Retrieval Top-1 Hit-Rate** | **70.0% (14/20)** | >= 80.0% | **REVIEW** | True blind first-run result on brand-new operational scenarios |
-| **Retrieval Top-5 Hit-Rate** | **70.0% (14/20)** | >= 90.0% | **BASELINE** | First-run top-5 presence without keyword bucket tuning |
-| **Mean Reciprocal Rank (MRR)** | **0.700** | >= 0.850 | **BASELINE** | Blind first-run MRR reported as-is |
-| **In-Domain Keyword Recall** | **60.0%** | >= 60.0% (Prod Target) | **PASS** | Extractive mock keyword presence |
-| **Out-of-Domain Refusal Accuracy** | **100.0% (5/5)** | 100.0% | **PASS** | 100% strict refusal on out-of-domain queries (CSS, sourdough, etc.) |
-| **Average Total Query Latency** | **7.87 ms** | < 2500 ms | **PASS** | In-RAM retrieval: 7.78ms |
+| **Retrieval Top-1 Hit-Rate** | **55.0% (11/20)** | >= 80.0% | **REVIEW** | Natural incident symptom phrasing without cluster keywords |
+| **Retrieval Top-5 Hit-Rate** | **55.0% (11/20)** | >= 90.0% | **BASELINE** | First-run top-5 presence reported as-is |
+| **Mean Reciprocal Rank (MRR)** | **0.550** | >= 0.850 | **BASELINE** | Blind first-run MRR reported as-is |
+| **In-Domain Keyword Recall** | **55.0%** | >= 60.0% (Prod Target) | **BASELINE (Mock)** | Extractive mock keyword presence |
+| **Out-of-Domain Refusal Accuracy** | **100.0% (5/5)** | 100.0% | **PASS** | 100% strict refusal on out-of-domain queries |
+| **Average Total Query Latency** | **7.07 ms** | < 2500 ms | **PASS** | In-RAM retrieval: 6.97ms |
+
+### 🔬 Keyword-Bucket vs. Hash-Only Ablation Study
+
+> [!WARNING]
+> **Synthetic Vector Sensitivity**: The table below isolates the impact of hand-written keyword cluster boosting (+15.0 vector weight) versus pure deterministic MD5 token hashing. It demonstrates that mock vector performance is heavily dependent on keyword buckets and does not reflect dense neural embedding semantics.
+
+| Evaluation Suite | With Keyword Clusters (Mock Boost) | Hash-Only (No Clusters) | Top-1 Delta | MRR (Clusters / Hash-Only) |
+| :--- | :---: | :---: | :---: | :---: |
+| **Primary Golden Benchmark** | **85.0%** | **10.0%** | -75.0% | 0.867 / 0.133 |
+| **Tagged Held-Out Baseline (v1)** | **75.0%** | **45.0%** | -30.0% | 0.792 / 0.483 |
+| **Blind Held-Out Suite (v2)** | **55.0%** | **5.0%** | -50.0% | 0.550 / 0.075 |
 
 *(Full benchmark report generated automatically by [evaluation/evaluate.py](evaluation/evaluate.py) to [evaluation/eval_report.json](evaluation/eval_report.json)).*
 

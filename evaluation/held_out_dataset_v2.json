@@ -1,175 +1,175 @@
 [
   {
-    "id": "v2-heldout-01",
-    "query": "Kubernetes worker node status shows NodeDiskPressure and kubelet starts evicting pods. Which threshold triggers this?",
+    "id": "v2-blind-01",
+    "query": "Workload pods are getting terminated by kubelet on worker nodes with reason Evicted due to local disk volume exhaustion.",
     "target_source_file": "kubernetes_node_disk_pressure.md",
-    "expected_answer_keywords": ["evictionhard", "imagefs", "nodefs", "diskpressure"],
+    "expected_answer_keywords": ["eviction", "diskpressure", "nodefs", "imagefs"],
     "is_in_domain": true
   },
   {
-    "id": "v2-heldout-02",
-    "query": "How do you recover a container failing with Exit Code 139 during container startup?",
-    "target_source_file": "kubernetes_crashloopbackoff.md",
-    "expected_answer_keywords": ["exit code 139", "segfault", "core dump", "crashloopbackoff"],
-    "is_in_domain": true
-  },
-  {
-    "id": "v2-heldout-03",
-    "query": "Istio Envoy logs display 503 UF flags when communicating with payment-service. What is the root cause?",
-    "target_source_file": "istio_503_service_unavailable.md",
-    "expected_answer_keywords": ["503", "uf", "upstream", "connection failure", "envoy"],
-    "is_in_domain": true
-  },
-  {
-    "id": "v2-heldout-04",
-    "query": "Docker build fails with no space left on device on CI runner. How to safely clean up overlay2 build cache?",
-    "target_source_file": "docker_daemon_out_of_space.md",
-    "expected_answer_keywords": ["docker system prune", "overlay2", "build cache", "dangling"],
-    "is_in_domain": true
-  },
-  {
-    "id": "v2-heldout-05",
-    "query": "What kubectl command should you run to inspect previous logs of an OOMKilled container?",
+    "id": "v2-blind-02",
+    "query": "Java application process in container dies silently with no stacktrace recorded in standard out.",
     "target_source_file": "kubernetes_oom_killed.md",
-    "expected_answer_keywords": ["kubectl logs", "--previous", "exit code 137", "oomkilled"],
+    "expected_answer_keywords": ["oom", "sigkill", "memory", "limits"],
     "is_in_domain": true
   },
   {
-    "id": "v2-heldout-06",
-    "query": "AWS Network Load Balancer target group marks all backend EC2 instances as Unhealthy. How to diagnose?",
-    "target_source_file": "aws_network_load_balancer_unhealthy_hosts.md",
-    "expected_answer_keywords": ["target.failedhealthchecks", "nlb", "health check", "security group"],
+    "id": "v2-blind-03",
+    "query": "Microservice gateway receives HTTP 503 errors when calling the billing service mesh upstream.",
+    "target_source_file": "istio_503_service_unavailable.md",
+    "expected_answer_keywords": ["503", "envoy", "upstream", "connection"],
     "is_in_domain": true
   },
   {
-    "id": "v2-heldout-07",
-    "query": "NGINX Ingress controller returns 504 Gateway Timeout while waiting for microservice response. Which ingress annotations fix this?",
-    "target_source_file": "kubernetes_ingress_504_gateway_timeout.md",
-    "expected_answer_keywords": ["504", "proxy-read-timeout", "proxy-connect-timeout", "gateway timeout"],
-    "is_in_domain": true
-  },
-  {
-    "id": "v2-heldout-08",
-    "query": "Connecting to an Istio service with STRICT mTLS enabled from outside the mesh fails SSL handshake. How to resolve?",
+    "id": "v2-blind-04",
+    "query": "Pods in staging namespace cannot reach production database after security team applied mutual TLS policy.",
     "target_source_file": "istio_mtls_strict_failures.md",
-    "expected_answer_keywords": ["peerauthentication", "strict", "permissive", "portlevelmtls", "mtls"],
+    "expected_answer_keywords": ["mtls", "peerauthentication", "permissive", "strict"],
     "is_in_domain": true
   },
   {
-    "id": "v2-heldout-09",
-    "query": "How to debug a distroless or scratched container without a shell using ephemeral debug containers?",
-    "target_source_file": "kubernetes_crashloopbackoff.md",
-    "expected_answer_keywords": ["kubectl debug", "ephemeral-containers", "target"],
-    "is_in_domain": true
-  },
-  {
-    "id": "v2-heldout-10",
-    "query": "PostgreSQL Patroni leader switchover failed and cluster consensus reports split-brain. How to verify node state?",
-    "target_source_file": "gitlab_connect_to_database_console_via_teleport.md",
-    "expected_answer_keywords": ["patronictl", "teleport", "tsh db", "patroni"],
-    "is_in_domain": true
-  },
-  {
-    "id": "v2-heldout-11",
-    "query": "Envoy proxy returns 503 UO. What circuit breaking threshold was exceeded?",
-    "target_source_file": "istio_503_service_unavailable.md",
-    "expected_answer_keywords": ["uo", "upstream overflow", "circuit breaker", "maxconnections"],
-    "is_in_domain": true
-  },
-  {
-    "id": "v2-heldout-12",
-    "query": "What JVM options ensure that container memory limits are respected by the JVM heap?",
-    "target_source_file": "kubernetes_oom_killed.md",
-    "expected_answer_keywords": ["-xx:maxrampercentage", "cgroup", "heap", "memory limit"],
-    "is_in_domain": true
-  },
-  {
-    "id": "v2-heldout-13",
-    "query": "Docker daemon on worker node fails to start because /var/lib/docker inode exhaustion occurred. How to check inodes?",
+    "id": "v2-blind-05",
+    "query": "CI agent disk usage reaches 100% due to uncollected container build layers.",
     "target_source_file": "docker_daemon_out_of_space.md",
-    "expected_answer_keywords": ["df -i", "inodes", "overlay2", "docker prune"],
+    "expected_answer_keywords": ["docker", "prune", "overlay2", "cache"],
     "is_in_domain": true
   },
   {
-    "id": "v2-heldout-14",
-    "query": "Kubernetes liveness probe failed repeatedly resulting in container restart loop. How to view probe failure events?",
-    "target_source_file": "kubernetes_crashloopbackoff.md",
-    "expected_answer_keywords": ["kubectl describe pod", "liveness probe", "events", "unhealthy"],
+    "id": "v2-blind-06",
+    "query": "Clients report periodic HTTP 504 while downloading large report exports through ingress.",
+    "target_source_file": "kubernetes_ingress_504_gateway_timeout.md",
+    "expected_answer_keywords": ["504", "timeout", "proxy-read-timeout", "ingress"],
     "is_in_domain": true
   },
   {
-    "id": "v2-heldout-15",
-    "query": "AWS NLB health checks fail because kube-proxy or NodePort is rejecting traffic on target instances. How to troubleshoot?",
+    "id": "v2-blind-07",
+    "query": "AWS Network Load Balancer drops traffic to target instances following maintenance update.",
     "target_source_file": "aws_network_load_balancer_unhealthy_hosts.md",
-    "expected_answer_keywords": ["nlb", "nodeport", "health check", "target group"],
+    "expected_answer_keywords": ["nlb", "health check", "target group", "unhealthy"],
     "is_in_domain": true
   },
   {
-    "id": "v2-heldout-16",
-    "query": "How does setting imageMinimumGCAge and imageGCHighThresholdPercent prevent kubelet disk eviction churn?",
+    "id": "v2-blind-08",
+    "query": "Newly deployed pod keeps cycling through termination before passing initial readiness checks.",
+    "target_source_file": "kubernetes_crashloopbackoff.md",
+    "expected_answer_keywords": ["crashloopbackoff", "restart", "liveness", "readiness"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-blind-09",
+    "query": "How to inspect ephemeral container state when main container does not contain bash or sh utilities?",
+    "target_source_file": "kubernetes_crashloopbackoff.md",
+    "expected_answer_keywords": ["kubectl debug", "ephemeral", "crictl"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-blind-10",
+    "query": "Database administrator needs console access to PostgreSQL primary node via secure bastion.",
+    "target_source_file": "gitlab_connect_to_database_console_via_teleport.md",
+    "expected_answer_keywords": ["teleport", "tsh", "database", "console"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-blind-11",
+    "query": "Which kubelet eviction flags configure garbage collection thresholds for unused container images?",
     "target_source_file": "kubernetes_node_disk_pressure.md",
-    "expected_answer_keywords": ["imagegchighthresholdpercent", "imageminimumgcage", "eviction", "kubelet"],
+    "expected_answer_keywords": ["imagegchighthresholdpercent", "eviction", "kubelet", "imagefs"],
     "is_in_domain": true
   },
   {
-    "id": "v2-heldout-17",
-    "query": "What tool validates Istio DestinationRule and VirtualService configurations against the mesh before deployment?",
+    "id": "v2-blind-12",
+    "query": "Client TLS handshake fails with SSL routines:ssl3_read_bytes:tlsv1 alert internal error in service mesh.",
+    "target_source_file": "istio_mtls_strict_failures.md",
+    "expected_answer_keywords": ["mtls", "peerauthentication", "certificate", "handshake"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-blind-13",
+    "query": "Envoy proxy downstream connection resets when backend service circuit breaker trips.",
+    "target_source_file": "istio_503_service_unavailable.md",
+    "expected_answer_keywords": ["circuit breaker", "upstream", "overflow", "503"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-blind-14",
+    "query": "Container filesystem becomes read-only because root partition inode count is 100% full.",
+    "target_source_file": "docker_daemon_out_of_space.md",
+    "expected_answer_keywords": ["df -i", "inodes", "prune", "docker"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-blind-15",
+    "query": "Application receives SIGKILL signal from operating system kernel under high memory allocation.",
+    "target_source_file": "kubernetes_oom_killed.md",
+    "expected_answer_keywords": ["oomkilled", "sigkill", "exit code 137", "memory"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-blind-16",
+    "query": "Network load balancer target group displays Target.FailedHealthChecks metric increase in CloudWatch.",
+    "target_source_file": "aws_network_load_balancer_unhealthy_hosts.md",
+    "expected_answer_keywords": ["failedhealthchecks", "nlb", "health check", "target"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-blind-17",
+    "query": "Command to view standard output of a prior failed instance of a crashing pod.",
+    "target_source_file": "kubernetes_crashloopbackoff.md",
+    "expected_answer_keywords": ["kubectl logs", "--previous", "logs"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-blind-18",
+    "query": "Setting upstream proxy timeouts in NGINX ingress resource to prevent gateway cutoff.",
+    "target_source_file": "kubernetes_ingress_504_gateway_timeout.md",
+    "expected_answer_keywords": ["proxy-read-timeout", "timeout", "ingress", "504"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-blind-19",
+    "query": "Configuring JVM memory limits to avoid container cgroup kill.",
+    "target_source_file": "kubernetes_oom_killed.md",
+    "expected_answer_keywords": ["-xx:maxrampercentage", "heap", "cgroup", "limits"],
+    "is_in_domain": true
+  },
+  {
+    "id": "v2-blind-20",
+    "query": "Validating mesh routing rules and sidecar proxy injection before deploying canary release.",
     "target_source_file": "istio_503_service_unavailable.md",
     "expected_answer_keywords": ["istioctl analyze", "virtualservice", "destinationrule"],
     "is_in_domain": true
   },
   {
-    "id": "v2-heldout-18",
-    "query": "How to connect securely to a production database console via Teleport without exposing database credentials?",
-    "target_source_file": "gitlab_connect_to_database_console_via_teleport.md",
-    "expected_answer_keywords": ["teleport", "tsh db connect", "tsh login"],
-    "is_in_domain": true
-  },
-  {
-    "id": "v2-heldout-19",
-    "query": "What is the consequence of setting PeerAuthentication to STRICT in the istio-system namespace without DestinationRules?",
-    "target_source_file": "istio_mtls_strict_failures.md",
-    "expected_answer_keywords": ["strict", "mtls", "peerauthentication", "503"],
-    "is_in_domain": true
-  },
-  {
-    "id": "v2-heldout-20",
-    "query": "Kubernetes node reports MemoryPressure condition. How does kubelet decide which pod QoS tier to evict first?",
-    "target_source_file": "kubernetes_oom_killed.md",
-    "expected_answer_keywords": ["besteffort", "burstable", "guaranteed", "qos", "eviction"],
-    "is_in_domain": true
-  },
-  {
-    "id": "v2-heldout-21",
-    "query": "What CSS Flexbox property controls how flex items wrap onto multiple lines?",
+    "id": "v2-blind-21",
+    "query": "What is the recommended recipe for New York style sourdough pizza dough?",
     "target_source_file": "OUT_OF_DOMAIN",
     "expected_answer_keywords": ["REFUSAL"],
     "is_in_domain": false
   },
   {
-    "id": "v2-heldout-22",
-    "query": "How do you calculate sourdough bread hydration percentage based on flour and water weight?",
+    "id": "v2-blind-22",
+    "query": "How to implement drag and drop gesture recognizers in SwiftUI?",
     "target_source_file": "OUT_OF_DOMAIN",
     "expected_answer_keywords": ["REFUSAL"],
     "is_in_domain": false
   },
   {
-    "id": "v2-heldout-23",
-    "query": "Explain the difference between SwiftUI ViewBuilder and UIKit UIViewController lifecycle.",
+    "id": "v2-blind-23",
+    "query": "What are the rules for infield fly in Major League Baseball?",
     "target_source_file": "OUT_OF_DOMAIN",
     "expected_answer_keywords": ["REFUSAL"],
     "is_in_domain": false
   },
   {
-    "id": "v2-heldout-24",
-    "query": "What is Shor's algorithm and how does quantum computing impact RSA public key cryptography?",
+    "id": "v2-blind-24",
+    "query": "Explanation of quantum teleportation protocol using Bell states.",
     "target_source_file": "OUT_OF_DOMAIN",
     "expected_answer_keywords": ["REFUSAL"],
     "is_in_domain": false
   },
   {
-    "id": "v2-heldout-25",
-    "query": "Which players should I start at running back in PPR fantasy football scoring this week?",
+    "id": "v2-blind-25",
+    "query": "How to tune a six-string acoustic guitar to drop D tuning?",
     "target_source_file": "OUT_OF_DOMAIN",
     "expected_answer_keywords": ["REFUSAL"],
     "is_in_domain": false

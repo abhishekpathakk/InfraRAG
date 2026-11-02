@@ -578,7 +578,7 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
 
 ### 1. What We Did
 1. **Implemented In-Memory Okapi BM25 Index (`BM25Index`)**:
-   - Engineered a lightweight, zero-dependency `BM25Index` class in [src/vector_store.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/vector_store.py) using standard Lucene/Robertson IDF scoring.
+   - Engineered a lightweight, zero-dependency `BM25Index` class in [`src/vector_store.py`](src/vector_store.py) using standard Lucene/Robertson IDF scoring.
    - Incorporated `ENGLISH_STOPWORDS` filtering to prevent spurious matches on conversational filler words while preserving alphanumeric incident identifiers (e.g., `137`, `503`, `OOMKilled`, `CrashLoopBackOff`, `istiod`).
    - Automatically builds/rebuilds inverted indexes on document ingestion (`add_documents`) and store deserialization (`load_local`).
 2. **Hybrid Retrieval with Keyword Boosting in FAISSVectorStore**:
@@ -589,11 +589,11 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
    - Replaced insecure Python `pickle` serialization of raw float lists with `np.save("vectors.npy", matrix)` and safe deserialization `np.load("vectors.npy", allow_pickle=False)`.
    - Maintained backward compatibility for legacy `.pkl` indices while eliminating arbitrary code execution attack surfaces and cutting vector disk footprint.
 4. **Decoupled Lambda Query Path & Fail-Closed Authentication**:
-   - In [src/lambda_handlers/ask.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/src/lambda_handlers/ask.py), removed the synchronous 819-file cold-start ingestion fallback inside the Lambda environment, replacing it with a fail-fast 503 response ("Vector index not initialized or empty").
+   - In [`src/lambda_handlers/ask.py`](src/lambda_handlers/ask.py), removed the synchronous 819-file cold-start ingestion fallback inside the Lambda environment, replacing it with a fail-fast 503 response ("Vector index not initialized or empty").
    - Implemented fail-closed authentication support: if `REQUIRE_API_KEY=true` and no valid key is matched, requests are rejected with 401 Unauthorized.
 5. **Comprehensive Automated Test Expansion**:
-   - Added `test_bm25_index_and_hybrid_search` and `test_vector_store_safe_npy_serialization` in [tests/test_vector_store.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/tests/test_vector_store.py).
-   - Added `test_ask_handler_empty_index_503` and `test_ask_handler_fail_closed_auth` in [tests/test_ask_lambda.py](file:///Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/tests/test_ask_lambda.py).
+   - Added `test_bm25_index_and_hybrid_search` and `test_vector_store_safe_npy_serialization` in [`tests/test_vector_store.py`](tests/test_vector_store.py).
+   - Added `test_ask_handler_empty_index_503` and `test_ask_handler_fail_closed_auth` in [`tests/test_ask_lambda.py`](tests/test_ask_lambda.py).
    - Full test suite: **17 passed in 0.18s** (`uv run pytest`), 100% ruff clean (`uv run ruff check .`).
 
 ### 2. Issues Faced & Autonomous Fixes Applied
@@ -855,8 +855,8 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
 
 ### 4. Measurable Achievements
 - **Golden Benchmark:** 85.0% Top-1 Hit Rate, 0.867 MRR, 100% Refusal.
-- **Tagged Baseline (v1.0.0-eval-frozen):** 75.0% Top-1 Hit Rate, 0.792 MRR (honest tagged state).
-- **Blind Held-Out Suite (v2.0):** 70.0% Top-1 Hit Rate, 0.700 MRR (unseen, untuned first run).
+- **Tagged Baseline (v1.0.0-eval-frozen):** 75.0% Top-1 Hit Rate, 0.792 MRR (incorporating Phase 15 BM25 hybrid ranking over original 65.0% pure-dense baseline).
+- **Blind Held-Out Suite (v2.0):** 55.0% Top-1 Hit Rate, 0.550 MRR (unseen, symptom-based first run without cluster cheat words).
 - **Test Suite:** 17/17 tests passing in **0.10s**.
 - **AWS Spend:** **$0.00**.
 
@@ -867,6 +867,49 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
 2. **Explicit "Known Limitations" Disclosure**:
    - *Trade-off:* Transparently reveals where mock mode deviates from production AWS Bedrock behavior.
    - *Rationale:* Establishes production credibility and honest engineering standards.
+
+---
+
+## Phase 22: Keyword Ablation Enforcement, Strict Assertion Restoration, and Bedrock Quota Forensics
+
+### 1. What We Did
+1. **Executed Keyword-Bucket vs Hash-Only Ablation Study**:
+   - Added `use_clusters: bool = True` to `MockEmbeddingProvider` in [`src/embeddings.py`](src/embeddings.py) and integrated an automated ablation study in [`evaluation/evaluate.py`](evaluation/evaluate.py).
+   - Proven mathematically that mock vector scores are keyword-bucket dependent:
+     - Golden Benchmark: 85.0% (with clusters) $\rightarrow$ 10.0% (hash-only)
+     - Tagged Held-Out v1: 75.0% (with clusters) $\rightarrow$ 45.0% (hash-only)
+     - Blind Held-Out v2: 55.0% (with clusters) $\rightarrow$ 5.0% (hash-only)
+   - Synchronized this ablation table directly into [`README.md`](README.md) via [`scripts/sync_readme_metrics.py`](scripts/sync_readme_metrics.py).
+2. **Restored Strict Test Assertions**:
+   - In [`tests/test_vector_store.py`](tests/test_vector_store.py), restored the strict assertion `assert getattr(store, "_matrix", None) is not None` (reversing the loosened `_index or _matrix` check).
+   - In [`src/vector_store.py`](src/vector_store.py), guaranteed that `self._matrix` is populated from `vectors.npy` unconditionally across both native FAISS and fallback engines.
+3. **Re-Authored Genuinely Blind v2 Held-Out Suite**:
+   - Rewrote [`evaluation/held_out_dataset_v2.json`](evaluation/held_out_dataset_v2.json) with natural incident symptom phrasing without cluster trigger words.
+   - First-run result reported as-is: **55.0% Top-1** (11/20), **MRR: 0.550** with clusters; **5.0% Top-1** hash-only.
+4. **Captured Exact AWS Bedrock Terminal Errors Across Global Regions**:
+   - Conducted API probe of `amazon.titan-embed-text-v2:0` across AWS regions:
+     - `us-east-1` & `us-west-2`: `botocore.errorfactory.ThrottlingException: An error occurred (ThrottlingException) when calling the InvokeModel operation (reached max retries: 4): Too many requests, please wait before trying again.`
+     - `eu-central-1` & `ap-south-1`: `botocore.errorfactory.ValidationException: An error occurred (ValidationException) when calling the InvokeModel operation: Operation not allowed` (Model access approval required).
+   - Documented these exact outputs in documentation and client reporting.
+
+### 2. Concepts Learned
+- **Ablation Studies as Truth Serum:** When an embedding or retrieval system uses heuristic boosting, running an ablation study (disabling the heuristic entirely) instantly reveals how much performance is genuine retrieval vs synthetic rule matching.
+  - *One-line analogy:* Removing training wheels from a bicycle to see if the child is actually balancing or just leaning on metal brackets.
+- **Strict Assertion Invariants:** Never loosen test assertions to fit an incomplete implementation; fix the underlying state allocation so strict contracts are satisfied across all environments.
+
+### 3. Issues Faced & Autonomous Fixes Applied
+
+| Issue / Friction Point | Root Cause | Fix Applied | Autonomous Prevention Rule |
+| :--- | :--- | :--- | :--- |
+| **Cluster Dependence Masked as Semantic Search** | Synthetic mock embeddings boosted keyword matches by +15.0, creating an illusion of 70–85% semantic generalization. | Built automated ablation suite in `evaluate.py` testing `use_clusters=False`; published comparative delta table. | Always publish ablation numbers alongside heuristic mock benchmarks. |
+| **Loosened Test Assertion** | `_matrix` assertion was relaxed to `_index or _matrix` when native FAISS was present. | Populated `self._matrix` from `vectors.npy` unconditionally in `load_local()`; restored strict `assert getattr(store, "_matrix", None) is not None`. | Do not alter test assertion contracts to accommodate internal branch shortcuts. |
+| **Machine-Local Links in Documentation** | Absolute `file:///Users/abhishekpathak/...` URIs leaked into documentation and communications. | Replaced all links with repository-relative paths (`src/...`). | Enforce repository-relative markdown links across all documentation. |
+
+### 4. Measurable Achievements
+- **Ablation Transparency:** 100% disclosed in `README.md` and `eval_report.json`.
+- **Test Suite:** 17/17 tests passing with strict assertions in **0.12s**.
+- **Documentation Parity:** Automatically synchronized.
+- **AWS Spend:** **$0.00**.
 
 
 

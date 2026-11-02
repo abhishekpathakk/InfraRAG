@@ -185,22 +185,22 @@ def run_evaluation() -> dict:
     heldout_path = settings.BASE_DIR / "evaluation" / "held_out_dataset.json"
     heldout_v2_path = settings.BASE_DIR / "evaluation" / "held_out_dataset_v2.json"
 
-    console.print("[bold cyan]Initializing InfraRAG Engine & Indexing Runbooks...[/bold cyan]")
+    # 1. Main Run: Mock with Clusters
+    console.print("[bold cyan]Initializing InfraRAG Engine (With Clusters)...[/bold cyan]")
     chain = RAGChain()
     chain.ingest_directory(settings.DATA_DIR)
-
     console.print(f"[bold green]Indexed {len(chain.vector_store.chunks)} chunks across multi-source corpus.[/bold green]")
 
     golden_summary = evaluate_dataset(
         chain=chain,
         dataset_path=golden_path,
-        title="1. InfraRAG Golden Benchmark (25 Technical Incidents + Out-of-Domain)",
+        title="1. InfraRAG Golden Benchmark (Keyword-Bucket Dependent)",
     )
 
     heldout_summary = evaluate_dataset(
         chain=chain,
         dataset_path=heldout_path,
-        title="2. InfraRAG Tagged Held-Out Baseline (v1.0.0-eval-frozen, 25 Scenarios)",
+        title="2. InfraRAG Tagged Held-Out Baseline (v1.0.0-eval-frozen, Keyword-Bucket Dependent)",
     )
 
     heldout_v2_summary = None
@@ -208,17 +208,88 @@ def run_evaluation() -> dict:
         heldout_v2_summary = evaluate_dataset(
             chain=chain,
             dataset_path=heldout_v2_path,
-            title="3. InfraRAG New Blind Held-Out Validation (v2.0, 25 Unseen Scenarios)",
+            title="3. InfraRAG Blind Held-Out Validation (v2.0, Keyword-Bucket Dependent)",
         )
+
+    # 2. Hash-Only Ablation Run (No Keyword Clusters)
+    console.print("\n[bold yellow]Running Hash-Only Ablation Suite (use_clusters=False)...[/bold yellow]")
+    from src.embeddings import MockEmbeddingProvider
+    ablation_chain = RAGChain()
+    ablation_chain.embedding_provider = MockEmbeddingProvider(dimension=settings.EMBEDDING_DIMENSION, use_clusters=False)
+    ablation_chain.ingest_directory(settings.DATA_DIR)
+
+    golden_ablated = evaluate_dataset(
+        chain=ablation_chain,
+        dataset_path=golden_path,
+        title="Ablation: Golden Benchmark (Hash-Only, No Clusters)",
+    )
+
+    heldout_ablated = evaluate_dataset(
+        chain=ablation_chain,
+        dataset_path=heldout_path,
+        title="Ablation: Tagged Held-Out (Hash-Only, No Clusters)",
+    )
+
+    heldout_v2_ablated = None
+    if heldout_v2_path.exists():
+        heldout_v2_ablated = evaluate_dataset(
+            chain=ablation_chain,
+            dataset_path=heldout_v2_path,
+            title="Ablation: Blind Held-Out v2 (Hash-Only, No Clusters)",
+        )
+
+    # Print Comparative Ablation Table
+    ablation_table = Table(
+        title="🔬 Keyword-Bucket vs Hash-Only Ablation Study",
+        show_header=True,
+        header_style="bold magenta",
+    )
+    ablation_table.add_column("Evaluation Suite", style="bold")
+    ablation_table.add_column("With Clusters (Top-1)", justify="center")
+    ablation_table.add_column("Hash-Only (Top-1)", justify="center")
+    ablation_table.add_column("With Clusters (MRR)", justify="center")
+    ablation_table.add_column("Hash-Only (MRR)", justify="center")
+
+    ablation_table.add_row(
+        "Golden Benchmark",
+        f"{golden_summary['top1_hit_rate_pct']}%",
+        f"{golden_ablated['top1_hit_rate_pct']}%",
+        f"{golden_summary['mrr']:.3f}",
+        f"{golden_ablated['mrr']:.3f}",
+    )
+    ablation_table.add_row(
+        "Tagged Held-Out v1",
+        f"{heldout_summary['top1_hit_rate_pct']}%",
+        f"{heldout_ablated['top1_hit_rate_pct']}%",
+        f"{heldout_summary['mrr']:.3f}",
+        f"{heldout_ablated['mrr']:.3f}",
+    )
+    if heldout_v2_summary and heldout_v2_ablated:
+        ablation_table.add_row(
+            "Blind Held-Out v2",
+            f"{heldout_v2_summary['top1_hit_rate_pct']}%",
+            f"{heldout_v2_ablated['top1_hit_rate_pct']}%",
+            f"{heldout_v2_summary['mrr']:.3f}",
+            f"{heldout_v2_ablated['mrr']:.3f}",
+        )
+    console.print()
+    console.print(ablation_table)
 
     report_path = settings.BASE_DIR / "evaluation" / "eval_report.json"
     full_report: dict[str, Any] = {
         "indexed_chunks": len(chain.vector_store.chunks),
+        "headline_label": "Synthetic Mock Baseline (Keyword-Bucket Dependent)",
         "golden_benchmark": golden_summary,
         "held_out_validation": heldout_summary,
+        "ablation_study": {
+            "golden_hash_only": golden_ablated,
+            "held_out_hash_only": heldout_ablated,
+        },
     }
     if heldout_v2_summary:
         full_report["new_blind_held_out_v2"] = heldout_v2_summary
+    if heldout_v2_ablated:
+        full_report["ablation_study"]["held_out_v2_hash_only"] = heldout_v2_ablated
 
     with open(report_path, "w", encoding="utf-8") as f:
         json.dump(full_report, f, indent=2)
