@@ -171,14 +171,14 @@ jobs:
         continue-on-error: true
 
       - name: SonarCloud Scan
-        if: ${{ secrets.SONAR_TOKEN != '' }}
+        if: secrets.SONAR_TOKEN != ''
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Notice on SonarCloud Token Configuration
-        if: ${{ secrets.SONAR_TOKEN == '' }}
+        if: secrets.SONAR_TOKEN == ''
         run: |
           echo "=================================================================================="
           echo "ℹ️  Bandit SAST security scan completed successfully."
