@@ -12,6 +12,7 @@ import logging
 import os
 import time
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Any
 
 from src.config import settings
@@ -223,15 +224,22 @@ class BedrockTitanEmbeddingProvider(BaseEmbeddingProvider):
 class LocalFastEmbedProvider(BaseEmbeddingProvider):
     """
     Open-Source Neural Embedding Provider using FastEmbed (ONNX Runtime).
-    Default model: BAAI/bge-small-en-v1.5 (dim=384, canonical HF commit: 5c38ec7c405ec4b44b94cc5a9bb96e735b38267a).
+    Default model: BAAI/bge-small-en-v1.5 (dim=384).
+    Source repo: Qdrant/bge-small-en-v1.5-onnx-Q pinned to commit aa8f8b060edb00e03bfdd08813a2949946c8ba55.
+    ONNX SHA-256: 51f1bd0addd6e859e42c2c8021a5e5461385bb676a649f4b269aa445449f2431.
     Provides genuine local neural dense embeddings with zero cloud API dependencies.
     """
+
+    DEFAULT_REVISION = "aa8f8b060edb00e03bfdd08813a2949946c8ba55"
+    EXPECTED_ONNX_SHA256 = "51f1bd0addd6e859e42c2c8021a5e5461385bb676a649f4b269aa445449f2431"
 
     def __init__(
         self,
         model_name: str = "BAAI/bge-small-en-v1.5",
-        revision: str = "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+        revision: str = DEFAULT_REVISION,
+        expected_sha256: str | None = EXPECTED_ONNX_SHA256,
         batch_size: int = 64,
+        cache_dir: str | None = None,
     ):
         try:
             from fastembed import TextEmbedding
@@ -241,7 +249,37 @@ class LocalFastEmbedProvider(BaseEmbeddingProvider):
         self.model_name = model_name
         self.revision = revision
         self.batch_size = batch_size
-        self._model = TextEmbedding(model_name=model_name)
+        effective_cache = cache_dir or os.getenv("FASTEMBED_CACHE_PATH", None)
+
+        # Pass exact pinned revision to TextEmbedding loader
+        self._model = TextEmbedding(
+            model_name=model_name,
+            revision=revision,
+            cache_dir=effective_cache,
+        )
+
+        # Enforce cryptographic binary integrity on the loaded ONNX model
+        raw_model_dir = getattr(self._model.model, "_model_dir", None)
+        model_dir = Path(raw_model_dir) if raw_model_dir else None
+        if model_dir and model_dir.exists():
+            onnx_file = model_dir / "model_optimized.onnx"
+            if not onnx_file.exists():
+                candidates = list(model_dir.glob("*.onnx"))
+                if candidates:
+                    onnx_file = candidates[0]
+
+            if onnx_file.exists():
+                self.onnx_sha256 = hashlib.sha256(onnx_file.read_bytes()).hexdigest()
+                if expected_sha256 and self.onnx_sha256 != expected_sha256:
+                    raise RuntimeError(
+                        f"FastEmbed ONNX integrity violation: expected SHA-256 {expected_sha256}, "
+                        f"got {self.onnx_sha256} for {onnx_file}"
+                    )
+            else:
+                self.onnx_sha256 = ""
+        else:
+            self.onnx_sha256 = ""
+
         # Determine actual embedding dimension
         probe_emb = list(self._model.embed(["probe"]))[0]
         self._dim = len(probe_emb)

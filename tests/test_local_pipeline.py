@@ -15,10 +15,12 @@ from src.vector_store import FAISSVectorStore
 
 
 def test_default_embedding_provider_is_local():
-    """Verifies that calling get_embedding_provider() with no env vars defaults to local BGE-small."""
+    """Verifies that calling get_embedding_provider() with no env vars defaults to local BGE-small with pinned commit and checksum."""
     provider = get_embedding_provider()
     assert isinstance(provider, LocalFastEmbedProvider), f"Expected LocalFastEmbedProvider, got {type(provider)}"
     assert provider.dimension == 384, f"Expected 384 dimensions for bge-small, got {provider.dimension}"
+    assert provider.revision == "aa8f8b060edb00e03bfdd08813a2949946c8ba55", f"Unexpected revision: {provider.revision}"
+    assert provider.onnx_sha256 == "51f1bd0addd6e859e42c2c8021a5e5461385bb676a649f4b269aa445449f2431", f"Unexpected sha256: {provider.onnx_sha256}"
 
 
 def test_local_neural_pipeline_end_to_end_smoke():

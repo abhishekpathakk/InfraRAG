@@ -10,6 +10,8 @@ jobs:
   lint-and-test:
     name: Lint, Test & Validate
     runs-on: ubuntu-latest
+    env:
+      FASTEMBED_CACHE_PATH: ${{ github.workspace }}/.cache/fastembed
 
     steps:
       - name: Checkout Repository
@@ -26,6 +28,12 @@ jobs:
 
       - name: Install Dependencies from Lockfile
         run: uv sync --all-extras --dev
+
+      - name: Cache Pinned FastEmbed Model Revision
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.cache/fastembed
+          key: fastembed-bge-small-aa8f8b060edb00e03bfdd08813a2949946c8ba55-51f1bd0addd6
 
       - name: Verify Frozen Evaluation Datasets Integrity
         run: uv run python scripts/verify_frozen_datasets.py
@@ -46,7 +54,7 @@ jobs:
     name: Local Neural Default Pipeline Smoke Test
     runs-on: ubuntu-latest
     env:
-      FASTEMBED_CACHE_PATH: ~/.cache/fastembed
+      FASTEMBED_CACHE_PATH: ${{ github.workspace }}/.cache/fastembed
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -64,13 +72,24 @@ jobs:
         run: uv sync --all-extras --dev
 
       - name: Cache Pinned FastEmbed Model Revision
+        id: cache-fastembed
         uses: actions/cache@v4
         with:
-          path: ~/.cache/fastembed
-          key: fastembed-bge-small-5c38ec7c405ec4b44b94cc5a9bb96e735b38267a
+          path: ${{ github.workspace }}/.cache/fastembed
+          key: fastembed-bge-small-aa8f8b060edb00e03bfdd08813a2949946c8ba55-51f1bd0addd6
+
+      - name: Log Cache State
+        run: |
+          echo "FastEmbed Cache Hit: ${{ steps.cache-fastembed.outputs.cache-hit }}"
+          if [ -d "${{ github.workspace }}/.cache/fastembed" ]; then
+            echo "Cached contents:"
+            find "${{ github.workspace }}/.cache/fastembed" -type f
+          else
+            echo "Cache not present prior to run."
+          fi
 
       - name: Run Local Neural Retrieval Smoke Test (Zero Environment Variables)
-        run: uv run pytest tests/test_local_pipeline.py -v
+        run: uv run pytest tests/test_local_pipeline.py -v -s
 
   terraform-validate:
     name: Terraform Validate & Lint

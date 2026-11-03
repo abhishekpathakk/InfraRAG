@@ -1255,6 +1255,63 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
 3. **Transparent Reporting of Dense vs Hybrid Discrepancy on Near-Domain Negatives**:
    - *Rationale*: Rather than hiding the 33.33% hybrid refusal score or hand-tuning BM25 weights post-hoc, we report the first-run result as-is. This provides clear empirical evidence that dense cosine distance is fundamentally superior to lexical keyword matching for out-of-scope rejection.
 
+---
+
+## Phase 29: Cryptographic ONNX Pinning, CI Cache Harmonization, and Exhaustive Metric Bounding
+
+### 1. What Was Done
+1. **Cryptographic ONNX Revision and Binary Pinning**:
+   - Pinned upstream FastEmbed HuggingFace repository `Qdrant/bge-small-en-v1.5-onnx-Q` to exact commit `aa8f8b060edb00e03bfdd08813a2949946c8ba55` in `LocalFastEmbedProvider`.
+   - Implemented runtime SHA-256 checksum verification on `model_optimized.onnx` (`51f1bd0addd6e859e42c2c8021a5e5461385bb676a649f4b269aa445449f2431`). The loader aborts with `RuntimeError` if weights deviate by a single byte from the pinned hash.
+   - Added automated tests in `tests/test_local_pipeline.py` verifying model provider type, dimension (384), pinned revision, and binary SHA-256.
+2. **Resolved GitHub Actions Tilde Expansion Defect**:
+   - Diagnosed root cause of CI cache misses: GitHub Actions workflow `env:` blocks do not expand `~`. Python created a literal `./~/.cache/fastembed` directory inside the runner workspace, while `actions/cache@v4` looked for `/home/runner/.cache/fastembed`.
+   - Unified both `env: FASTEMBED_CACHE_PATH` and `actions/cache` `path` to `${{ github.workspace }}/.cache/fastembed` across both `lint-and-test` and `local-neural-smoke-test` jobs.
+3. **Repository-Wide Scrubbing of Unbounded Metrics**:
+   - Eliminated all blanket "100% refusal" and "zero false positives" assertions across `README.md`, `scripts/sync_readme_metrics.py`, and `ui/index.html`.
+   - Replaced all sample observations with explicit binomial counts and Wilson score 95% confidence intervals (e.g., 5/5 negative refusals in mock tables bounded at `[56.6%–100.0%]`, and 15/15 on v4 negatives bounded at `[79.6%–100.0%]`).
+4. **Explicit Cryptographic Pinning & Provenance Disclosure**:
+   - Added an explicit disclosure banner to `README.md` defining exactly what is cryptographically pinned (eval datasets SHA-256, dependencies in `uv.lock`, ONNX binary checksum) and what is external/unverified (AWS Bedrock endpoints).
+
+---
+
+### 2. Plain-Language Concepts & One-Line Analogies
+- **Workflow Environment Tilde Expansion Gotcha**:
+  In Unix shells, `~` is shorthand for `$HOME`, but in YAML workflow configurations, `~` is just a literal one-character ASCII string unless evaluated by an active shell.
+  - *One-line analogy:* Writing "Home" on an envelope instead of your street address; the postman in your town might know what you mean, but an automated sorting machine creates a delivery bin named "Home".
+- **Runtime Binary Integrity Pinning**:
+  Saving a version string or commit label is only metadata; verifying the SHA-256 digest of the binary payload at load time proves physical immutability.
+  - *One-line analogy:* Checking someone's ID badge against an immutable biometric fingerprint rather than trusting the handwritten name tag on their lapel.
+
+---
+
+### 3. Issues Faced & Autonomous Fixes Applied
+
+| Issue / Friction Point | Root Cause | Fix Applied | Autonomous Prevention Rule |
+| :--- | :--- | :--- | :--- |
+| **Model "Pin" Was Stored But Not Passed** | `LocalFastEmbedProvider` stored `revision` on `self` but passed only `model_name` to `TextEmbedding()`. | Passed `revision=revision` directly to `TextEmbedding` and added binary SHA-256 checksum validation. | Always inspect the callee parameter signature and verify runtime loaded file paths. |
+| **CI Cache Miss via Tilde Literal** | `FASTEMBED_CACHE_PATH: ~/.cache/fastembed` in workflow YAML created `./~` relative folder. | Replaced `~` with `${{ github.workspace }}/.cache/fastembed` in both env and cache paths. | Never rely on shell expansion inside CI declarative environment blocks. |
+| **Mypy Attribute Error on FastEmbed Inner Model** | `self._model.model` typed as base class without `_model_dir`. | Used `getattr(self._model.model, "_model_dir", None)` with path validation. | Guard internal third-party dynamic attributes through safe introspection. |
+| **Residual Blanket "100%" in Generated Markdown** | `scripts/sync_readme_metrics.py` hardcoded `"100% refusal preserved"` in mock table generation. | Updated table generation strings to report exact counts and Wilson intervals. | Audit generator scripts alongside static markdown files when auditing metrics. |
+
+---
+
+### 4. Measurable Achievements
+- **Model Provenance**: Upstream commit `aa8f8b060edb00e03bfdd08813a2949946c8ba55`, binary SHA-256 `51f1bd0addd6e859e42c2c8021a5e5461385bb676a649f4b269aa445449f2431`.
+- **Test Suite**: 19/19 tests passing in 0.71s (`uv run pytest tests/`).
+- **Static Analysis**: Ruff 0 lint errors, Mypy 0 type errors across 12 source files.
+- **CI Pipeline**: 3 standalone jobs in `.github/workflows/ci.yml` with synchronized cache paths.
+- **Metric Integrity**: Zero uncalibrated blanket claims across all documentation.
+
+---
+
+### 5. Architectural Decisions & Engineering Trade-Offs
+1. **Runtime Binary Checksum Verification vs Packaging ONNX in Git**:
+   - *Rationale*: Checking SHA-256 of `model_optimized.onnx` at runtime ensures identical weights while avoiding bloating the git repository with 67MB binary blobs.
+   - *Trade-off*: First cold load in a fresh environment requires downloading the 67MB snapshot before verifying, which is mitigated by GitHub Actions caching.
+2. **Declarative Absolute Workspace Paths in CI**:
+   - *Rationale*: Using `${{ github.workspace }}` provides identical path resolution across GitHub Actions runner containers and steps, eliminating cross-step directory mismatches.
+
 
 
 

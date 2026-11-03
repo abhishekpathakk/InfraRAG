@@ -90,7 +90,7 @@ def calibrate_threshold() -> float:
     min_in = min(in_domain_scores)
 
     # Pick calibrated threshold safely above maximum out-of-domain distractor
-    # Margin of +0.02 above max out-of-domain score to guarantee 100% refusal
+    # Margin of +0.02 above max out-of-domain score to achieve full refusal on dev calibration sample
     calibrated_threshold = round(max_out + 0.02, 2)
     console.print(f"\n[bold green]Maximum Out-of-Domain Score:[/bold green] {max_out:.4f}")
     console.print(f"[bold green]Minimum In-Domain Score:[/bold green] {min_in:.4f}")
