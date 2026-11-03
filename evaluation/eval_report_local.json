@@ -1,7 +1,7 @@
 {
   "model_name": "BAAI/bge-small-en-v1.5",
-  "canonical_commit_sha": "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
-  "onnx_distribution": "Qdrant/bge-small-en-v1.5-onnx-Q (aa8f8b060edb00e03bfdd08813a2949946c8ba55)",
+  "onnx_sha256": "51f1bd0addd6e859e42c2c8021a5e5461385bb676a649f4b269aa445449f2431",
+  "onnx_distribution": "Qdrant/bge-small-en-v1.5-onnx-Q",
   "vector_dimension": 384,
   "frozen_refusal_threshold": 0.8,
   "dense_only_evaluations": {
@@ -25,8 +25,8 @@
       "mrr": 0.9,
       "in_domain_grounded_pct": 50.0,
       "out_domain_refusal_pct": 100.0,
-      "avg_latency_ms": 4.89,
-      "avg_retrieval_ms": 4.78
+      "avg_latency_ms": 4.39,
+      "avg_retrieval_ms": 4.28
     },
     "Tagged Held-Out v1 (Burned/Seen)": {
       "dataset": "held_out_dataset.json",
@@ -48,8 +48,8 @@
       "mrr": 0.925,
       "in_domain_grounded_pct": 65.0,
       "out_domain_refusal_pct": 100.0,
-      "avg_latency_ms": 5.3,
-      "avg_retrieval_ms": 5.18
+      "avg_latency_ms": 4.64,
+      "avg_retrieval_ms": 4.55
     },
     "Blind Held-Out v2 (Unseen)": {
       "dataset": "held_out_dataset_v2.json",
@@ -71,8 +71,8 @@
       "mrr": 0.642,
       "in_domain_grounded_pct": 10.0,
       "out_domain_refusal_pct": 100.0,
-      "avg_latency_ms": 4.11,
-      "avg_retrieval_ms": 4.09
+      "avg_latency_ms": 4.26,
+      "avg_retrieval_ms": 4.25
     },
     "Blind Held-Out v3 (Unseen)": {
       "dataset": "held_out_dataset_v3.json",
@@ -94,8 +94,8 @@
       "mrr": 0.542,
       "in_domain_grounded_pct": 25.0,
       "out_domain_refusal_pct": 100.0,
-      "avg_latency_ms": 4.84,
-      "avg_retrieval_ms": 4.79
+      "avg_latency_ms": 4.36,
+      "avg_retrieval_ms": 4.31
     },
     "Blind Held-Out v4 (Unseen, 65 Questions)": {
       "dataset": "held_out_dataset_v4.json",
@@ -117,8 +117,8 @@
       "mrr": 0.75,
       "in_domain_grounded_pct": 48.0,
       "out_domain_refusal_pct": 100.0,
-      "avg_latency_ms": 5.11,
-      "avg_retrieval_ms": 5.03
+      "avg_latency_ms": 5.22,
+      "avg_retrieval_ms": 5.14
     }
   },
   "hybrid_evaluations": {
@@ -142,8 +142,8 @@
       "mrr": 0.9,
       "in_domain_grounded_pct": 55.0,
       "out_domain_refusal_pct": 100.0,
-      "avg_latency_ms": 10.17,
-      "avg_retrieval_ms": 10.07
+      "avg_latency_ms": 7.6,
+      "avg_retrieval_ms": 7.51
     },
     "Tagged Held-Out v1 (Burned/Seen)": {
       "dataset": "held_out_dataset.json",
@@ -165,8 +165,8 @@
       "mrr": 0.875,
       "in_domain_grounded_pct": 70.0,
       "out_domain_refusal_pct": 100.0,
-      "avg_latency_ms": 8.23,
-      "avg_retrieval_ms": 8.12
+      "avg_latency_ms": 8.07,
+      "avg_retrieval_ms": 7.96
     },
     "Blind Held-Out v2 (Unseen)": {
       "dataset": "held_out_dataset_v2.json",
@@ -188,8 +188,8 @@
       "mrr": 0.642,
       "in_domain_grounded_pct": 10.0,
       "out_domain_refusal_pct": 100.0,
-      "avg_latency_ms": 4.53,
-      "avg_retrieval_ms": 4.52
+      "avg_latency_ms": 4.76,
+      "avg_retrieval_ms": 4.75
     },
     "Blind Held-Out v3 (Unseen)": {
       "dataset": "held_out_dataset_v3.json",
@@ -211,8 +211,8 @@
       "mrr": 0.542,
       "in_domain_grounded_pct": 25.0,
       "out_domain_refusal_pct": 100.0,
-      "avg_latency_ms": 6.18,
-      "avg_retrieval_ms": 6.12
+      "avg_latency_ms": 5.62,
+      "avg_retrieval_ms": 5.58
     },
     "Blind Held-Out v4 (Unseen, 65 Questions)": {
       "dataset": "held_out_dataset_v4.json",
@@ -234,8 +234,8 @@
       "mrr": 0.733,
       "in_domain_grounded_pct": 50.0,
       "out_domain_refusal_pct": 100.0,
-      "avg_latency_ms": 8.38,
-      "avg_retrieval_ms": 8.3
+      "avg_latency_ms": 8.04,
+      "avg_retrieval_ms": 7.96
     }
   }
 }

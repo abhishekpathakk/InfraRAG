@@ -146,45 +146,45 @@ All queries evaluate with parameters `top_k = 5` and `min_relevance_threshold = 
 
 | Metric Dimension | Score / Count | Internal Target | Status | Operational Notes |
 | :--- | :---: | :---: | :---: | :--- |
-| **Retrieval Top-1 Hit-Rate** | **85.0% (17/20)** | >= 80.0% | **PASS** | Top retrieved chunk contains exact ground truth runbook |
-| **Retrieval Top-5 Hit-Rate** | **95.0% (19/20)** | >= 90.0% | **PASS** | Recall of relevant runbooks within top 5 candidates |
-| **Mean Reciprocal Rank (MRR)** | **0.892** | >= 0.850 | **PASS** | High ranking density near rank 1 |
-| **In-Domain Keyword Recall** | **70.0%** | >= 60.0% (Prod Target) | **BASELINE (Mock)** | Extractive mock baseline (in-domain denominator) |
+| **Retrieval Top-1 Hit-Rate** | **80.0% (16/20)** | >= 80.0% | **PASS** | Top retrieved chunk contains exact ground truth runbook |
+| **Retrieval Top-5 Hit-Rate** | **90.0% (18/20)** | >= 90.0% | **PASS** | Recall of relevant runbooks within top 5 candidates |
+| **Mean Reciprocal Rank (MRR)** | **0.833** | >= 0.850 | **BASELINE** | High ranking density near rank 1 |
+| **In-Domain Keyword Recall** | **50.0%** | >= 60.0% (Prod Target) | **BASELINE (Mock)** | Extractive mock baseline (in-domain denominator) |
 | **Out-of-Domain Refusal Accuracy** | **5/5 (100.0%)** | >= 80.0% (point estimate) | **PASS (Point Estimate)** | 5/5 sample refusals observed (Wilson 95% CI: [56.6%–100.0%]). N=5 sample is underpowered to establish an 80% Wilson lower bound (requires N >= 15). |
-| **Average Total Query Latency** | **13.19 ms** | < 2500 ms | **PASS** | In-RAM vector search (12.99ms) |
+| **Average Total Query Latency** | **6.18 ms** | < 2500 ms | **PASS** | In-RAM vector search (6.07ms) |
 
 ### 2. Tagged Held-Out Baseline (v1.0.0-eval-frozen, Keyword-Bucket Dependent)
 
 | Metric Dimension | Score / Count | Internal Target | Status | Operational Notes |
 | :--- | :---: | :---: | :---: | :--- |
-| **Retrieval Top-1 Hit-Rate** | **80.0% (16/20)** | >= 80.0% | **PASS** | Frozen tag v1.0.0 baseline across 7,207 multi-source chunks |
-| **Retrieval Top-5 Hit-Rate** | **100.0% (20/20)** | >= 90.0% | **PASS** | Recall of relevant runbooks within top 5 candidates |
-| **Mean Reciprocal Rank (MRR)** | **0.892** | >= 0.850 | **PASS** | Tagged-state MRR without post-freeze adjustments |
-| **In-Domain Keyword Recall** | **80.0%** | >= 60.0% (Prod Target) | **BASELINE (Mock)** | Multi-sentence extraction with verified citations |
+| **Retrieval Top-1 Hit-Rate** | **70.0% (14/20)** | >= 80.0% | **REVIEW** | Frozen tag v1.0.0 baseline across 7,207 multi-source chunks |
+| **Retrieval Top-5 Hit-Rate** | **80.0% (16/20)** | >= 90.0% | **BASELINE** | Recall of relevant runbooks within top 5 candidates |
+| **Mean Reciprocal Rank (MRR)** | **0.742** | >= 0.850 | **BASELINE** | Tagged-state MRR without post-freeze adjustments |
+| **In-Domain Keyword Recall** | **50.0%** | >= 60.0% (Prod Target) | **BASELINE (Mock)** | Multi-sentence extraction with verified citations |
 | **Out-of-Domain Refusal Accuracy** | **5/5 (100.0%)** | >= 80.0% (point estimate) | **PASS (Point Estimate)** | 5/5 sample refusals observed (Wilson 95% CI: [56.6%–100.0%]). N=5 sample is underpowered to establish an 80% Wilson lower bound (requires N >= 15). |
-| **Average Total Query Latency** | **14.63 ms** | < 2500 ms | **PASS** | In-RAM retrieval: 14.46ms |
+| **Average Total Query Latency** | **6.07 ms** | < 2500 ms | **PASS** | In-RAM retrieval: 5.96ms |
 
 ### 3. Blind Held-Out Validation (v2.0, Keyword-Bucket Dependent)
 
 | Metric Dimension | Score / Count | Internal Target | Status | Operational Notes |
 | :--- | :---: | :---: | :---: | :--- |
-| **Retrieval Top-1 Hit-Rate** | **65.0% (13/20)** | >= 80.0% | **REVIEW** | Natural incident symptom phrasing without cluster keywords |
-| **Retrieval Top-5 Hit-Rate** | **75.0% (15/20)** | >= 90.0% | **BASELINE** | First-run top-5 presence reported as-is |
-| **Mean Reciprocal Rank (MRR)** | **0.692** | >= 0.850 | **BASELINE** | Blind first-run MRR reported as-is |
-| **In-Domain Keyword Recall** | **80.0%** | >= 60.0% (Prod Target) | **PASS** | Extractive mock keyword presence |
+| **Retrieval Top-1 Hit-Rate** | **50.0% (10/20)** | >= 80.0% | **REVIEW** | Natural incident symptom phrasing without cluster keywords |
+| **Retrieval Top-5 Hit-Rate** | **50.0% (10/20)** | >= 90.0% | **BASELINE** | First-run top-5 presence reported as-is |
+| **Mean Reciprocal Rank (MRR)** | **0.500** | >= 0.850 | **BASELINE** | Blind first-run MRR reported as-is |
+| **In-Domain Keyword Recall** | **55.0%** | >= 60.0% (Prod Target) | **BASELINE (Mock)** | Extractive mock keyword presence |
 | **Out-of-Domain Refusal Accuracy** | **5/5 (100.0%)** | >= 80.0% (point estimate) | **PASS (Point Estimate)** | 5/5 sample refusals observed (Wilson 95% CI: [56.6%–100.0%]). N=5 sample is underpowered to establish an 80% Wilson lower bound (requires N >= 15). |
-| **Average Total Query Latency** | **13.63 ms** | < 2500 ms | **PASS** | In-RAM retrieval: 13.47ms |
+| **Average Total Query Latency** | **6.71 ms** | < 2500 ms | **PASS** | In-RAM retrieval: 6.62ms |
 
 ### 4. Blind Held-Out Validation (v3.0 Unseen, Keyword-Bucket Dependent)
 
 | Metric Dimension | Score / Count | Internal Target | Status | Operational Notes |
 | :--- | :---: | :---: | :---: | :--- |
-| **Retrieval Top-1 Hit-Rate** | **50.0% (10/20)** | >= 80.0% | **REVIEW** | Authored blind without consulting embedding clusters or internal mock weights |
-| **Retrieval Top-5 Hit-Rate** | **70.0% (14/20)** | >= 90.0% | **BASELINE** | First-run blind top-5 candidate presence reported as-is |
-| **Mean Reciprocal Rank (MRR)** | **0.575** | >= 0.850 | **BASELINE** | Uncalibrated blind first-run MRR |
-| **In-Domain Keyword Recall** | **70.0%** | >= 60.0% (Prod Target) | **PASS** | Extractive mock keyword coverage |
+| **Retrieval Top-1 Hit-Rate** | **40.0% (8/20)** | >= 80.0% | **REVIEW** | Authored blind without consulting embedding clusters or internal mock weights |
+| **Retrieval Top-5 Hit-Rate** | **40.0% (8/20)** | >= 90.0% | **BASELINE** | First-run blind top-5 candidate presence reported as-is |
+| **Mean Reciprocal Rank (MRR)** | **0.400** | >= 0.850 | **BASELINE** | Uncalibrated blind first-run MRR |
+| **In-Domain Keyword Recall** | **55.0%** | >= 60.0% (Prod Target) | **BASELINE (Mock)** | Extractive mock keyword coverage |
 | **Out-of-Domain Refusal Accuracy** | **5/5 (100.0%)** | >= 80.0% (point estimate) | **PASS (Point Estimate)** | 5/5 sample refusals observed (Wilson 95% CI: [56.6%–100.0%]). N=5 sample is underpowered to establish an 80% Wilson lower bound (requires N >= 15). |
-| **Average Total Query Latency** | **13.69 ms** | < 2500 ms | **PASS** | In-RAM retrieval: 13.54ms |
+| **Average Total Query Latency** | **7.53 ms** | < 2500 ms | **PASS** | In-RAM retrieval: 7.42ms |
 
 ### 🔬 Keyword-Bucket vs. Hash-Only Ablation Study
 
@@ -193,10 +193,10 @@ All queries evaluate with parameters `top_k = 5` and `min_relevance_threshold = 
 
 | Evaluation Suite | With Keyword Clusters (Mock Boost) | Hash-Only (No Clusters) | Top-1 Delta | MRR (Clusters / Hash-Only) |
 | :--- | :---: | :---: | :---: | :---: |
-| **Primary Golden Benchmark** | **85.0%** | **35.0%** | -50.0% | 0.892 / 0.375 |
-| **Tagged Held-Out Baseline (v1)** | **80.0%** | **60.0%** | -20.0% | 0.892 / 0.667 |
-| **Blind Held-Out Suite (v2)** | **65.0%** | **15.0%** | -50.0% | 0.692 / 0.150 |
-| **Blind Held-Out Suite (v3 Unseen)** | **50.0%** | **30.0%** | -20.0% | 0.575 / 0.300 |
+| **Primary Golden Benchmark** | **80.0%** | **30.0%** | -50.0% | 0.833 / 0.317 |
+| **Tagged Held-Out Baseline (v1)** | **70.0%** | **65.0%** | -5.0% | 0.742 / 0.667 |
+| **Blind Held-Out Suite (v2)** | **50.0%** | **20.0%** | -30.0% | 0.500 / 0.225 |
+| **Blind Held-Out Suite (v3 Unseen)** | **40.0%** | **20.0%** | -20.0% | 0.400 / 0.225 |
 
 ### ⚡ Real Neural Retrieval Benchmark (`BAAI/bge-small-en-v1.5`)
 
@@ -452,12 +452,12 @@ terraform apply
 ### 8. What metrics do you track to evaluate RAG system quality?
 > **Answer:** System quality metrics are synchronized programmatically from `evaluation/eval_report.json` (synthetic mock baseline across 7,207 chunks) and `evaluation/eval_report_local.json` (sovereign local neural BGE-small benchmark across the 65-question v4 suite):
 > 1. **Retrieval Top-1 & Top-5 Hit-Rate**: Percentage of queries where retrieved chunks contain the ground-truth runbook:
->    - *Synthetic Mock Baseline*: Golden: **85.0% Top-1, 95.0% Top-5**; Tagged Held-Out v1: **80.0% Top-1, 100.0% Top-5**.
+>    - *Synthetic Mock Baseline*: Golden: **80.0% Top-1, 90.0% Top-5**; Tagged Held-Out v1: **70.0% Top-1, 80.0% Top-5**.
 >    - *Neural Dense Baseline (v4 65-Q)*: **68.0% Top-1** (95% CI: [54.2%–79.2%]), **84.0% Top-5** (95% CI: [71.5%–91.7%]).
-> 2. **Mean Reciprocal Rank (MRR)**: Measures ranking density (1.0 for rank 1, 0.2 for rank 5): Golden: **0.892**, Tagged Held-Out v1: **0.892** (Neural Dense v4: **0.750** / Hybrid v4: **0.733**).
-> 3. **In-Domain Keyword Recall (Extractive Mock Baseline)**: Measures whether extracted sentences contain required diagnostic terms with valid chunk citations over in-domain queries: Golden: **70.0%**; Tagged Held-Out v1: **80.0%**.
+> 2. **Mean Reciprocal Rank (MRR)**: Measures ranking density (1.0 for rank 1, 0.2 for rank 5): Golden: **0.833**, Tagged Held-Out v1: **0.742** (Neural Dense v4: **0.750** / Hybrid v4: **0.733**).
+> 3. **In-Domain Keyword Recall (Extractive Mock Baseline)**: Measures whether extracted sentences contain required diagnostic terms with valid chunk citations over in-domain queries: Golden: **50.0%**; Tagged Held-Out v1: **50.0%**.
 > 4. **Out-of-Domain Refusal Accuracy**: Ensures queries outside the DevOps runbook corpus trigger explicit 'I don't know' refusals: Golden / Held-Out mock sample: **5/5 (100.0%)** (Wilson 95% CI: [56.6%–100.0%], underpowered N=5); Neural v4 near-domain negatives: **15/15 on v4 negatives (Wilson 95% CI: [79.6%–100.0%])**.
-> 5. **In-RAM Query Latency**: Vector search against 7,207 pre-indexed chunks completes in **12.99ms** (mock baseline) / **5.03ms** (neural dense BGE-small) / **8.30ms** (neural hybrid BM25).
+> 5. **In-RAM Query Latency**: Vector search against 7,207 pre-indexed chunks completes in **6.07ms** (mock baseline) / **5.14ms** (neural dense BGE-small) / **7.96ms** (neural hybrid BM25).
 
 ### 9. How does Terraform enforce security in this deployment?
 > **Answer:** Our Terraform code enforces:

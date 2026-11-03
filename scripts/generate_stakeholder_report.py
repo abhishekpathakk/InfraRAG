@@ -415,7 +415,7 @@ def render_html_email(digest: dict[str, Any]) -> str:
 
             <!-- FinOps & Compliance Footer -->
             <div style="background-color: #EDF2F7; padding: 12px 16px; border-radius: 6px; font-size: 0.85rem; color: #4A5568;">
-                <strong>FinOps & Free-Tier Guardrail:</strong> Zero AWS API charges incurred. All evaluations executed under local neural ONNX engine (384-dim, FastEmbed) with 100% free-tier compliance.
+                <strong>FinOps & Free-Tier Guardrail:</strong> Zero AWS API charges incurred. All evaluations executed under local neural ONNX engine (384-dim, FastEmbed) with strict zero-cost free-tier compliance.
             </div>
         </div>
 
