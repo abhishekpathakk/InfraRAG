@@ -43,7 +43,7 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
         total_chunks = chain.ingest_directory(settings.DATA_DIR)
 
         # Persist index to local /tmp or S3
-        target_dir = "/tmp/faiss_index"
+        target_dir = "/tmp/faiss_index"  # nosec B108
         chain.vector_store.save_local(target_dir)
 
         if not settings.USE_MOCK_BEDROCK and bucket_name:

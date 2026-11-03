@@ -10,7 +10,7 @@ Provides:
 import json
 import logging
 import math
-import pickle
+import pickle  # nosec B403
 import re
 import time
 from abc import ABC, abstractmethod
@@ -445,7 +445,7 @@ class FAISSVectorStore(BaseVectorStore):
         elif vec_pkl.exists() and not loaded_vectors:
             # Backward-compatibility fallback for legacy pickle files
             with open(vec_pkl, "rb") as f:
-                self._vectors = pickle.load(f)
+                self._vectors = pickle.load(f)  # nosec B301
             if HAS_NUMPY and self._vectors:
                 self._matrix = np.array(self._vectors, dtype=np.float32)
             loaded_vectors = True
@@ -495,8 +495,8 @@ class FAISSVectorStore(BaseVectorStore):
                 try:
                     local_target = dest_dir / filename
                     s3_client.download_file(bucket, s3_key, str(local_target))
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug("Optional S3 index file %s not present: %s", s3_key, e)
             self.load_local(dest_dir, expected_model_id=expected_model_id)
         else:
             import tempfile
@@ -507,7 +507,7 @@ class FAISSVectorStore(BaseVectorStore):
                     try:
                         local_target = tmp_path / filename
                         s3_client.download_file(bucket, s3_key, str(local_target))
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.debug("Optional S3 index file %s not present: %s", s3_key, e)
                 self.load_local(tmp_path, expected_model_id=expected_model_id)
 

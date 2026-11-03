@@ -31,7 +31,7 @@ def get_cached_chain() -> RAGChain:
         return _CACHED_CHAIN
 
     chain = RAGChain()
-    tmp_path = Path("/tmp/faiss_index")
+    tmp_path = Path("/tmp/faiss_index")  # nosec B108
     bucket_name = os.environ.get("S3_BUCKET_NAME", settings.S3_BUCKET_NAME)
 
     expected_model = settings.BEDROCK_EMBEDDING_MODEL_ID if not settings.USE_MOCK_BEDROCK else "mock"

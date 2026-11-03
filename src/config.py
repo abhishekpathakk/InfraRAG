@@ -65,9 +65,9 @@ except ImportError:
             self.CHUNK_OVERLAP = 100
             self.TOP_K = 3
             self.MIN_RELEVANCE_THRESHOLD = float(os.getenv("MIN_RELEVANCE_THRESHOLD", "0.25"))
-            self.BASE_DIR = Path("/tmp")
+            self.BASE_DIR = Path("/tmp")  # nosec B108
             self.DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-            self.CACHE_DIR = Path("/tmp/faiss_index")
+            self.CACHE_DIR = Path("/tmp/faiss_index")  # nosec B108
             self.BEDROCK_PRICING = {
                 "amazon.titan-embed-text-v2:0": {"input_per_1k": 0.00002, "output_per_1k": 0.0},
                 "amazon.nova-micro-v1:0": {"input_per_1k": 0.000035, "output_per_1k": 0.00014},

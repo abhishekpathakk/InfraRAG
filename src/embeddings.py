@@ -124,7 +124,7 @@ class MockEmbeddingProvider(BaseEmbeddingProvider):
 
         tokens = normalized_text.split()
         for token in tokens:
-            seed = int(hashlib.md5(token.encode("utf-8")).hexdigest(), 16) % self._dim
+            seed = int(hashlib.md5(token.encode("utf-8"), usedforsecurity=False).hexdigest(), 16) % self._dim
             vec[seed] += 0.3
 
         if self.use_clusters:
