@@ -216,6 +216,7 @@ resource "aws_lambda_function" "ingest" {
   environment {
     variables = {
       S3_BUCKET_NAME             = local.bucket_name
+      EMBEDDING_PROVIDER         = var.embedding_provider
       BEDROCK_EMBEDDING_MODEL_ID = var.embedding_model_id
       USE_MOCK_BEDROCK           = var.use_mock_bedrock
     }
@@ -238,6 +239,7 @@ resource "aws_lambda_function" "ask" {
   environment {
     variables = {
       S3_BUCKET_NAME             = local.bucket_name
+      EMBEDDING_PROVIDER         = var.embedding_provider
       BEDROCK_EMBEDDING_MODEL_ID = var.embedding_model_id
       BEDROCK_LLM_MODEL_ID       = var.llm_model_id
       USE_MOCK_BEDROCK           = var.use_mock_bedrock

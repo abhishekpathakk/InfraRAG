@@ -10,9 +10,17 @@
 > **System Architecture & Operational Status**:
 > - **Primary Default Pipeline**: 100% Sovereign Local Inference via FastEmbed ONNX (`BAAI/bge-small-en-v1.5`, 384-dimensional dense vectors) paired with BM25 Reciprocal Rank Fusion hybrid retrieval. Configured as default in `src/config.py` (`EMBEDDING_PROVIDER="local"`).
 > - **Dense-Gated Hybrid Refusal**: Hybrid retrieval gates BM25 fusion on top dense cosine similarity, preventing keyword-matching false positives on near-domain negative queries.
+> - **Refusal Recall Cost (42% In-Domain Refused at 0.80)**: To guarantee 100% refusal of near-domain negative distractors (e.g. Terraform, Transit Gateway, Ceph OSD), the empirical refusal threshold is locked at `0.80`. **Recall Cost**: At `0.80`, approximately **42.0% (21/50)** of valid in-domain incident questions with symptom phrasing are refused because dense cosine similarity overlaps between `0.73` and `0.79`.
 > - **Evaluation Dataset Freezes**: All benchmark datasets are cryptographically locked via SHA-256 digests in `evaluation/frozen_dataset_hashes.json` and verified in CI. *Note on Release Tags*: Tags `v1.0.0-eval-frozen`, `v2.0.0-eval-frozen`, `v3.0.0-eval-frozen`, and `v4.0.0-eval-frozen` were tagged retroactively alongside their respective evaluation commits. Going forward, dataset commits are tagged *prior* to running evaluation.
-> - **Serverless AWS Deployment**: The deployed AWS Lambda function and HTTP API Gateway operate in zero-cost offline mock verification mode (`USE_MOCK_BEDROCK=true`) using an in-RAM FAISS index.
+> - **Serverless AWS Deployment**: The deployed AWS Lambda function and HTTP API Gateway operate in zero-cost offline mock verification mode (`USE_MOCK_BEDROCK=true`, `EMBEDDING_PROVIDER="mock"`) pinned via Terraform.
 > - **Amazon Bedrock Quota Status**: Support quota increase case is **not filed** (Basic Support tier restricts API-driven quota requests for `L-26C560CE`). Deployment operates 100% locally with zero cloud API dependencies.
+
+> [!TIP]
+> **Operator Runbook: Tuning Refusal Threshold for Production (Precision vs. Recall)**:
+> In production SRE operations, the threshold can be configured via environment variable `MIN_RELEVANCE_THRESHOLD`:
+> - **Strict Zero-Hallucination Mode (`MIN_RELEVANCE_THRESHOLD=0.80`, Default)**: Delivers 100% refusal accuracy against out-of-scope DevOps queries (zero false positives), at the expense of refusing ~42% of legitimate in-domain symptom questions.
+> - **High-Recall Incident Response Mode (`MIN_RELEVANCE_THRESHOLD=0.74–0.75`)**: Recovers 96%–98% in-domain recall (only 1–2 out of 50 in-domain incident questions refused), but allows ~40%–47% of near-domain negative distractors past the dense gate. In this mode, the system relies on downstream citation verification (`assert len(citations) > 0`) to catch and refuse ungrounded responses.
+> - **Production Recommendation**: For teams requiring both >95% recall and 100% negative rejection, pair the bi-encoder with a cross-encoder reranker (e.g. `bge-reranker-base`) on the top-20 candidates rather than relying solely on a static cosine cutoff.
 
 > **InfraRAG** is a sovereign, serverless Retrieval-Augmented Generation (RAG) assistant purpose-built for DevOps and SRE teams. It indexes **819 runbook and documentation files (7,207 searchable chunks)** across Kubernetes, Istio, GitLab incident runbooks, and authored internal operational guides. By pairing an in-RAM vector store with **FastEmbed neural embeddings**, **BM25 hybrid ranking**, and an optional serverless **AWS Lambda / API Gateway** layer, InfraRAG delivers grounded incident resolution steps with strict source citations.
 

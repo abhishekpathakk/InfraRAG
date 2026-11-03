@@ -42,6 +42,28 @@ jobs:
       - name: Run Autonomous Loop Engineer Self-Check
         run: USE_MOCK_BEDROCK=true uv run python scripts/loop_engineer.py --dry-run
 
+  local-neural-smoke-test:
+    name: Local Neural Default Pipeline Smoke Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          version: "latest"
+
+      - name: Set up Python 3.12
+        run: uv python install 3.12
+
+      - name: Install Dependencies from Lockfile
+        run: uv sync --all-extras --dev
+
+      - name: Run Local Neural Retrieval Smoke Test (Zero Environment Variables)
+        run: uv run pytest tests/test_local_pipeline.py -v
+
   terraform-validate:
     name: Terraform Validate & Lint
     runs-on: ubuntu-latest

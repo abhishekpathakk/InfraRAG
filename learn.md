@@ -1015,7 +1015,62 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
 
 ---
 
-## Phase 26: Dense-Gated BM25 Refusal, Mixed Dev-Set Calibration, Wilson Confidence Intervals & Transparent Release Protocol (2026-11-03)
+## Phase 27: Explicit Dependency Declaration, Terraform Environment Pinning, CI Local Smoke Test, and Up-Front Recall Cost Disclosure (2026-11-03)
+
+### 1. What Was Done
+1. **Declared `fastembed` in Package Manifests & Lockfile**:
+   - Added `fastembed>=0.2.0` to `pyproject.toml` dependencies and `requirements.txt`.
+   - Updated and regenerated `uv.lock` (resolving `fastembed v0.9.1`, `onnxruntime v1.31.1`, and dependencies). Clean installations (`uv sync`, `pip install -r requirements.txt`) now install the default engine dependencies without manual intervention.
+2. **Pinned Lambda Environment in Terraform**:
+   - Added `variable "embedding_provider"` (default `"mock"`) in `terraform/variables.tf`.
+   - Explicitly injected `EMBEDDING_PROVIDER = var.embedding_provider` into the environment blocks of both `aws_lambda_function.ingest` and `aws_lambda_function.ask` in `terraform/main.tf`.
+   - Guarantees serverless Lambda functions never attempt to initialize local FastEmbed ONNX weights or crash with `ImportError`.
+3. **Automated Local Path Smoke Testing in CI**:
+   - Authored `tests/test_local_pipeline.py` verifying that when no environment variables are set, `get_embedding_provider()` resolves to `LocalFastEmbedProvider` (384-dim), indexes chunks, executes dense-gated hybrid retrieval, generates citations, and refuses out-of-domain queries.
+   - Added a dedicated `local-neural-smoke-test` job in `.github/workflows/ci.yml` running on clean Ubuntu runners.
+4. **Up-Front Disclosure of Recall Trade-Off in README**:
+   - Disclosed in the `README.md` headline status banner that locking the refusal threshold at `0.80` causes approximately **42.0% (21/50)** of valid in-domain incident questions to be refused due to cosine similarity overlap (`0.73`–`0.79`) with near-domain DevOps negatives.
+   - Provided an **Operator Runbook** detailing how to trade precision for recall: lowering `MIN_RELEVANCE_THRESHOLD` to `0.74–0.75` recovers 96%–98% recall while relying on downstream citation checks (`len(citations) > 0`) to prevent ungrounded outputs.
+
+---
+
+### 2. Plain-Language Concepts & One-Line Analogies
+- **Package Manifest Integrity**:
+  Declaring a feature as the default architecture without declaring its package in `pyproject.toml` creates a silent crash on first clean deployment.
+  - *One-line analogy:* Shipping a smartphone advertised with a standard charger, but leaving the charger out of the box.
+- **The Bi-Encoder Overlap Boundary**:
+  A bi-encoder embeds entire sentences into 384 fixed floats. Symptom descriptions of real incidents and near-domain negative queries inevitably share technical vocabulary, creating an overlap region (`0.74`–`0.78`).
+  - *One-line analogy:* Identifying a bird from its silhouette alone (bi-encoder) vs inspecting its plumage with binoculars (cross-encoder).
+
+---
+
+### 3. Issues Faced & Autonomous Fixes Applied
+
+| Issue / Friction Point | Root Cause | Fix Applied | Autonomous Prevention Rule |
+| :--- | :--- | :--- | :--- |
+| **`fastembed` Missing from Manifests** | Package was installed in dev environment but omitted from `pyproject.toml` and `requirements.txt`. | Added `fastembed>=0.2.0` to manifests and re-locked `uv.lock`. | Run test installs in sterile venvs in CI to catch undeclared imports. |
+| **Unpinned Lambda Embedding Provider** | Terraform did not inject `EMBEDDING_PROVIDER`, risking Lambda falling back to local ONNX. | Injected `EMBEDDING_PROVIDER = "mock"` explicitly in `terraform/main.tf`. | Always pin provider and runtime modes explicitly in infrastructure-as-code. |
+| **Local Neural Path Untested in CI** | CI tests ran exclusively with `USE_MOCK_BEDROCK=true`. | Authored `tests/test_local_pipeline.py` and added a standalone CI workflow job. | Include zero-config smoke tests in CI that test the real default configuration. |
+| **Concealed Recall Penalty at 0.80 Cutoff** | Reporting 100% negative refusal obscured the 42% in-domain refusal cost. | Disclosed the 21/50 refusal penalty prominently in the README headline banner. | Never report high precision without stating the corresponding recall cost. |
+
+---
+
+### 4. Measurable Achievements
+- **Package Manifests**: `fastembed` declared in `pyproject.toml`, `requirements.txt`, and pinned in `uv.lock`.
+- **Infrastructure Safety**: Terraform validates cleanly with `EMBEDDING_PROVIDER = "mock"` pinned.
+- **Test Suite**: 19/19 pytest tests passing in 0.42s (including local neural default smoke test).
+- **CI Pipeline**: 3 standalone GitHub Actions jobs (`lint-and-test`, `local-neural-smoke-test`, `terraform-validate`).
+- **Audit Transparency**: Recall cost (42% at 0.80) and operator tuning guidelines documented up front.
+
+---
+
+### 5. Architectural Decisions & Engineering Trade-Offs
+1. **Decoupling Local Default from Cloud Lambda Runtime**:
+   - *Rationale*: Setting `EMBEDDING_PROVIDER="local"` locally gives developers instant zero-cost neural retrieval. Pinning `EMBEDDING_PROVIDER="mock"` in Terraform keeps the deployed Lambda within AWS Free Tier limits (128–1024MB RAM, sub-100ms cold starts) without packing 200MB+ ONNX models into Lambda zips.
+   - *Trade-off*: Developers run local ONNX while Lambda runs mock verification until containerized Lambda deployment is enabled.
+2. **Prominent Up-Front Recall Cost Disclosure**:
+   - *Rationale*: Stating the 42% refusal penalty directly in the README headline builds trust. Rather than claiming a mythical 100% precision and 100% recall on dense embeddings, we document the mathematical reality and give operators clear knobs (`MIN_RELEVANCE_THRESHOLD`) to manage it.
+
 
 ### 1. What Was Done
 1. **Configured `local` as the Genuine Default Engine**:

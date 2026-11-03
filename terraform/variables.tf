@@ -41,6 +41,12 @@ variable "use_mock_bedrock" {
   default     = "true"
 }
 
+variable "embedding_provider" {
+  description = "Embedding provider for Lambda execution (default: mock for zero-cost serverless execution, or bedrock when configured)"
+  type        = string
+  default     = "mock"
+}
+
 variable "lambda_layers" {
   description = "Optional list of Lambda Layer ARNs (e.g. AWS-managed NumPy/SciPy layer)"
   type        = list(string)
