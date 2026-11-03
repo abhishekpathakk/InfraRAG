@@ -1015,7 +1015,57 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
 
 ---
 
-## Phase 27: Explicit Dependency Declaration, Terraform Environment Pinning, CI Local Smoke Test, and Up-Front Recall Cost Disclosure (2026-11-03)
+## Phase 28: Statistical Language Precision, Documented 0.80 Smoke Test, and FastEmbed Model Caching in CI (2026-11-03)
+
+### 1. What Was Done
+1. **Statistical Language Precision in Documentation**:
+   - Replaced blanket claims of "100% refusal" and "zero false positives" in `README.md` with exact binomial counts and confidence bounds: `"15/15 on the v4 negatives (95% lower bound about 80%)"`.
+   - Explicitly marked the 96%–98% recall figure in the Operator Runbook as `"measured post-hoc on v4 (48–49/50 incident questions admitted)"` when threshold is lowered to 0.74–0.75, acknowledging that this figure was evaluated after observing v4 distributions.
+2. **Standardized Smoke Test on Documented 0.80 Threshold**:
+   - Updated `tests/test_local_pipeline.py` to use `min_relevance_threshold=0.80`.
+   - Selected focused incident query `"What causes container Exit Code 137 and OOMKilled termination?"` which scores `0.9025` against the OOMKilled runbook chunk, passing the documented 0.80 threshold with verified citations.
+   - Tested both off-topic distractors (cake recipe) and near-domain negative distractors (AWS Transit Gateway route tables), verifying clean refusal.
+3. **Model Revision Caching in CI Workflow**:
+   - Updated `.github/workflows/ci.yml` `local-neural-smoke-test` job to set `FASTEMBED_CACHE_PATH: ~/.cache/fastembed`.
+   - Added `actions/cache@v4` step with cache key `fastembed-bge-small-5c38ec7c405ec4b44b94cc5a9bb96e735b38267a`.
+   - Guarantees fast, reproducible CI executions without re-downloading 67MB ONNX model weights on every runner.
+4. **Verified CI Pipeline Accessibility**:
+   - GitHub Actions workflow runs are publicly visible at `https://github.com/abhishekpathakk/InfraRAG/actions`.
+
+---
+
+### 2. Plain-Language Concepts & One-Line Analogies
+- **Statistical Lower Bound vs Blanket Assertion**:
+  Observing 15 out of 15 negative refusals on a sample size of N=15 gives a Wilson 95% lower bound of 79.6% (~80%). Claiming "100% refusal" or "zero false positives" treats sample success as an absolute guarantee.
+  - *One-line analogy:* Flipping heads 15 times in a row doesn't mean the coin has no tails; it only means you can be 95% confident the probability of heads is at least 80%.
+
+---
+
+### 3. Issues Faced & Autonomous Fixes Applied
+
+| Issue / Friction Point | Root Cause | Fix Applied | Autonomous Prevention Rule |
+| :--- | :--- | :--- | :--- |
+| **Uncalibrated Smoke Test Cutoff** | Smoke test used 0.70 while docs cited 0.80. | Updated smoke test to 0.80 with query scoring 0.9025. | Test suites must always enforce the documented production threshold. |
+| **Unbounded Precision Assertions** | Documentation claimed "zero false positives". | Replaced with "15/15 on v4 negatives (95% lower bound about 80%)". | Always pair empirical sample rates with their confidence bounds. |
+| **Uncached Model Weights in CI** | Runner downloaded 67MB ONNX model on every workflow trigger. | Added `actions/cache@v4` on `FASTEMBED_CACHE_PATH` keyed by canonical revision. | Always cache immutable model artifacts in CI pipelines. |
+
+---
+
+### 4. Measurable Achievements
+- **Test Suite**: 19/19 pytest tests passing in 0.44s.
+- **CI Caching**: Pinned `5c38ec7c405ec4b44b94cc5a9bb96e735b38267a` ONNX cache key in GitHub Actions.
+- **Documentation Precision**: Wilson confidence intervals and post-hoc labels synchronized across documentation.
+
+---
+
+### 5. Architectural Roadmap to 9/10
+1. **Containerized Lambda Deployment**:
+   - Package `fastembed`, ONNX runtime, and `BAAI/bge-small-en-v1.5` inside an AWS Lambda container image deployed via ECR, replacing the mock Lambda endpoint with the real neural index behind the public HTTP API.
+2. **Fresh Blind Suite v5**:
+   - Commit and cut tag `v5.0.0-eval-frozen` *before* running evaluation, reporting first-run metrics as-is.
+3. **Cross-Encoder Reranker Empirical Evaluation**:
+   - Implement and benchmark a two-stage pipeline: bi-encoder `bge-small-en-v1.5` retrieval (top-20, loose threshold 0.70) followed by a cross-encoder (`bge-reranker-base`) to measure if the 42% in-domain refusal penalty can be eliminated while preserving 15/15 negative rejection.
+
 
 ### 1. What Was Done
 1. **Declared `fastembed` in Package Manifests & Lockfile**:

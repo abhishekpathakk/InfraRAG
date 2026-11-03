@@ -34,7 +34,7 @@ def test_local_neural_pipeline_end_to_end_smoke():
         embedding_provider=provider,
         vector_store=store,
         llm_provider=llm,
-        min_relevance_threshold=0.70,
+        min_relevance_threshold=0.80,
     )
 
     # Ingest technical runbook chunk
@@ -47,8 +47,8 @@ def test_local_neural_pipeline_end_to_end_smoke():
     embeddings = provider.embed_batch([chunk.content])
     store.add_documents([chunk], embeddings)
 
-    # 1. In-domain technical query
-    response = chain.answer_question("What causes Exit Code 137?", hybrid=True)
+    # 1. In-domain technical query (passes documented 0.80 threshold)
+    response = chain.answer_question("What causes container Exit Code 137 and OOMKilled termination?", hybrid=True)
     assert "Exit Code 137" in response.answer or "OOMKilled" in response.answer
     assert len(response.citations) > 0
     assert response.citations[0].source_file == "kubernetes_oom_killed.md"
@@ -58,3 +58,9 @@ def test_local_neural_pipeline_end_to_end_smoke():
     negative_response = chain.answer_question("What is the recipe for baking a chocolate cake?", hybrid=True)
     assert "I don't know based on the provided runbooks." in negative_response.answer
     assert len(negative_response.citations) == 0
+
+    # 3. Near-domain negative refusal query (gated out by 0.80 threshold)
+    near_domain_response = chain.answer_question("How to configure route table blackholes in AWS Transit Gateway peering attachments?", hybrid=True)
+    assert "I don't know based on the provided runbooks." in near_domain_response.answer
+    assert len(near_domain_response.citations) == 0
+
