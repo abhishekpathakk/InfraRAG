@@ -128,7 +128,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
-          security-checks: 'secret'
+          scanners: 'secret'
           format: 'table'
 
       - name: Run Trivy Terraform Misconfiguration Scan
@@ -136,6 +136,7 @@ jobs:
         with:
           scan-type: 'config'
           scan-ref: 'terraform/'
+          scanners: 'misconfig'
           format: 'table'
 
       - name: Upload Security Reports & SBOM
@@ -174,7 +175,7 @@ jobs:
 
       - name: SonarCloud Scan
         if: env.SONAR_TOKEN != ''
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v5
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
