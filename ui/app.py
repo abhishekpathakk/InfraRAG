@@ -63,16 +63,24 @@ st.markdown(
 )
 
 
+def get_index_path() -> Path:
+    if settings.EMBEDDING_PROVIDER == "local":
+        local_dir = settings.CACHE_DIR / "local_bge_small"
+        if (local_dir / "chunks.json").exists():
+            return local_dir
+    return settings.CACHE_DIR
+
+
 @st.cache_resource
 def get_rag_chain() -> RAGChain:
     chain = RAGChain()
-    # Ingest runbooks if not already loaded
-    cache_file = settings.CACHE_DIR / "chunks.json"
+    index_dir = get_index_path()
+    cache_file = index_dir / "chunks.json"
     if cache_file.exists():
-        chain.vector_store.load_local(settings.CACHE_DIR)
+        chain.vector_store.load_local(index_dir)
     else:
         chain.ingest_directory(settings.DATA_DIR)
-        chain.vector_store.save_local(settings.CACHE_DIR)
+        chain.vector_store.save_local(index_dir)
     return chain
 
 
@@ -98,8 +106,9 @@ def main():
 
         if st.button("🔄 Re-index Runbooks", use_container_width=True):
             with st.spinner("Re-chunking and rebuilding FAISS index..."):
+                index_dir = get_index_path()
                 count = chain.ingest_directory(settings.DATA_DIR)
-                chain.vector_store.save_local(settings.CACHE_DIR)
+                chain.vector_store.save_local(index_dir)
                 st.success(f"Indexed {count} chunks!")
                 st.rerun()
 

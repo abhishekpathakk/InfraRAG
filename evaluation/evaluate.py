@@ -188,7 +188,10 @@ def run_evaluation() -> dict:
 
     # 1. Main Run: Mock with Clusters
     console.print("[bold cyan]Initializing InfraRAG Engine (With Clusters)...[/bold cyan]")
-    chain = RAGChain()
+    from src.embeddings import MockEmbeddingProvider
+
+    cluster_provider = MockEmbeddingProvider(dimension=1024, use_clusters=True)
+    chain = RAGChain(embedding_provider=cluster_provider)
     chain.ingest_directory(settings.DATA_DIR)
     console.print(f"[bold green]Indexed {len(chain.vector_store.chunks)} chunks across multi-source corpus.[/bold green]")
 
@@ -224,7 +227,7 @@ def run_evaluation() -> dict:
     # Both document ingestion and query retrieval MUST share the same hash-only provider
     console.print("\n[bold yellow]Running Hash-Only Ablation Suite (use_clusters=False, Matched Retriever)...[/bold yellow]")
     from src.embeddings import MockEmbeddingProvider
-    hash_provider = MockEmbeddingProvider(dimension=settings.EMBEDDING_DIMENSION, use_clusters=False)
+    hash_provider = MockEmbeddingProvider(dimension=1024, use_clusters=False)
     ablation_chain = RAGChain(embedding_provider=hash_provider)
     ablation_chain.ingest_directory(settings.DATA_DIR)
 

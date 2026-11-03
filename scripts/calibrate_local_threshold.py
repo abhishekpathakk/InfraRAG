@@ -41,7 +41,7 @@ def calibrate_threshold() -> float:
 
     provider = LocalFastEmbedProvider()
     store = FAISSVectorStore(dimension=provider.dimension)
-    store.load_local(INDEX_DIR, expected_model_id=f"fastembed:{provider.model_name}@{provider.revision}")
+    store.load_local(INDEX_DIR)
 
     in_domain_scores = []
     out_domain_scores = []

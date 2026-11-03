@@ -132,7 +132,8 @@ class MockEmbeddingProvider(BaseEmbeddingProvider):
                 for pat in patterns:
                     if pat.search(normalized_text):
                         for b in range(bucket_start, bucket_start + 65):
-                            vec[b] += 15.0
+                            if b < self._dim:
+                                vec[b] += 15.0
 
         # L2-normalize vector so ||v|| = 1.0
         norm = sum(x * x for x in vec) ** 0.5

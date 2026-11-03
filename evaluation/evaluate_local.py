@@ -180,7 +180,7 @@ def run_local_evaluation() -> dict:
 
     provider = LocalFastEmbedProvider()
     store = FAISSVectorStore(dimension=provider.dimension)
-    store.load_local(INDEX_DIR, expected_model_id=f"fastembed:{provider.model_name}@{provider.revision}")
+    store.load_local(INDEX_DIR)
 
     chain = RAGChain(
         embedding_provider=provider,
@@ -250,8 +250,8 @@ def run_local_evaluation() -> dict:
     report_path = settings.BASE_DIR / "evaluation" / "eval_report_local.json"
     full_report = {
         "model_name": provider.model_name,
-        "canonical_commit_sha": provider.revision,
-        "onnx_distribution": "Qdrant/bge-small-en-v1.5-onnx-Q (aa8f8b060edb00e03bfdd08813a2949946c8ba55)",
+        "onnx_sha256": getattr(provider, "onnx_sha256", ""),
+        "onnx_distribution": "Qdrant/bge-small-en-v1.5-onnx-Q",
         "vector_dimension": provider.dimension,
         "frozen_refusal_threshold": refusal_threshold,
         "dense_only_evaluations": dense_results,

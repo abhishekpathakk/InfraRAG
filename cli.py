@@ -9,6 +9,7 @@ Usage:
 """
 
 import sys
+from pathlib import Path
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
@@ -19,12 +20,20 @@ from src.config import settings
 console = Console()
 
 
+def get_index_dir() -> Path:
+    if settings.EMBEDDING_PROVIDER == "local":
+        local_dir = settings.CACHE_DIR / "local_bge_small"
+        if (local_dir / "chunks.json").exists():
+            return local_dir
+    return settings.CACHE_DIR
+
+
 def get_chain() -> RAGChain:
     chain = RAGChain()
-    # If index cache exists, load it
-    cache_file = settings.CACHE_DIR / "chunks.json"
+    index_dir = get_index_dir()
+    cache_file = index_dir / "chunks.json"
     if cache_file.exists():
-        chain.vector_store.load_local(settings.CACHE_DIR)
+        chain.vector_store.load_local(index_dir)
     return chain
 
 
@@ -35,10 +44,11 @@ def do_ingest():
     chain = RAGChain()
     total_chunks = chain.ingest_directory(settings.DATA_DIR)
 
+    index_dir = get_index_dir()
     # Persist locally to cache directory
-    chain.vector_store.save_local(settings.CACHE_DIR)
+    chain.vector_store.save_local(index_dir)
 
-    console.print(f"[bold green]✔ Successfully indexed and saved {total_chunks} chunks to {settings.CACHE_DIR}[/bold green]\n")
+    console.print(f"[bold green]✔ Successfully indexed and saved {total_chunks} chunks to {index_dir}[/bold green]\n")
 
 
 def do_ask(question: str, type_filter: str | None = None):
