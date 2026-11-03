@@ -96,7 +96,7 @@ def test_vector_store_model_mismatch_guard():
 
 
 def test_vector_store_load_local_parity_and_fast_latency():
-    """Validates that loaded vector store has 100% search parity and sub-millisecond retrieval."""
+    """Validates that loaded vector store has exact search parity and fast retrieval."""
     import time
     provider = MockEmbeddingProvider(dimension=1024)
     original_store = FAISSVectorStore(dimension=1024)

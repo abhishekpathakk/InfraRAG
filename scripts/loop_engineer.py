@@ -41,12 +41,12 @@ def run_cmd(cmd: list[str], desc: str) -> bool:
 def check_free_tier_status():
     print_banner("Checking Free-Tier & Cost Guardrails")
     use_mock = os.getenv("USE_MOCK_BEDROCK", "true").lower() in ("true", "1", "yes")
-    print(f"• USE_MOCK_BEDROCK: {use_mock} (100% Free Local Testing)")
+    print(f"• USE_MOCK_BEDROCK: {use_mock} (Offline Local Testing)")
     print("• Monthly AWS Cost Baseline: $0.00 (Local / Free tier eligible)")
     print("• S3 Free Tier: 5GB storage, 20,000 GET requests")
     print("• Lambda Free Tier: 1,000,000 requests / month")
     print("• API Gateway Free Tier: 1,000,000 requests / month")
-    print("✅ Cost safety guardrails verified: ZERO unexpected spend.")
+    print("✅ Cost safety guardrails verified: zero unexpected spend.")
 
 
 def main():

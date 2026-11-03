@@ -3,11 +3,9 @@
 Builds a persistent vector index using open-source dense neural embeddings via FastEmbed.
 
 Model Architecture:
-- Canonical Model: BAAI/bge-small-en-v1.5
-- HuggingFace Commit SHA: 5c38ec7c405ec4b44b94cc5a9bb96e735b38267a
-- Quantized ONNX Engine: Qdrant/bge-small-en-v1.5-onnx-Q (Commit SHA: aa8f8b060edb00e03bfdd08813a2949946c8ba55)
-- Vector Dimension: 384
-- Zero AWS API / Token Costs: 100% Free, local CPU inference via ONNX Runtime.
+- Canonical Model: BAAI/bge-small-en-v1.5 (dim=384)
+- ONNX Binary Checksum: SHA-256 51f1bd0addd6e859e42c2c8021a5e5461385bb676a649f4b269aa445449f2431
+- Zero external API costs: offline local CPU inference via ONNX Runtime.
 """
 
 import logging

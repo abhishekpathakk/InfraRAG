@@ -10,7 +10,7 @@ Explaining Chunk Size and Overlap for DevOps/SRE:
    - If a chunk is too large (e.g., 3000 words), the embedding vector averages out multiple
      different topics, diluting search accuracy and wasting LLM context window tokens.
 2. Chunk Overlap (e.g., 100 tokens / ~70 words):
-   - Overlap acts as a sliding buffer across chunk boundaries. It guarantees that multi-line
+   - Overlap acts as a sliding buffer across chunk boundaries. It preserves multi-line
      YAML snippets or consecutive shell commands that span boundary lines are never split
      in half without context in at least one chunk.
 """

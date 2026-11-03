@@ -3,7 +3,8 @@ Embeddings Provider for InfraRAG.
 
 Supports:
 1. Amazon Bedrock Titan Text Embeddings v2 (1024-dim, unit normalized).
-2. Mock Embedding Provider (100% Free, offline local mode for zero-cost dev/test).
+2. Mock Embedding Provider (Offline local mode for zero-cost dev/test).
+3. Sovereign Local FastEmbed Provider (BAAI/bge-small-en-v1.5, verified via post-download SHA-256).
 """
 
 import hashlib
@@ -42,7 +43,7 @@ class BaseEmbeddingProvider(ABC):
 
 class MockEmbeddingProvider(BaseEmbeddingProvider):
     """
-    100% Free offline local embedding generator.
+    Offline local embedding generator.
     Produces deterministic 1024-dimensional unit-normalized vectors.
     Uses semantic term weighting so related DevOps concepts (e.g., OOMKilled, memory, exit 137)
     have high cosine similarity.
@@ -224,19 +225,20 @@ class BedrockTitanEmbeddingProvider(BaseEmbeddingProvider):
 class LocalFastEmbedProvider(BaseEmbeddingProvider):
     """
     Open-Source Neural Embedding Provider using FastEmbed (ONNX Runtime).
-    Default model: BAAI/bge-small-en-v1.5 (dim=384).
-    Source repo: Qdrant/bge-small-en-v1.5-onnx-Q pinned to commit aa8f8b060edb00e03bfdd08813a2949946c8ba55.
-    ONNX SHA-256: 51f1bd0addd6e859e42c2c8021a5e5461385bb676a649f4b269aa445449f2431.
-    Provides genuine local neural dense embeddings with zero cloud API dependencies.
+    Default model: BAAI/bge-small-en-v1.5 (dim=384, source repo: Qdrant/bge-small-en-v1.5-onnx-Q).
+
+    Note on Upstream Resolution & Provenance:
+    FastEmbed resolves upstream repository HEAD during download. Weight integrity and immutability
+    are enforced post-download via runtime SHA-256 verification on the optimized ONNX model binary
+    (EXPECTED_ONNX_SHA256 = '51f1bd0addd6e859e42c2c8021a5e5461385bb676a649f4b269aa445449f2431').
+    Provides local neural dense embeddings without cloud API dependencies.
     """
 
-    DEFAULT_REVISION = "aa8f8b060edb00e03bfdd08813a2949946c8ba55"
     EXPECTED_ONNX_SHA256 = "51f1bd0addd6e859e42c2c8021a5e5461385bb676a649f4b269aa445449f2431"
 
     def __init__(
         self,
         model_name: str = "BAAI/bge-small-en-v1.5",
-        revision: str = DEFAULT_REVISION,
         expected_sha256: str | None = EXPECTED_ONNX_SHA256,
         batch_size: int = 64,
         cache_dir: str | None = None,
@@ -247,38 +249,56 @@ class LocalFastEmbedProvider(BaseEmbeddingProvider):
             raise ImportError("fastembed is required for LocalFastEmbedProvider. Install with `pip install fastembed`.")
 
         self.model_name = model_name
-        self.revision = revision
         self.batch_size = batch_size
         effective_cache = cache_dir or os.getenv("FASTEMBED_CACHE_PATH", None)
 
-        # Pass exact pinned revision to TextEmbedding loader
         self._model = TextEmbedding(
             model_name=model_name,
-            revision=revision,
             cache_dir=effective_cache,
         )
 
-        # Enforce cryptographic binary integrity on the loaded ONNX model
-        raw_model_dir = getattr(self._model.model, "_model_dir", None)
-        model_dir = Path(raw_model_dir) if raw_model_dir else None
-        if model_dir and model_dir.exists():
+        # Enforce fail-closed cryptographic binary integrity on the loaded ONNX model
+        if expected_sha256:
+            raw_model_dir = getattr(self._model.model, "_model_dir", None)
+            if not raw_model_dir:
+                raise RuntimeError(
+                    "FastEmbed integrity check failed: model directory attribute '_model_dir' "
+                    "could not be resolved from loaded TextEmbedding instance."
+                )
+            model_dir = Path(raw_model_dir)
+            if not model_dir.exists():
+                raise RuntimeError(
+                    f"FastEmbed integrity check failed: resolved model directory does not exist: {model_dir}"
+                )
             onnx_file = model_dir / "model_optimized.onnx"
             if not onnx_file.exists():
                 candidates = list(model_dir.glob("*.onnx"))
                 if candidates:
                     onnx_file = candidates[0]
-
-            if onnx_file.exists():
-                self.onnx_sha256 = hashlib.sha256(onnx_file.read_bytes()).hexdigest()
-                if expected_sha256 and self.onnx_sha256 != expected_sha256:
+                else:
                     raise RuntimeError(
-                        f"FastEmbed ONNX integrity violation: expected SHA-256 {expected_sha256}, "
-                        f"got {self.onnx_sha256} for {onnx_file}"
+                        f"FastEmbed integrity check failed: no ONNX binary found in {model_dir}"
                     )
+
+            try:
+                self.onnx_sha256 = hashlib.sha256(onnx_file.read_bytes()).hexdigest()
+            except Exception as e:
+                raise RuntimeError(
+                    f"FastEmbed integrity check failed: unable to compute SHA-256 for {onnx_file}: {e}"
+                ) from e
+
+            if self.onnx_sha256 != expected_sha256:
+                raise RuntimeError(
+                    f"FastEmbed ONNX integrity violation: expected SHA-256 {expected_sha256}, "
+                    f"got {self.onnx_sha256} for {onnx_file}"
+                )
+        else:
+            raw_model_dir = getattr(self._model.model, "_model_dir", None)
+            opt_model_dir = Path(raw_model_dir) if raw_model_dir else None
+            if opt_model_dir and (opt_model_dir / "model_optimized.onnx").exists():
+                self.onnx_sha256 = hashlib.sha256((opt_model_dir / "model_optimized.onnx").read_bytes()).hexdigest()
             else:
                 self.onnx_sha256 = ""
-        else:
-            self.onnx_sha256 = ""
 
         # Determine actual embedding dimension
         probe_emb = list(self._model.embed(["probe"]))[0]
@@ -305,7 +325,7 @@ def get_embedding_provider() -> BaseEmbeddingProvider:
         return LocalFastEmbedProvider()
     dim = int(os.getenv("EMBEDDING_DIMENSION", str(getattr(settings, "EMBEDDING_DIMENSION", 1024))))
     if provider_type == "mock" or os.getenv("USE_MOCK_BEDROCK", "").lower() in ("true", "1", "yes"):
-        logger.info("Using 100% Free MockEmbeddingProvider for zero-cost execution.")
+        logger.info("Using MockEmbeddingProvider for offline execution.")
         return MockEmbeddingProvider(dimension=dim)
     return BedrockTitanEmbeddingProvider(
         region_name=settings.AWS_REGION,

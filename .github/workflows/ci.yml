@@ -30,11 +30,11 @@ jobs:
       - name: Install Dependencies from Lockfile
         run: uv sync --all-extras --dev
 
-      - name: Cache Pinned FastEmbed Model Revision
+      - name: Cache Verified FastEmbed Model Weights
         uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/.cache/fastembed
-          key: fastembed-bge-small-aa8f8b060edb00e03bfdd08813a2949946c8ba55-51f1bd0addd6
+          key: fastembed-bge-small-sha256-51f1bd0addd6e859e42c2c8021a5e5461385bb676a649f4b269aa445449f2431
 
       - name: Verify Frozen Evaluation Datasets Integrity
         run: uv run python scripts/verify_frozen_datasets.py
@@ -72,12 +72,12 @@ jobs:
       - name: Install Dependencies from Lockfile
         run: uv sync --all-extras --dev
 
-      - name: Cache Pinned FastEmbed Model Revision
+      - name: Cache Verified FastEmbed Model Weights
         id: cache-fastembed
         uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/.cache/fastembed
-          key: fastembed-bge-small-aa8f8b060edb00e03bfdd08813a2949946c8ba55-51f1bd0addd6
+          key: fastembed-bge-small-sha256-51f1bd0addd6e859e42c2c8021a5e5461385bb676a649f4b269aa445449f2431
 
       - name: Log Cache State
         run: |

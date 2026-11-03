@@ -88,7 +88,7 @@ def main():
     # Sidebar controls & metrics
     with st.sidebar:
         st.header("⚙️ System Status")
-        mode = "100% Free / Mock Mode" if settings.USE_MOCK_BEDROCK else "AWS Bedrock (ap-south-1)"
+        mode = "Offline Mock Mode" if settings.USE_MOCK_BEDROCK else "AWS Bedrock (ap-south-1)"
         st.info(f"**Execution Mode:**\n{mode}")
         st.write(f"**Indexed Chunks:** {len(chain.vector_store.chunks)}")
         st.write("**Source Runbooks:** 4 Markdown files")

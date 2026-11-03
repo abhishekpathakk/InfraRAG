@@ -7,6 +7,8 @@ Verifies that when InfraRAG is executed with zero environment variables:
    function out-of-the-box without requiring AWS credentials or mock overrides.
 """
 
+import pytest
+
 from src.chain import RAGChain
 from src.embeddings import LocalFastEmbedProvider, get_embedding_provider
 from src.generator import MockLLMProvider
@@ -15,12 +17,51 @@ from src.vector_store import FAISSVectorStore
 
 
 def test_default_embedding_provider_is_local():
-    """Verifies that calling get_embedding_provider() with no env vars defaults to local BGE-small with pinned commit and checksum."""
+    """Verifies that calling get_embedding_provider() with no env vars defaults to local BGE-small with verified ONNX checksum."""
     provider = get_embedding_provider()
     assert isinstance(provider, LocalFastEmbedProvider), f"Expected LocalFastEmbedProvider, got {type(provider)}"
     assert provider.dimension == 384, f"Expected 384 dimensions for bge-small, got {provider.dimension}"
-    assert provider.revision == "aa8f8b060edb00e03bfdd08813a2949946c8ba55", f"Unexpected revision: {provider.revision}"
     assert provider.onnx_sha256 == "51f1bd0addd6e859e42c2c8021a5e5461385bb676a649f4b269aa445449f2431", f"Unexpected sha256: {provider.onnx_sha256}"
+
+
+def test_integrity_check_fails_closed_when_model_dir_unresolvable(monkeypatch):
+    """Verifies fail-closed behavior: raises RuntimeError if _model_dir cannot be introspected."""
+    from fastembed import TextEmbedding
+    original_init = TextEmbedding.__init__
+
+    def dummy_init(self, *args, **kwargs):
+        original_init(self, *args, **kwargs)
+        # Simulate private attribute rename or missing _model_dir
+        if hasattr(self.model, "_model_dir"):
+            delattr(self.model, "_model_dir")
+
+    monkeypatch.setattr(TextEmbedding, "__init__", dummy_init)
+    with pytest.raises(RuntimeError, match="model directory attribute '_model_dir' could not be resolved"):
+        LocalFastEmbedProvider()
+
+
+def test_integrity_check_fails_closed_when_onnx_missing(monkeypatch, tmp_path):
+    """Verifies fail-closed behavior: raises RuntimeError if the resolved model dir contains no ONNX binary."""
+    from fastembed import TextEmbedding
+    original_init = TextEmbedding.__init__
+
+    empty_dir = tmp_path / "empty_model_dir"
+    empty_dir.mkdir()
+
+    def dummy_init(self, *args, **kwargs):
+        original_init(self, *args, **kwargs)
+        self.model._model_dir = str(empty_dir)
+
+    monkeypatch.setattr(TextEmbedding, "__init__", dummy_init)
+    with pytest.raises(RuntimeError, match="no ONNX binary found"):
+        LocalFastEmbedProvider()
+
+
+def test_integrity_check_fails_closed_on_hash_mismatch():
+    """Verifies fail-closed behavior: raises RuntimeError when binary checksum does not match expected_sha256."""
+    mismatched_hash = "0000000000000000000000000000000000000000000000000000000000000000"
+    with pytest.raises(RuntimeError, match="FastEmbed ONNX integrity violation"):
+        LocalFastEmbedProvider(expected_sha256=mismatched_hash)
 
 
 def test_local_neural_pipeline_end_to_end_smoke():

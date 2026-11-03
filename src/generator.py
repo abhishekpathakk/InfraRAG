@@ -118,7 +118,7 @@ class BaseLLMProvider(ABC):
 
 class MockLLMProvider(BaseLLMProvider):
     """
-    100% Free offline extractive mock LLM generator.
+    Offline extractive mock LLM generator.
     Extracts relevant facts directly from retrieved context chunks using query term overlap
     with verifiable source citations. Does NOT use hardcoded question/answer rules.
     """
@@ -174,7 +174,7 @@ class MockLLMProvider(BaseLLMProvider):
                     top_lines.append(f"{s} [{c.source_file}#{c.chunk_id}]")
             answer = " ".join(top_lines)
         else:
-            # If retrieved chunks have zero query overlap, the information is absent -> strict refusal
+            # If retrieved chunks have no query overlap, the information is absent -> refusal fallback
             return "I don't know based on the provided runbooks.", [], 50, 10, (time.perf_counter() - start) * 1000.0
 
         latency = (time.perf_counter() - start) * 1000.0
@@ -182,7 +182,7 @@ class MockLLMProvider(BaseLLMProvider):
         output_tokens = len(answer.split())
         citations = parse_citations_from_answer(answer, chunks)
 
-        # Non-refusal answers with zero valid citations are treated as ungrounded
+        # Non-refusal answers without valid citations are treated as ungrounded
         if not citations and "I don't know based on the provided runbooks" not in answer:
             answer = "I don't know based on the provided runbooks."
 
