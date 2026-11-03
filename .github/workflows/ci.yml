@@ -46,7 +46,13 @@ jobs:
         run: uv run mypy src/
 
       - name: Run Pytest with Coverage
-        run: USE_MOCK_BEDROCK=true uv run pytest --cov=src --cov-report=term-missing tests/
+        run: USE_MOCK_BEDROCK=true uv run pytest --cov=src --cov-report=term-missing --cov-report=xml:coverage.xml tests/
+
+      - name: Upload Coverage XML
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
 
       - name: Run Autonomous Loop Engineer Self-Check
         run: USE_MOCK_BEDROCK=true uv run python scripts/loop_engineer.py --dry-run
@@ -92,6 +98,81 @@ jobs:
       - name: Run Local Neural Retrieval Smoke Test (Zero Environment Variables)
         run: uv run pytest tests/test_local_pipeline.py -v -s
 
+  security-and-sbom:
+    name: Security Scan & SBOM Generation (Trivy)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Create Reports Directory
+        run: mkdir -p reports
+
+      - name: Run Trivy Vulnerability Scanner (JSON Report)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          format: 'json'
+          output: 'reports/trivy-fs.json'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+
+      - name: Generate CycloneDX SBOM
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          format: 'cyclonedx'
+          output: 'reports/sbom.cyclonedx.json'
+
+      - name: Run Trivy Secret Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          security-checks: 'secret'
+          format: 'table'
+
+      - name: Run Trivy Terraform Misconfiguration Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: 'terraform/'
+          format: 'table'
+
+      - name: Upload Security Reports & SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: reports/
+
+  sonar-analysis:
+    name: SonarQube / SonarCloud Code Analysis
+    runs-on: ubuntu-latest
+    needs: [lint-and-test]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download Coverage XML
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+          path: .
+        continue-on-error: true
+
+      - name: SonarCloud Scan
+        if: env.SONAR_TOKEN != ''
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Log Sonar Status When Token Not Provided
+        if: env.SONAR_TOKEN == ''
+        run: |
+          echo "SONAR_TOKEN not configured in GitHub Secrets. Sonar analysis skipped (Zero-cost fallback)."
+
   terraform-validate:
     name: Terraform Validate & Lint
     runs-on: ubuntu-latest
@@ -119,3 +200,56 @@ jobs:
             terraform -chdir=terraform init -backend=false
             terraform -chdir=terraform validate
           fi
+
+  stakeholder-digest:
+    name: Stakeholder Operational & Security Digest
+    runs-on: ubuntu-latest
+    needs: [lint-and-test, security-and-sbom]
+    if: always()
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          version: "latest"
+
+      - name: Set up Python 3.12
+        run: uv python install 3.12
+
+      - name: Download Security Reports Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: security-reports
+          path: reports
+        continue-on-error: true
+
+      - name: Download Coverage Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+          path: .
+        continue-on-error: true
+
+      - name: Generate Stakeholder Digest (Console, HTML, Plaintext)
+        env:
+          SES_SENDER_EMAIL: ${{ secrets.SES_SENDER_EMAIL }}
+          SES_RECIPIENT_EMAILS: ${{ secrets.SES_RECIPIENT_EMAILS }}
+          AWS_REGION: ${{ secrets.AWS_REGION || 'ap-south-1' }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          uv run python scripts/generate_stakeholder_report.py \
+            --trivy-report=reports/trivy-fs.json \
+            --sbom=reports/sbom.cyclonedx.json \
+            --coverage-xml=coverage.xml \
+            --output-dir=reports \
+            ${{ secrets.SES_SENDER_EMAIL && '--send-ses' || '' }}
+
+      - name: Upload Stakeholder Digest Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: stakeholder-digest
+          path: reports/

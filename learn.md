@@ -1361,6 +1361,68 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
 2. **Declarative Absolute Workspace Paths in CI**:
    - *Rationale*: Using `${{ github.workspace }}` provides identical path resolution across GitHub Actions runner containers and steps, eliminating cross-step directory mismatches.
 
+---
+
+## Phase 14: Automated Security Scanning (Trivy, SBOM, Sonar) & AWS SES Structured Stakeholder Reporting
+
+### 1. What Was Done
+1. **Automated Supply Chain & Vulnerability Scanning (Aqua Trivy)**:
+   - Configured automated Aqua Trivy scanning in `.github/workflows/ci.yml` covering Python dependencies (`uv.lock`), Terraform IaC misconfigurations, and hardcoded secrets detection.
+   - Enforced fail-closed CI gating on unfixed `CRITICAL` and `HIGH` CVEs.
+2. **Standardized Software Bill of Materials (SBOM)**:
+   - Automated CycloneDX JSON SBOM generation via Trivy in CI (`reports/sbom.cyclonedx.json`) and uploaded as a build artifact for supply-chain provenance.
+3. **SonarQube / SonarCloud Integration**:
+   - Added `sonar-project.properties` in repo root and configured the Sonar analysis CI step in `.github/workflows/ci.yml` mapping Python coverage from `coverage.xml`.
+4. **Structured Stakeholder Reporting Engine (`scripts/generate_stakeholder_report.py`)**:
+   - Implemented an end-to-end telemetry aggregator that parses test results, coverage XML, local evaluation benchmarks (v4 Dense & Hybrid), and security scan findings.
+   - Built a responsive HTML email template and structured plain-text digest with clear color-coded executive sections: `PASS`, `REQUIRES ATTENTION`, and `FAILING CHECKS`.
+5. **Zero-Cost AWS SES Dispatcher & Offline Fallback**:
+   - Integrated AWS SES delivery via `boto3.ses` within the AWS Free Tier (62,000 outbound messages/mo).
+   - Enforced zero-cost local fallback: when running locally or in mock mode without AWS credentials, writes all artifacts (`reports/stakeholder_digest.html`, `.txt`, `.json`) and outputs console logs without network calls ($0.00 cost).
+6. **Architecture Spine Formalization**:
+   - Codified `AD-7` (Automated Supply Chain & Static Security Gate) and `AD-8` (Structured Stakeholder Telemetry & AWS SES Notification Invariant) into `ARCHITECTURE-SPINE.md`.
+7. **Comprehensive Unit Testing**:
+   - Added 6 automated unit tests in `tests/test_stakeholder_report.py` covering digest compilation, status escalation on CVEs, HTML rendering, and SES dispatch mocks.
+
+---
+
+### 2. Plain-Language Concepts & One-Line Analogies
+- **Software Bill of Materials (SBOM)**:
+  A comprehensive, machine-readable inventory of every ingredient and sub-component inside your software, from direct libraries down to nested transitive dependencies.
+  - *One-line analogy:* An FDA nutrition and ingredients label on a box of cereal, ensuring you know exactly what is inside and whether anything is recalled.
+- **Three-Pillar Stakeholder Reporting**:
+  Separating reporting into operational health, security compliance, and FinOps cloud spend with clear pass/fail status flags so leaders get an immediate 10-second summary without digging through raw logs.
+  - *One-line analogy:* A car dashboard warning light system: green means drive, yellow means service soon, red means pull over immediately.
+
+---
+
+### 3. Issues Faced & Autonomous Fixes Applied
+
+| Issue / Friction Point | Root Cause | Fix Applied | Autonomous Prevention Rule |
+| :--- | :--- | :--- | :--- |
+| **Index Dimension Mismatch in CLI & UI** | When `EMBEDDING_PROVIDER` defaulted to `local` (384-dim), `cli.py` and `ui/app.py` loaded `index_cache/` directly, which contained the 1024-dim mock index. | Added dynamic index resolution (`get_index_dir()`) targeting `index_cache/local_bge_small` under local mode and root cache under mock mode. | Runtime loaders must resolve index cache paths dynamically based on active embedding dimensionality. |
+| **Outdated `provider.revision` Reference in Evaluation** | Evaluation scripts referenced `provider.revision`, which was removed when FastEmbed was recognized to ignore constructor revisions. | Cleaned up references across `evaluate_local.py` and `calibrate_local_threshold.py`. | Remove legacy attributes completely across all consumers when refactoring provider interfaces. |
+| **Static f-string and Unused Imports** | `generate_stakeholder_report.py` and `test_stakeholder_report.py` had unused imports and static f-strings. | Resolved via `ruff check --fix .`. | Always run automated linter before finalizing implementation turns. |
+
+---
+
+### 4. Measurable Achievements
+- **Test Suite**: 28/28 tests passing in 1.03s (`uv run pytest tests/`).
+- **Linter & Type Checker**: 0 errors across 12 source files in `ruff check .` and `mypy src/`.
+- **Security & SBOM**: Automated Trivy vulnerability scans, secret checks, IaC analysis, and CycloneDX SBOM generation active in CI.
+- **Zero Cost**: $0.00 spend strictly maintained.
+
+---
+
+### 5. Architectural Decisions & Engineering Trade-Offs
+1. **GitHub Actions Native Trivy & CycloneDX vs Heavyweight Python Scanner**:
+   - *Rationale*: Running Aqua Trivy via GitHub Actions provides instant scanning for OS packages, Python lockfiles, git secrets, and Terraform configs without adding heavy security libraries to the local runtime environment.
+   - *Trade-off*: Full Trivy binary runs in CI rather than being a mandatory local pre-commit hook, keeping local development instant while ensuring CI gate enforcement.
+2. **Dual-Format Stakeholder Reporting (HTML + Plain-Text)**:
+   - *Rationale*: Executive stakeholders demand clean HTML rendering with color badges in desktop email clients, while CI build logs and SRE terminal operators require structured ASCII text.
+   - *Trade-off*: Requires rendering two distinct output formats from a shared Python dictionary payload, which is verified by automated snapshot unit tests.
+
+
 
 
 
