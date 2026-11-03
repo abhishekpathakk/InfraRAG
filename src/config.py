@@ -25,8 +25,8 @@ try:
         S3_BUCKET_NAME: str = os.getenv("S3_BUCKET_NAME", "infrarag-storage-runbooks")
 
         BEDROCK_EMBEDDING_MODEL_ID: str = os.getenv("BEDROCK_EMBEDDING_MODEL_ID", "amazon.titan-embed-text-v2:0")
-        EMBEDDING_PROVIDER: str = os.getenv("EMBEDDING_PROVIDER", "mock")
-        EMBEDDING_DIMENSION: int = 1024
+        EMBEDDING_PROVIDER: str = os.getenv("EMBEDDING_PROVIDER", "local")
+        EMBEDDING_DIMENSION: int = int(os.getenv("EMBEDDING_DIMENSION", "384"))
         BEDROCK_LLM_MODEL_ID: str = os.getenv("BEDROCK_LLM_MODEL_ID", "amazon.nova-micro-v1:0")
 
         USE_MOCK_BEDROCK: bool = os.getenv("USE_MOCK_BEDROCK", "true").lower() in ("true", "1", "yes")
@@ -57,8 +57,8 @@ except ImportError:
             self.AWS_FALLBACK_REGION = "us-east-1"
             self.S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "infrarag-storage-runbooks")
             self.BEDROCK_EMBEDDING_MODEL_ID = os.getenv("BEDROCK_EMBEDDING_MODEL_ID", "amazon.titan-embed-text-v2:0")
-            self.EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "mock")
-            self.EMBEDDING_DIMENSION = 1024
+            self.EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "local")
+            self.EMBEDDING_DIMENSION = int(os.getenv("EMBEDDING_DIMENSION", "384"))
             self.BEDROCK_LLM_MODEL_ID = os.getenv("BEDROCK_LLM_MODEL_ID", "amazon.nova-micro-v1:0")
             self.USE_MOCK_BEDROCK = os.getenv("USE_MOCK_BEDROCK", "true").lower() in ("true", "1", "yes")
             self.CHUNK_SIZE = 500

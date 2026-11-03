@@ -70,6 +70,76 @@
     "is_in_domain": true
   },
   {
+    "id": "dev-sym-01",
+    "query": "Production API responds with HTTP 502 Bad Gateway during database schema migration because puma worker threads timeout waiting for locks.",
+    "target_source_file": "gkg-dispatcher.md",
+    "expected_answer_keywords": ["puma", "timeout", "502", "locks"],
+    "is_in_domain": true
+  },
+  {
+    "id": "dev-sym-02",
+    "query": "GitLab Sidekiq memory usage exceeds 2GB per worker pod during massive repository archive generation causing cgroup OOM kills.",
+    "target_source_file": "sidekiq-survival-guide-for-sres.md",
+    "expected_answer_keywords": ["sidekiq", "memory", "cgroup", "oom"],
+    "is_in_domain": true
+  },
+  {
+    "id": "dev-sym-03",
+    "query": "HAProxy backend servers in gprd are intermittently marked DOWN with layer4 timeout during network blips.",
+    "target_source_file": "haproxy.md",
+    "expected_answer_keywords": ["haproxy", "down", "timeout", "backend"],
+    "is_in_domain": true
+  },
+  {
+    "id": "dev-sym-04",
+    "query": "Elasticsearch cluster state turns RED because unassigned primary shards cannot allocate on disk-full data nodes.",
+    "target_source_file": "disk_space_saturation.md",
+    "expected_answer_keywords": ["elasticsearch", "shards", "disk", "red"],
+    "is_in_domain": true
+  },
+  {
+    "id": "dev-sym-05",
+    "query": "Redis sentinel fails to execute failover when master node becomes unresponsive due to slow background BGSAVE.",
+    "target_source_file": "redis-survival-guide-for-sres.md",
+    "expected_answer_keywords": ["redis", "sentinel", "failover", "bgsave"],
+    "is_in_domain": true
+  },
+  {
+    "id": "dev-sym-06",
+    "query": "PostgreSQL replica lag spikes to 500MB WAL delay following a bulk UPDATE transaction on the issues table.",
+    "target_source_file": "postgres.md",
+    "expected_answer_keywords": ["postgres", "replica", "lag", "wal"],
+    "is_in_domain": true
+  },
+  {
+    "id": "dev-sym-07",
+    "query": "Gitaly nodes report rpc error code DeadlineExceeded when running git-pack-objects on huge repositories.",
+    "target_source_file": "GitalyRPCCPUAnomaly.md",
+    "expected_answer_keywords": ["gitaly", "deadlineexceeded", "git-pack-objects"],
+    "is_in_domain": true
+  },
+  {
+    "id": "dev-sym-08",
+    "query": "Kube-state-metrics alert fires because multiple cronjobs are stuck in active state without terminating.",
+    "target_source_file": "ConsulRaftSnapshot.md",
+    "expected_answer_keywords": ["cronjob", "active", "stuck"],
+    "is_in_domain": true
+  },
+  {
+    "id": "dev-sym-09",
+    "query": "Fluentd logging daemonset pods are evicted from Kubernetes nodes due to /var/log disk filling up rapidly.",
+    "target_source_file": "kubernetes_node_disk_pressure.md",
+    "expected_answer_keywords": ["evicted", "disk", "nodefs", "var/log"],
+    "is_in_domain": true
+  },
+  {
+    "id": "dev-sym-10",
+    "query": "Ingress nginx controller returns 413 Request Entity Too Large when clients push large Docker layers.",
+    "target_source_file": "kubernetes_ingress_504_gateway_timeout.md",
+    "expected_answer_keywords": ["ingress", "nginx", "413", "proxy-body-size"],
+    "is_in_domain": true
+  },
+  {
     "id": "dev-11",
     "query": "What are the orbital characteristics and atmosphere composition of Jupiter's moon Europa?",
     "target_source_file": "OUT_OF_DOMAIN",

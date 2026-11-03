@@ -9,6 +9,7 @@ Supports:
 import hashlib
 import json
 import logging
+import os
 import time
 from abc import ABC, abstractmethod
 from typing import Any
@@ -260,15 +261,16 @@ class LocalFastEmbedProvider(BaseEmbeddingProvider):
 
 def get_embedding_provider() -> BaseEmbeddingProvider:
     """Factory returns Local FastEmbed, Mock, or AWS Bedrock provider based on configuration."""
-    provider_type = getattr(settings, "EMBEDDING_PROVIDER", "mock" if settings.USE_MOCK_BEDROCK else "bedrock").lower()
+    provider_type = os.getenv("EMBEDDING_PROVIDER", getattr(settings, "EMBEDDING_PROVIDER", "local")).lower()
     if provider_type in ("local", "fastembed"):
         logger.info("Using Sovereign LocalFastEmbedProvider (BAAI/bge-small-en-v1.5, 384-dim).")
         return LocalFastEmbedProvider()
-    if settings.USE_MOCK_BEDROCK or provider_type == "mock":
+    dim = int(os.getenv("EMBEDDING_DIMENSION", str(getattr(settings, "EMBEDDING_DIMENSION", 1024))))
+    if provider_type == "mock" or os.getenv("USE_MOCK_BEDROCK", "").lower() in ("true", "1", "yes"):
         logger.info("Using 100% Free MockEmbeddingProvider for zero-cost execution.")
-        return MockEmbeddingProvider(dimension=settings.EMBEDDING_DIMENSION)
+        return MockEmbeddingProvider(dimension=dim)
     return BedrockTitanEmbeddingProvider(
         region_name=settings.AWS_REGION,
         model_id=settings.BEDROCK_EMBEDDING_MODEL_ID,
-        dimension=settings.EMBEDDING_DIMENSION,
+        dimension=dim,
     )

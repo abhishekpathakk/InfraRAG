@@ -67,7 +67,7 @@ def calibrate_threshold() -> float:
     table.add_column("Mean Score", justify="center")
 
     table.add_row(
-        "In-Domain Technical (10 runbooks)",
+        f"In-Domain Technical ({len(in_domain_scores)} queries: 10 alert + 10 symptom)",
         str(len(in_domain_scores)),
         f"{min(in_domain_scores):.4f}",
         f"{statistics.median(in_domain_scores):.4f}",
@@ -75,7 +75,7 @@ def calibrate_threshold() -> float:
         f"{statistics.mean(in_domain_scores):.4f}",
     )
     table.add_row(
-        "Out-of-Domain Distractors (5 queries)",
+        f"Out-of-Domain & Near-Domain ({len(out_domain_scores)} queries: 5 off-topic + 10 near-domain)",
         str(len(out_domain_scores)),
         f"{min(out_domain_scores):.4f}",
         f"{statistics.median(out_domain_scores):.4f}",

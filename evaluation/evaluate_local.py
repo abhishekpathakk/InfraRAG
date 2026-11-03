@@ -20,6 +20,7 @@ Reports:
 
 import json
 import logging
+import math
 import sys
 from pathlib import Path
 from typing import Any
@@ -41,6 +42,23 @@ logger = logging.getLogger("evaluate_local")
 
 INDEX_DIR = settings.BASE_DIR / "index_cache" / "local_bge_small"
 CALIBRATION_REPORT_PATH = settings.BASE_DIR / "evaluation" / "dev_calibration_report.json"
+
+
+def calculate_confidence_interval(k: int, n: int, confidence: float = 0.95) -> tuple[float, float]:
+    """
+    Computes Wilson score 95% confidence interval for a binomial proportion k/n.
+    Returns (lower_bound_pct, upper_bound_pct).
+    """
+    if n == 0:
+        return (0.0, 0.0)
+    p = k / n
+    z = 1.96  # 95% confidence
+    denominator = 1.0 + (z**2) / n
+    center_adj = p + (z**2) / (2 * n)
+    margin = z * math.sqrt((p * (1.0 - p) / n) + (z**2) / (4 * (n**2)))
+    lower = max(0.0, (center_adj - margin) / denominator) * 100.0
+    upper = min(1.0, (center_adj + margin) / denominator) * 100.0
+    return (round(lower, 1), round(upper, 1))
 
 
 def evaluate_dataset(
@@ -126,6 +144,9 @@ def evaluate_dataset(
     avg_latency = total_latency_ms / len(items)
     avg_retrieval = total_retrieval_ms / len(items)
 
+    top1_ci = calculate_confidence_interval(top1_hits, in_domain_total)
+    top5_ci = calculate_confidence_interval(top5_hits, in_domain_total)
+
     return {
         "dataset": str(dataset_path.name),
         "title": title,
@@ -134,7 +155,9 @@ def evaluate_dataset(
         "in_domain_total": in_domain_total,
         "out_domain_total": out_domain_total,
         "top1_hit_rate_pct": round(top1_rate, 2),
+        "top1_ci_95": top1_ci,
         "top5_hit_rate_pct": round(top5_rate, 2),
+        "top5_ci_95": top5_ci,
         "mrr": round(mrr, 3),
         "in_domain_grounded_pct": round(grounded_rate, 2),
         "out_domain_refusal_pct": round(refusal_rate, 2),

@@ -51,11 +51,13 @@ class Retriever:
         query_vector = self.embedding_provider.embed_text(query)
 
         # 2. Similarity search in vector store with type filter and query text for hybrid ranking
+        # Gate BM25 hybrid fusion on dense cosine relevance threshold
         matches = self.vector_store.similarity_search(
             query_embedding=query_vector,
             top_k=k,
             type_filter=type_filter,
             query_text=query if hybrid else None,
+            dense_threshold=self.min_relevance_threshold if hybrid else None,
         )
 
         latency_ms = (time.perf_counter() - start_time) * 1000.0

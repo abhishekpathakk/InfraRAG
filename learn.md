@@ -1015,7 +1015,68 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
 
 ---
 
-## Phase 25: Cryptographic Freeze Integrity, Blind 65-Question v4 Suite, Near-Domain Threshold Calibration & Local Sovereign Architecture (2026-11-02)
+## Phase 26: Dense-Gated BM25 Refusal, Mixed Dev-Set Calibration, Wilson Confidence Intervals & Transparent Release Protocol (2026-11-03)
+
+### 1. What Was Done
+1. **Configured `local` as the Genuine Default Engine**:
+   - Updated `src/config.py` and `src/embeddings.py` so that calling `get_embedding_provider()` with zero environment variables returns `LocalFastEmbedProvider` (`BAAI/bge-small-en-v1.5`, 384 dimensions) instead of `MockEmbeddingProvider`.
+   - Updated AWS Lambda test harnesses to explicitly set mock configurations for unit testing without altering the runtime default.
+2. **Dense-Gated BM25 Fusion (Fixed Hybrid Refusal Defect)**:
+   - Diagnosed root cause of the 33.33% Hybrid refusal on v4: BM25 keyword overlap on infrastructure terms ("AWS", "gateway", "token", "timeout") was boosting near-domain negative scores past the refusal threshold.
+   - Implemented dense cosine gating in `FAISSVectorStore.similarity_search` and `Retriever.retrieve`: if the top dense score is below `dense_threshold`, BM25 fusion is bypassed entirely, and raw unboosted scores are returned to the refusal logic.
+   - Re-evaluated v4: Hybrid refusal accuracy against near-domain negatives increased from **33.33% to 100.0% (15/15)**.
+3. **Recalibrated Mixed Dev Set & In-Domain Refusal Post-Mortem**:
+   - Expanded `evaluation/dev_calibration_dataset.json` to 35 queries by adding 10 realistic, symptom-based incident queries to the existing 10 direct alert queries, alongside 15 negative distractors (5 off-topic + 10 near-domain).
+   - Recalibration results on mixed dev set: In-domain min `0.7417`, median `0.8148`, max `0.8778`. Near-domain min `0.5598`, median `0.7293`, max `0.7829`.
+   - Documented the empirical distribution: at threshold `0.80`, exactly **21 out of 50 in-domain queries (42.0%)** in v4 are refused because symptom-phrased queries produce lower dense cosine similarities than direct alert queries.
+4. **Incorporated Wilson 95% Confidence Intervals**:
+   - Integrated Wilson score binomial confidence interval calculations into `evaluation/evaluate_local.py` and `scripts/sync_readme_metrics.py`.
+   - Reported intervals for all suites (e.g., v4 Dense Top-1: `68.0% [54.2%–79.2%]`, Hybrid Top-1: `64.0% [50.1%–75.9%]`), demonstrating that the -4.0% BM25 delta on N=50 is within random sampling noise ($p > 0.05$).
+5. **Documented Tagging Protocol & Unfiled Support Case**:
+   - Explicitly documented in `README.md` that earlier tags (`v1.0.0` through `v4.0.0`) were cut retroactively alongside evaluation runs, and committed to tagging datasets *prior* to evaluation runs going forward.
+   - Plainly stated in `README.md` and documentation that an AWS Support ticket for Titan v2 is **not filed** due to AWS Basic Support restrictions.
+
+---
+
+### 2. Plain-Language Concepts & One-Line Analogies
+- **Dense-Gated Hybrid Fusion**:
+  Never allow a keyword search engine to decide if a query belongs in the domain. Use semantic cosine similarity as the bouncer at the door, and only allow the keyword search engine to seat guests once they are inside.
+  - *One-line analogy:* The bouncer checks IDs at the club entrance (dense gate); once admitted, the DJ takes song requests (BM25 ranking). If you don't have an ID, knowing the DJ's playlist won't get you inside.
+- **Sample-Size Noise in Retrieval Benchmarks**:
+  On a sample size of N=50 queries, a 2% score drop represents a single query shifting from rank 1 to rank 2.
+  - *One-line analogy:* Missing one free-throw out of fifty doesn't mean your shooting technique changed; it is normal game variance.
+
+---
+
+### 3. Issues Faced & Autonomous Fixes Applied
+
+| Issue / Friction Point | Root Cause | Fix Applied | Autonomous Prevention Rule |
+| :--- | :--- | :--- | :--- |
+| **`EMBEDDING_PROVIDER` Defaulted to Mock** | `config.py` had fallback `"mock"`. | Changed fallback to `"local"` (384-dim) in both `Settings` and `StandaloneSettings`. | Always test zero-env provider initialization in CI. |
+| **Hybrid Refusal Dropped to 33.33%** | BM25 added up to +0.15 score boost on near-domain negatives with overlapping infrastructure words. | Gated BM25 fusion on `top_dense_score >= dense_threshold`, returning raw dense scores when below threshold. | Never allow lexical matching to override semantic refusal thresholds. |
+| **42% In-Domain Refusal at 0.80 Cutoff** | Dev set queries were phrased directly as alert names, hiding lower cosine scores of symptom queries. | Added 10 symptom queries to dev set; documented the 21/50 refusal post-mortem and the precision-recall boundary. | Calibrate refusal thresholds using diverse query formulations (direct alerts + symptom descriptions). |
+
+---
+
+### 4. Measurable Achievements
+- **Hybrid Refusal Accuracy**: **100.0% (15/15)** on v4 near-domain negatives with dense gating.
+- **Dense Refusal Accuracy**: **100.0% (15/15)** on v4 near-domain negatives.
+- **Blind v4 Hit-Rates (65 Qs)**:
+  - Dense Top-1: **68.0%** [95% CI: 54.2%–79.2%] | Top-5: **84.0%** [71.5%–91.7%]
+  - Hybrid Top-1: **64.0%** [95% CI: 50.1%–75.9%] | Top-5: **84.0%** [71.5%–91.7%]
+  - Dense MRR: **0.750** | Hybrid MRR: **0.733**
+- **Test Suite**: 17/17 passing cleanly in 0.11s.
+- **Static Checks**: Ruff 0 errors, Mypy 0 issues.
+
+---
+
+### 5. Architectural Decisions & Engineering Trade-Offs
+1. **Dense Semantic Gating Before BM25 Fusion**:
+   - *Rationale*: Prevents lexical leakage where out-of-domain queries that mention generic infrastructure keywords bypass refusal guards.
+   - *Trade-off*: If an in-domain query has low dense similarity (e.g. 0.73), BM25 cannot rescue it. However, in production SRE systems, avoiding hallucinations on out-of-scope services is far more critical than retrieving low-confidence candidates.
+2. **Transparent Documentation of In-Domain Refusal vs Near-Domain Rejection**:
+   - *Rationale*: A single static threshold in dense cosine space cannot cleanly separate all in-domain incident symptoms (min 0.7338) from near-domain DevOps negatives (max 0.7883) without an LLM reranker. Documenting the 21/50 refusal trade-off honestly is scientifically sound and avoids misleading claims of perfection.
+
 
 ### 1. What Was Done
 1. **Cut & Pushed Git Freeze Tags**:

@@ -13,12 +13,20 @@
       "in_domain_total": 20,
       "out_domain_total": 5,
       "top1_hit_rate_pct": 90.0,
+      "top1_ci_95": [
+        69.9,
+        97.2
+      ],
       "top5_hit_rate_pct": 90.0,
+      "top5_ci_95": [
+        69.9,
+        97.2
+      ],
       "mrr": 0.9,
       "in_domain_grounded_pct": 50.0,
       "out_domain_refusal_pct": 100.0,
-      "avg_latency_ms": 4.46,
-      "avg_retrieval_ms": 4.36
+      "avg_latency_ms": 4.89,
+      "avg_retrieval_ms": 4.78
     },
     "Tagged Held-Out v1 (Burned/Seen)": {
       "dataset": "held_out_dataset.json",
@@ -28,12 +36,20 @@
       "in_domain_total": 20,
       "out_domain_total": 5,
       "top1_hit_rate_pct": 90.0,
+      "top1_ci_95": [
+        69.9,
+        97.2
+      ],
       "top5_hit_rate_pct": 95.0,
+      "top5_ci_95": [
+        76.4,
+        99.1
+      ],
       "mrr": 0.925,
       "in_domain_grounded_pct": 65.0,
       "out_domain_refusal_pct": 100.0,
-      "avg_latency_ms": 4.71,
-      "avg_retrieval_ms": 4.6
+      "avg_latency_ms": 5.3,
+      "avg_retrieval_ms": 5.18
     },
     "Blind Held-Out v2 (Unseen)": {
       "dataset": "held_out_dataset_v2.json",
@@ -43,12 +59,20 @@
       "in_domain_total": 20,
       "out_domain_total": 5,
       "top1_hit_rate_pct": 60.0,
+      "top1_ci_95": [
+        38.7,
+        78.1
+      ],
       "top5_hit_rate_pct": 70.0,
+      "top5_ci_95": [
+        48.1,
+        85.5
+      ],
       "mrr": 0.642,
       "in_domain_grounded_pct": 10.0,
       "out_domain_refusal_pct": 100.0,
-      "avg_latency_ms": 4.55,
-      "avg_retrieval_ms": 4.53
+      "avg_latency_ms": 4.11,
+      "avg_retrieval_ms": 4.09
     },
     "Blind Held-Out v3 (Unseen)": {
       "dataset": "held_out_dataset_v3.json",
@@ -58,12 +82,20 @@
       "in_domain_total": 20,
       "out_domain_total": 5,
       "top1_hit_rate_pct": 45.0,
+      "top1_ci_95": [
+        25.8,
+        65.8
+      ],
       "top5_hit_rate_pct": 65.0,
+      "top5_ci_95": [
+        43.3,
+        81.9
+      ],
       "mrr": 0.542,
       "in_domain_grounded_pct": 25.0,
       "out_domain_refusal_pct": 100.0,
-      "avg_latency_ms": 4.4,
-      "avg_retrieval_ms": 4.35
+      "avg_latency_ms": 4.84,
+      "avg_retrieval_ms": 4.79
     },
     "Blind Held-Out v4 (Unseen, 65 Questions)": {
       "dataset": "held_out_dataset_v4.json",
@@ -73,12 +105,20 @@
       "in_domain_total": 50,
       "out_domain_total": 15,
       "top1_hit_rate_pct": 68.0,
+      "top1_ci_95": [
+        54.2,
+        79.2
+      ],
       "top5_hit_rate_pct": 84.0,
+      "top5_ci_95": [
+        71.5,
+        91.7
+      ],
       "mrr": 0.75,
       "in_domain_grounded_pct": 48.0,
       "out_domain_refusal_pct": 100.0,
-      "avg_latency_ms": 5.29,
-      "avg_retrieval_ms": 5.21
+      "avg_latency_ms": 5.11,
+      "avg_retrieval_ms": 5.03
     }
   },
   "hybrid_evaluations": {
@@ -89,13 +129,21 @@
       "total_queries": 25,
       "in_domain_total": 20,
       "out_domain_total": 5,
-      "top1_hit_rate_pct": 85.0,
+      "top1_hit_rate_pct": 90.0,
+      "top1_ci_95": [
+        69.9,
+        97.2
+      ],
       "top5_hit_rate_pct": 90.0,
-      "mrr": 0.875,
-      "in_domain_grounded_pct": 70.0,
+      "top5_ci_95": [
+        69.9,
+        97.2
+      ],
+      "mrr": 0.9,
+      "in_domain_grounded_pct": 55.0,
       "out_domain_refusal_pct": 100.0,
-      "avg_latency_ms": 9.08,
-      "avg_retrieval_ms": 8.96
+      "avg_latency_ms": 10.17,
+      "avg_retrieval_ms": 10.07
     },
     "Tagged Held-Out v1 (Burned/Seen)": {
       "dataset": "held_out_dataset.json",
@@ -104,13 +152,21 @@
       "total_queries": 25,
       "in_domain_total": 20,
       "out_domain_total": 5,
-      "top1_hit_rate_pct": 75.0,
-      "top5_hit_rate_pct": 95.0,
-      "mrr": 0.833,
-      "in_domain_grounded_pct": 80.0,
+      "top1_hit_rate_pct": 85.0,
+      "top1_ci_95": [
+        64.0,
+        94.8
+      ],
+      "top5_hit_rate_pct": 90.0,
+      "top5_ci_95": [
+        69.9,
+        97.2
+      ],
+      "mrr": 0.875,
+      "in_domain_grounded_pct": 70.0,
       "out_domain_refusal_pct": 100.0,
-      "avg_latency_ms": 10.02,
-      "avg_retrieval_ms": 9.87
+      "avg_latency_ms": 8.23,
+      "avg_retrieval_ms": 8.12
     },
     "Blind Held-Out v2 (Unseen)": {
       "dataset": "held_out_dataset_v2.json",
@@ -119,13 +175,21 @@
       "total_queries": 25,
       "in_domain_total": 20,
       "out_domain_total": 5,
-      "top1_hit_rate_pct": 65.0,
-      "top5_hit_rate_pct": 65.0,
-      "mrr": 0.65,
-      "in_domain_grounded_pct": 80.0,
+      "top1_hit_rate_pct": 60.0,
+      "top1_ci_95": [
+        38.7,
+        78.1
+      ],
+      "top5_hit_rate_pct": 70.0,
+      "top5_ci_95": [
+        48.1,
+        85.5
+      ],
+      "mrr": 0.642,
+      "in_domain_grounded_pct": 10.0,
       "out_domain_refusal_pct": 100.0,
-      "avg_latency_ms": 10.22,
-      "avg_retrieval_ms": 10.1
+      "avg_latency_ms": 4.53,
+      "avg_retrieval_ms": 4.52
     },
     "Blind Held-Out v3 (Unseen)": {
       "dataset": "held_out_dataset_v3.json",
@@ -134,13 +198,21 @@
       "total_queries": 25,
       "in_domain_total": 20,
       "out_domain_total": 5,
-      "top1_hit_rate_pct": 50.0,
-      "top5_hit_rate_pct": 75.0,
-      "mrr": 0.617,
-      "in_domain_grounded_pct": 75.0,
+      "top1_hit_rate_pct": 45.0,
+      "top1_ci_95": [
+        25.8,
+        65.8
+      ],
+      "top5_hit_rate_pct": 65.0,
+      "top5_ci_95": [
+        43.3,
+        81.9
+      ],
+      "mrr": 0.542,
+      "in_domain_grounded_pct": 25.0,
       "out_domain_refusal_pct": 100.0,
-      "avg_latency_ms": 10.27,
-      "avg_retrieval_ms": 10.16
+      "avg_latency_ms": 6.18,
+      "avg_retrieval_ms": 6.12
     },
     "Blind Held-Out v4 (Unseen, 65 Questions)": {
       "dataset": "held_out_dataset_v4.json",
@@ -149,13 +221,21 @@
       "total_queries": 65,
       "in_domain_total": 50,
       "out_domain_total": 15,
-      "top1_hit_rate_pct": 66.0,
-      "top5_hit_rate_pct": 88.0,
-      "mrr": 0.757,
-      "in_domain_grounded_pct": 82.0,
-      "out_domain_refusal_pct": 33.33,
-      "avg_latency_ms": 11.62,
-      "avg_retrieval_ms": 11.45
+      "top1_hit_rate_pct": 64.0,
+      "top1_ci_95": [
+        50.1,
+        75.9
+      ],
+      "top5_hit_rate_pct": 84.0,
+      "top5_ci_95": [
+        71.5,
+        91.7
+      ],
+      "mrr": 0.733,
+      "in_domain_grounded_pct": 50.0,
+      "out_domain_refusal_pct": 100.0,
+      "avg_latency_ms": 8.38,
+      "avg_retrieval_ms": 8.3
     }
   }
 }

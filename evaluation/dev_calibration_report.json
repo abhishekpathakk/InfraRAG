@@ -1,11 +1,11 @@
 {
   "dev_dataset": "dev_calibration_dataset.json",
-  "total_queries": 25,
+  "total_queries": 35,
   "in_domain_scores": {
-    "min": 0.7856,
-    "median": 0.8302,
+    "min": 0.7417,
+    "median": 0.8148,
     "max": 0.8778,
-    "mean": 0.8317
+    "mean": 0.8127
   },
   "out_of_domain_scores": {
     "min": 0.5598,

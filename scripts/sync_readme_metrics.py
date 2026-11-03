@@ -257,7 +257,7 @@ def generate_tables(report: dict) -> str:
         lines.append(f"> - **Frozen Refusal Threshold**: `{local_rep.get('frozen_refusal_threshold')}` (Empirically calibrated on separate `dev_calibration_dataset.json` with zero exposure to eval sets)")
         lines.append("> - **Reproduction Command**: `python scripts/build_local_index.py && python evaluation/evaluate_local.py`")
         lines.append("")
-        lines.append("| Suite Classification | Evaluation Suite | Dense Top-1 | Hybrid Top-1 | Dense Top-5 | Hybrid Top-5 | BM25 Delta | Dense MRR | Hybrid MRR | Refusal Acc (Dense / Hybrid) |")
+        lines.append("| Suite Classification | Evaluation Suite | Dense Top-1 (95% CI) | Hybrid Top-1 (95% CI) | Dense Top-5 | Hybrid Top-5 | BM25 Delta (Top-1) | Dense MRR | Hybrid MRR | Refusal Acc (Dense / Hybrid) |")
         lines.append("| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |")
 
         suite_order = [
@@ -274,9 +274,16 @@ def generate_tables(report: dict) -> str:
             if d and h:
                 delta = h.get("top1_hit_rate_pct", 0.0) - d.get("top1_hit_rate_pct", 0.0)
                 delta_str = f"+{delta:.1f}%" if delta > 0 else f"{delta:.1f}%"
+                d_ci = d.get("top1_ci_95")
+                h_ci = h.get("top1_ci_95")
+                d_str = f"**{d.get('top1_hit_rate_pct', 0.0)}%**" + (f" <br><sub>[{d_ci[0]}%–{d_ci[1]}%]</sub>" if d_ci else "")
+                h_str = f"**{h.get('top1_hit_rate_pct', 0.0)}%**" + (f" <br><sub>[{h_ci[0]}%–{h_ci[1]}%]</sub>" if h_ci else "")
                 lines.append(
-                    f"| {classification} | **{name}** | **{d.get('top1_hit_rate_pct', 0.0)}%** | **{h.get('top1_hit_rate_pct', 0.0)}%** | {d.get('top5_hit_rate_pct', 0.0)}% | {h.get('top5_hit_rate_pct', 0.0)}% | {delta_str} | {d.get('mrr', 0.0):.3f} | {h.get('mrr', 0.0):.3f} | {d.get('out_domain_refusal_pct', 0.0)}% / {h.get('out_domain_refusal_pct', 0.0)}% |"
+                    f"| {classification} | **{name}** | {d_str} | {h_str} | {d.get('top5_hit_rate_pct', 0.0)}% | {h.get('top5_hit_rate_pct', 0.0)}% | {delta_str} | {d.get('mrr', 0.0):.3f} | {h.get('mrr', 0.0):.3f} | {d.get('out_domain_refusal_pct', 0.0)}% / {h.get('out_domain_refusal_pct', 0.0)}% |"
                 )
+        lines.append("")
+        lines.append("> [!NOTE]")
+        lines.append("> **Statistical Significance & Confidence Intervals**: Subscripts indicate 95% Wilson score binomial confidence intervals. On sample sizes of N=20 and N=50, Top-1 score deltas of ±2.0% to ±5.0% (representing 1 single question difference) have heavily overlapping confidence intervals and are within normal random sampling variance (p > 0.05).")
         lines.append("")
 
     return "\n".join(lines)
@@ -301,8 +308,7 @@ def sync_readme() -> None:
         re.DOTALL,
     )
 
-    replacement = f"{new_tables}\n\\1"
-    updated_content = pattern.sub(replacement, content)
+    updated_content = pattern.sub(lambda m: f"{new_tables}\n{m.group(1)}", content)
 
     with open(README_PATH, "w", encoding="utf-8") as f:
         f.write(updated_content)

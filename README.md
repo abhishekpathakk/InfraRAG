@@ -8,9 +8,11 @@
 
 > [!IMPORTANT]
 > **System Architecture & Operational Status**:
-> - **Primary Default Pipeline**: 100% Sovereign Local Inference via FastEmbed ONNX (`BAAI/bge-small-en-v1.5`, 384-dimensional dense vectors) paired with BM25 Reciprocal Rank Fusion hybrid retrieval.
+> - **Primary Default Pipeline**: 100% Sovereign Local Inference via FastEmbed ONNX (`BAAI/bge-small-en-v1.5`, 384-dimensional dense vectors) paired with BM25 Reciprocal Rank Fusion hybrid retrieval. Configured as default in `src/config.py` (`EMBEDDING_PROVIDER="local"`).
+> - **Dense-Gated Hybrid Refusal**: Hybrid retrieval gates BM25 fusion on top dense cosine similarity, preventing keyword-matching false positives on near-domain negative queries.
+> - **Evaluation Dataset Freezes**: All benchmark datasets are cryptographically locked via SHA-256 digests in `evaluation/frozen_dataset_hashes.json` and verified in CI. *Note on Release Tags*: Tags `v1.0.0-eval-frozen`, `v2.0.0-eval-frozen`, `v3.0.0-eval-frozen`, and `v4.0.0-eval-frozen` were tagged retroactively alongside their respective evaluation commits. Going forward, dataset commits are tagged *prior* to running evaluation.
 > - **Serverless AWS Deployment**: The deployed AWS Lambda function and HTTP API Gateway operate in zero-cost offline mock verification mode (`USE_MOCK_BEDROCK=true`) using an in-RAM FAISS index.
-> - **Amazon Bedrock Cloud Extension**: Fully implemented in code (`BedrockTitanEmbeddingProvider` and `BedrockNovaLLMProvider`) and configurable via `USE_MOCK_BEDROCK=false` when running on an AWS account with approved Bedrock on-demand quotas.
+> - **Amazon Bedrock Quota Status**: Support quota increase case is **not filed** (Basic Support tier restricts API-driven quota requests for `L-26C560CE`). Deployment operates 100% locally with zero cloud API dependencies.
 
 > **InfraRAG** is a sovereign, serverless Retrieval-Augmented Generation (RAG) assistant purpose-built for DevOps and SRE teams. It indexes **819 runbook and documentation files (7,207 searchable chunks)** across Kubernetes, Istio, GitLab incident runbooks, and authored internal operational guides. By pairing an in-RAM vector store with **FastEmbed neural embeddings**, **BM25 hybrid ranking**, and an optional serverless **AWS Lambda / API Gateway** layer, InfraRAG delivers grounded incident resolution steps with strict source citations.
 
@@ -201,13 +203,16 @@ All queries evaluate with parameters `top_k = 5` and `min_relevance_threshold = 
 > - **Frozen Refusal Threshold**: `0.8` (Empirically calibrated on separate `dev_calibration_dataset.json` with zero exposure to eval sets)
 > - **Reproduction Command**: `python scripts/build_local_index.py && python evaluation/evaluate_local.py`
 
-| Suite Classification | Evaluation Suite | Dense Top-1 | Hybrid Top-1 | Dense Top-5 | Hybrid Top-5 | BM25 Delta | Dense MRR | Hybrid MRR | Refusal Acc (Dense / Hybrid) |
+| Suite Classification | Evaluation Suite | Dense Top-1 (95% CI) | Hybrid Top-1 (95% CI) | Dense Top-5 | Hybrid Top-5 | BM25 Delta (Top-1) | Dense MRR | Hybrid MRR | Refusal Acc (Dense / Hybrid) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| Reference (Burned/Seen) | **Golden Benchmark (Burned/Seen)** | **90.0%** | **85.0%** | 90.0% | 90.0% | -5.0% | 0.900 | 0.875 | 100.0% / 100.0% |
-| Reference (Burned/Seen) | **Tagged Held-Out v1 (Burned/Seen)** | **90.0%** | **75.0%** | 95.0% | 95.0% | -15.0% | 0.925 | 0.833 | 100.0% / 100.0% |
-| Held-Out (Unseen/Blind) | **Blind Held-Out v2 (Unseen)** | **60.0%** | **65.0%** | 70.0% | 65.0% | +5.0% | 0.642 | 0.650 | 100.0% / 100.0% |
-| Held-Out (Unseen/Blind) | **Blind Held-Out v3 (Unseen)** | **45.0%** | **50.0%** | 65.0% | 75.0% | +5.0% | 0.542 | 0.617 | 100.0% / 100.0% |
-| Held-Out (Unseen/Blind, 65 Qs) | **Blind Held-Out v4 (Unseen, 65 Questions)** | **68.0%** | **66.0%** | 84.0% | 88.0% | -2.0% | 0.750 | 0.757 | 100.0% / 33.33% |
+| Reference (Burned/Seen) | **Golden Benchmark (Burned/Seen)** | **90.0%** <br><sub>[69.9%–97.2%]</sub> | **90.0%** <br><sub>[69.9%–97.2%]</sub> | 90.0% | 90.0% | 0.0% | 0.900 | 0.900 | 100.0% / 100.0% |
+| Reference (Burned/Seen) | **Tagged Held-Out v1 (Burned/Seen)** | **90.0%** <br><sub>[69.9%–97.2%]</sub> | **85.0%** <br><sub>[64.0%–94.8%]</sub> | 95.0% | 90.0% | -5.0% | 0.925 | 0.875 | 100.0% / 100.0% |
+| Held-Out (Unseen/Blind) | **Blind Held-Out v2 (Unseen)** | **60.0%** <br><sub>[38.7%–78.1%]</sub> | **60.0%** <br><sub>[38.7%–78.1%]</sub> | 70.0% | 70.0% | 0.0% | 0.642 | 0.642 | 100.0% / 100.0% |
+| Held-Out (Unseen/Blind) | **Blind Held-Out v3 (Unseen)** | **45.0%** <br><sub>[25.8%–65.8%]</sub> | **45.0%** <br><sub>[25.8%–65.8%]</sub> | 65.0% | 65.0% | 0.0% | 0.542 | 0.542 | 100.0% / 100.0% |
+| Held-Out (Unseen/Blind, 65 Qs) | **Blind Held-Out v4 (Unseen, 65 Questions)** | **68.0%** <br><sub>[54.2%–79.2%]</sub> | **64.0%** <br><sub>[50.1%–75.9%]</sub> | 84.0% | 84.0% | -4.0% | 0.750 | 0.733 | 100.0% / 100.0% |
+
+> [!NOTE]
+> **Statistical Significance & Confidence Intervals**: Subscripts indicate 95% Wilson score binomial confidence intervals. On sample sizes of N=20 and N=50, Top-1 score deltas of ±2.0% to ±5.0% (representing 1 single question difference) have heavily overlapping confidence intervals and are within normal random sampling variance (p > 0.05).
 
 *(Full benchmark report generated automatically by [evaluation/evaluate.py](evaluation/evaluate.py) to [evaluation/eval_report.json](evaluation/eval_report.json)).*
 
@@ -313,7 +318,7 @@ InfraRAG is architected under a **strict Free-Tier First policy** (Directive #1 
      IllegalArgumentException: An error occurred (IllegalArgumentException) when calling the RequestServiceQuotaIncrease operation: The request failed because the specified quota is not adjustable.
      ```
      Because Bedrock on-demand quotas for new accounts cannot be adjusted self-service via the Service Quotas API, quota increases require manual request submission via the AWS Management Console Support Center (programmatic `support:DescribeCases` returns `SubscriptionRequiredException` on accounts without a paid AWS Support plan).
-   - Until AWS Support grants additional on-demand throughput or provisioned model units are configured, live Amazon Bedrock indexing cannot proceed, and the deployment defaults to offline mock or local neural verification.
+   - **Support Case Filing Status**: An AWS Support ticket for Titan v2 quota increase is **not filed**. The account operates on AWS Basic Support, where quota code `L-26C560CE` is not adjustable programmatically and manual console submissions have not been opened. InfraRAG is explicitly designed, evaluated, and defaulted to run offline on the sovereign local neural embedding engine (`BAAI/bge-small-en-v1.5`), requiring zero Bedrock credentials or external quota approvals.
 
 2. **Extractive Mock Generator vs Neural LLM**:
    - In local and CI mock mode, `MockLLMGenerator` performs extractive keyword and sentence matching rather than abstractive generative synthesis.

@@ -150,6 +150,7 @@ class BaseVectorStore(ABC):
         top_k: int = 3,
         type_filter: str | None = None,
         query_text: str | None = None,
+        dense_threshold: float | None = None,
     ) -> list[tuple[DocumentChunk, float]]:
         """Search top-k most similar document chunks and return (chunk, score) pairs, optionally filtered by type."""
         pass
@@ -238,6 +239,7 @@ class FAISSVectorStore(BaseVectorStore):
         top_k: int = 3,
         type_filter: str | None = None,
         query_text: str | None = None,
+        dense_threshold: float | None = None,
     ) -> list[tuple[DocumentChunk, float]]:
         if not self.chunks:
             return []
@@ -274,15 +276,34 @@ class FAISSVectorStore(BaseVectorStore):
             scored.sort(key=lambda x: x[1], reverse=True)
             dense_matches = [(idx, float(score)) for idx, score in scored[:candidate_pool]]
 
+        top_dense_score = dense_matches[0][1] if dense_matches else 0.0
+
         # 2. Hybrid Boost with BM25 if query_text is provided
+        # Production Safety Guard: Gate refusal on dense cosine BEFORE BM25 fusion.
+        # If top dense score is below dense_threshold, the query is out-of-domain.
+        # Do not allow BM25 keyword matching to promote out-of-domain queries past refusal.
         if query_text and self.bm25.num_docs > 0:
+            if dense_threshold is not None and top_dense_score < dense_threshold:
+                # Query fails dense semantic relevance gate: return raw dense scores for refusal
+                results = []
+                for idx, score in dense_matches:
+                    chunk = self.chunks[idx]
+                    if type_filter and getattr(chunk, "type", "internal") != type_filter:
+                        continue
+                    clean_score = max(0.0, min(1.0, float(score)))
+                    results.append((chunk, clean_score))
+                    if len(results) >= top_k:
+                        break
+                return results
+
             bm25_matches = dict(self.bm25.search(query_text, top_k=candidate_pool))
             if bm25_matches:
                 max_bm25 = max(bm25_matches.values())
                 boosted_candidates: list[tuple[int, float]] = []
+                min_cand_dense = dense_threshold if dense_threshold is not None else 0.15
                 for idx, score in dense_matches:
                     b_score = bm25_matches.get(idx, 0.0)
-                    if b_score > 0 and score >= 0.15:
+                    if b_score > 0 and score >= min_cand_dense:
                         b_norm = b_score / max_bm25
                         final_score = min(1.0, score + 0.15 * b_norm)
                     else:
@@ -291,7 +312,7 @@ class FAISSVectorStore(BaseVectorStore):
 
                 boosted_candidates.sort(key=lambda x: x[1], reverse=True)
 
-                results: list[tuple[DocumentChunk, float]] = []
+                results = []
                 for idx, score in boosted_candidates:
                     chunk = self.chunks[idx]
                     if type_filter and getattr(chunk, "type", "internal") != type_filter:

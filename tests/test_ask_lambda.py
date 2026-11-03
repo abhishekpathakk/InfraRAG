@@ -27,22 +27,23 @@ def test_ask_handler_warm_cache_local():
         tmp_path = Path(tmpdir)
         store.save_local(tmp_path, embedding_model_id="mock")
 
-        # Point ask handler to this tmp cache
-        with patch.object(ask, "Path", return_value=tmp_path):
-            # Reset global cache
-            ask._CACHED_CHAIN = None
+        # Point ask handler to this tmp cache with mock provider environment
+        with patch.dict("os.environ", {"EMBEDDING_PROVIDER": "mock", "EMBEDDING_DIMENSION": "1024", "USE_MOCK_BEDROCK": "true"}):
+            with patch.object(ask, "Path", return_value=tmp_path):
+                # Reset global cache
+                ask._CACHED_CHAIN = None
 
-            event = {
-                "rawPath": "/ask",
-                "body": json.dumps({"question": "What does Exit Code 137 mean?"}),
-            }
-            res = ask.handler(event, None)
-            assert res["statusCode"] == 200
-            body = json.loads(res["body"])
-            assert "Exit Code 137" in body["answer"] or "memory limits" in body["answer"]
-            assert len(body["citations"]) > 0
-            assert body["metrics"]["retrieval_latency_ms"] >= 0.0
-            assert body["metrics"]["retrieval_latency_ms"] < 2500.0  # Production latency SLA ceiling
+                event = {
+                    "rawPath": "/ask",
+                    "body": json.dumps({"question": "What does Exit Code 137 mean?"}),
+                }
+                res = ask.handler(event, None)
+                assert res["statusCode"] == 200
+                body = json.loads(res["body"])
+                assert "Exit Code 137" in body["answer"] or "memory limits" in body["answer"]
+                assert len(body["citations"]) > 0
+                assert body["metrics"]["retrieval_latency_ms"] >= 0.0
+                assert body["metrics"]["retrieval_latency_ms"] < 2500.0  # Production latency SLA ceiling
 
 
 def test_ask_handler_auth_and_validation():
