@@ -148,6 +148,8 @@ jobs:
     name: SAST Security & SonarCloud Code Analysis
     runs-on: ubuntu-latest
     needs: [lint-and-test]
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -171,14 +173,14 @@ jobs:
         continue-on-error: true
 
       - name: SonarCloud Scan
-        if: secrets.SONAR_TOKEN != ''
+        if: env.SONAR_TOKEN != ''
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Notice on SonarCloud Token Configuration
-        if: secrets.SONAR_TOKEN == ''
+        if: env.SONAR_TOKEN == ''
         run: |
           echo "=================================================================================="
           echo "ℹ️  Bandit SAST security scan completed successfully."
