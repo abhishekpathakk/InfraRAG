@@ -20,6 +20,24 @@ def test_mock_embedding_provider():
     assert abs(norm - 1.0) < 1e-4
 
 
+def test_mock_embedding_provider_dimension_guard():
+    import pytest
+
+    # 1. Dimension below cluster requirement (384 < 865) must loudly fail
+    with pytest.raises(ValueError, match="requires dimension >="):
+        MockEmbeddingProvider(dimension=384, use_clusters=True)
+
+    # 2. Hash-only mode (use_clusters=False) allows smaller dimensions
+    hash_provider = MockEmbeddingProvider(dimension=384, use_clusters=False)
+    assert hash_provider.dimension == 384
+    vec = hash_provider.embed_text("test query")
+    assert len(vec) == 384
+
+    # 3. Full dimension (1024) allows clusters
+    full_provider = MockEmbeddingProvider(dimension=1024, use_clusters=True)
+    assert full_provider.dimension == 1024
+
+
 def test_faiss_vector_store_add_and_search():
     provider = MockEmbeddingProvider(dimension=1024)
     store = FAISSVectorStore(dimension=1024)

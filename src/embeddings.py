@@ -114,6 +114,15 @@ class MockEmbeddingProvider(BaseEmbeddingProvider):
                     patterns.append(re.compile(re.escape(kw)))
             self._compiled_clusters.append((idx * 80, patterns))
 
+        if self.use_clusters and self._compiled_clusters:
+            min_required_dim = max(bucket_start + 65 for bucket_start, _ in self._compiled_clusters)
+            if self._dim < min_required_dim:
+                raise ValueError(
+                    f"MockEmbeddingProvider configuration error: use_clusters=True requires dimension >= {min_required_dim} "
+                    f"to allocate all {len(self._compiled_clusters)} concept cluster buckets without truncation (configured dimension is {self._dim}). "
+                    f"Either set dimension >= {min_required_dim} (standard is 1024) or set use_clusters=False."
+                )
+
     @property
     def dimension(self) -> int:
         return self._dim
