@@ -42,14 +42,38 @@ variable "use_mock_bedrock" {
 }
 
 variable "embedding_provider" {
-  description = "Embedding provider for Lambda execution (default: mock for zero-cost serverless execution, or bedrock when configured)"
+  description = "Embedding provider for Lambda execution (default: local for benchmarked neural pipeline, or bedrock/mock when configured)"
   type        = string
-  default     = "mock"
+  default     = "local"
+}
+
+variable "embedding_dimension" {
+  description = "Embedding vector dimension matching active model (384 for BAAI/bge-small-en-v1.5, 1024 for Titan/Mock)"
+  type        = number
+  default     = 384
 }
 
 variable "lambda_layers" {
   description = "Optional list of Lambda Layer ARNs (e.g. AWS-managed NumPy/SciPy layer)"
   type        = list(string)
   default     = []
+}
+
+variable "lambda_package_type" {
+  description = "Lambda package type: 'Image' for sovereign container image (benchmarked neural pipeline), or 'Zip' for legacy zip payload"
+  type        = string
+  default     = "Image"
+}
+
+variable "lambda_image_uri" {
+  description = "ECR or local container image URI for the /ask Lambda function when package_type is 'Image'"
+  type        = string
+  default     = ""
+}
+
+variable "lambda_image_digest" {
+  description = "Pinned immutable SHA-256 digest of the ECR container image (e.g. sha256:...)"
+  type        = string
+  default     = ""
 }
 

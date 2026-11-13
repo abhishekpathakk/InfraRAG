@@ -581,6 +581,10 @@ dependencies = [
     { name = "pydantic" },
     { name = "pydantic-settings" },
     { name = "rich" },
+]
+
+[package.optional-dependencies]
+ui = [
     { name = "streamlit" },
 ]
 
@@ -601,8 +605,9 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.6.0" },
     { name = "pydantic-settings", specifier = ">=2.2.0" },
     { name = "rich", specifier = ">=13.7.0" },
-    { name = "streamlit", specifier = ">=1.66.1" },
+    { name = "streamlit", marker = "extra == 'ui'", specifier = ">=1.66.1" },
 ]
+provides-extras = ["ui"]
 
 [package.metadata.requires-dev]
 dev = [

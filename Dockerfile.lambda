@@ -1,0 +1,33 @@
+# AWS Lambda Container Image for InfraRAG /ask endpoint
+# Encapsulates the benchmarked Sovereign Local Neural Pipeline (BAAI/bge-small-en-v1.5)
+# with zero-idle-cost, in-RAM vector retrieval, and zero external runtime model downloads.
+
+FROM public.ecr.aws/lambda/python:3.12
+
+# 1. Set task directory
+WORKDIR ${LAMBDA_TASK_ROOT}
+
+# 2. Install dependencies strictly from lockfile with cryptographic hash verification
+COPY requirements.lock ${LAMBDA_TASK_ROOT}/requirements.lock
+RUN pip install --no-cache-dir --require-hashes -r requirements.lock
+
+# 3. Set persistent cache and runtime configuration paths
+ENV FASTEMBED_CACHE_PATH=${LAMBDA_TASK_ROOT}/.cache/fastembed \
+    INDEX_CACHE_PATH=${LAMBDA_TASK_ROOT}/index_cache/local_bge_small \
+    EMBEDDING_PROVIDER=local \
+    EMBEDDING_DIMENSION=384 \
+    USE_MOCK_BEDROCK=true
+
+# 4. Pre-download and strictly verify canonical FastEmbed ONNX weights during build time
+# BAAI/bge-small-en-v1.5 SHA256: 51f1bd0addd6e859e42c2c8021a5e5461385bb676a649f4b269aa445449f2431
+COPY scripts/verify_onnx.py /tmp/verify_onnx.py
+RUN python3 /tmp/verify_onnx.py && rm /tmp/verify_onnx.py
+
+# 5. Copy pre-indexed neural vectors (7,207 chunks, vectors.npy, chunks.json, bm25_index.json)
+COPY index_cache/local_bge_small ${LAMBDA_TASK_ROOT}/index_cache/local_bge_small
+
+# 6. Copy application source code
+COPY src ${LAMBDA_TASK_ROOT}/src
+
+# 7. Set handler entrypoint
+CMD [ "src.lambda_handlers.ask.handler" ]

@@ -225,25 +225,64 @@ resource "aws_lambda_function" "ingest" {
   depends_on = [aws_cloudwatch_log_group.ingest_logs]
 }
 
+# ---------------------------------------------------------------------------
+# Amazon ECR Repository for Sovereign Lambda Container Images
+# ---------------------------------------------------------------------------
+resource "aws_ecr_repository" "ask_repo" {
+  name                 = "${var.project_name}-ask"
+  image_tag_mutability = "IMMUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+
+resource "aws_ecr_lifecycle_policy" "ask_repo_lifecycle" {
+  repository = aws_ecr_repository.ask_repo.name
+
+  policy = jsonencode({
+    rules = [
+      {
+        rulePriority = 1
+        description  = "Keep last 3 container images to minimize storage cost"
+        selection = {
+          tagStatus   = "any"
+          countType   = "imageCountMoreThan"
+          countNumber = 3
+        }
+        action = {
+          type = "expire"
+        }
+      }
+    ]
+  })
+}
+
 resource "aws_lambda_function" "ask" {
-  function_name    = "${var.project_name}-ask"
-  role             = aws_iam_role.lambda_ask_exec.arn
-  handler          = "src.lambda_handlers.ask.handler"
-  runtime          = "python3.12"
-  filename         = "${path.module}/build/lambda_payload.zip"
-  source_code_hash = fileexists("${path.module}/build/lambda_payload.zip") ? filebase64sha256("${path.module}/build/lambda_payload.zip") : null
+  function_name = "${var.project_name}-ask"
+  role          = aws_iam_role.lambda_ask_exec.arn
+  package_type  = var.lambda_package_type
+  image_uri     = var.lambda_package_type == "Image" ? (var.lambda_image_digest != "" ? "${aws_ecr_repository.ask_repo.repository_url}@${var.lambda_image_digest}" : (var.lambda_image_uri != "" ? var.lambda_image_uri : "${aws_ecr_repository.ask_repo.repository_url}:latest")) : null
+
+  handler          = var.lambda_package_type == "Zip" ? "src.lambda_handlers.ask.handler" : null
+  runtime          = var.lambda_package_type == "Zip" ? "python3.12" : null
+  filename         = var.lambda_package_type == "Zip" ? "${path.module}/build/lambda_payload.zip" : null
+  source_code_hash = var.lambda_package_type == "Zip" && fileexists("${path.module}/build/lambda_payload.zip") ? filebase64sha256("${path.module}/build/lambda_payload.zip") : null
+  layers           = var.lambda_package_type == "Zip" ? var.lambda_layers : null
   timeout          = 30
   memory_size      = 1024
-  layers           = var.lambda_layers
 
   environment {
     variables = {
       S3_BUCKET_NAME             = local.bucket_name
       EMBEDDING_PROVIDER         = var.embedding_provider
+      EMBEDDING_DIMENSION        = tostring(var.embedding_dimension)
       BEDROCK_EMBEDDING_MODEL_ID = var.embedding_model_id
       BEDROCK_LLM_MODEL_ID       = var.llm_model_id
       USE_MOCK_BEDROCK           = var.use_mock_bedrock
       INFRARAG_API_KEY           = var.infrarag_api_key
+      INDEX_CACHE_PATH           = "/var/task/index_cache/local_bge_small"
+      FASTEMBED_CACHE_PATH       = "/var/task/.cache/fastembed"
     }
   }
 
@@ -259,7 +298,7 @@ resource "aws_apigatewayv2_api" "http_api" {
 
   cors_configuration {
     allow_origins = ["*"]
-    allow_methods = ["POST", "OPTIONS"]
+    allow_methods = ["GET", "POST", "OPTIONS"]
     allow_headers = ["Content-Type", "Authorization", "x-api-key"]
   }
 }
@@ -296,4 +335,18 @@ resource "aws_lambda_permission" "apigw_ask" {
   function_name = aws_lambda_function.ask.function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.http_api.execution_arn}/*/*/ask"
+}
+
+resource "aws_apigatewayv2_route" "health_route" {
+  api_id    = aws_apigatewayv2_api.http_api.id
+  route_key = "GET /health"
+  target    = "integrations/${aws_apigatewayv2_integration.ask_integration.id}"
+}
+
+resource "aws_lambda_permission" "apigw_health" {
+  statement_id  = "AllowAPIGatewayInvokeHealth"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.ask.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.http_api.execution_arn}/*/*/health"
 }

@@ -46,6 +46,32 @@ def test_ask_handler_warm_cache_local():
                 assert body["metrics"]["retrieval_latency_ms"] < 2500.0  # Production latency SLA ceiling
 
 
+def test_ask_handler_local_neural_parity():
+    """Tests handler execution with the benchmarked Local FastEmbed neural pipeline."""
+    # Reset global cache
+    ask._CACHED_CHAIN = None
+    with patch.dict(
+        "os.environ",
+        {
+            "EMBEDDING_PROVIDER": "local",
+            "EMBEDDING_DIMENSION": "384",
+            "USE_MOCK_BEDROCK": "true",
+            "INDEX_CACHE_PATH": "index_cache/local_bge_small",
+        },
+    ):
+        event = {
+            "rawPath": "/ask",
+            "body": json.dumps({"question": "What causes container Exit Code 137 and OOMKilled termination?"}),
+        }
+        res = ask.handler(event, None)
+        assert res["statusCode"] == 200
+        body = json.loads(res["body"])
+        assert "Exit Code 137" in body["answer"] or "OOMKilled" in body["answer"]
+        assert len(body["citations"]) >= 1
+        assert any(c["source_file"] in ("kubernetes_crashloopbackoff.md", "kubernetes_oom_killed.md") for c in body["citations"])
+        assert body["metrics"]["retrieval_latency_ms"] < 2500.0
+
+
 def test_ask_handler_auth_and_validation():
     """Tests API key authentication and input validation in ask handler."""
     with patch.dict("os.environ", {"INFRARAG_API_KEY": "secret-123"}):
@@ -94,4 +120,36 @@ def test_ask_handler_fail_closed_auth():
         # Even with no INFRARAG_API_KEY set, it must reject requests (fail-closed)
         res = ask.handler({"body": json.dumps({"question": "test"})}, None)
         assert res["statusCode"] == 401
+
+
+def test_ask_handler_health_check():
+    """Tests that /health route returns provider, model SHA-256, dimension, and threshold."""
+    ask._CACHED_CHAIN = None
+    with patch.dict(
+        "os.environ",
+        {
+            "EMBEDDING_PROVIDER": "local",
+            "EMBEDDING_DIMENSION": "384",
+            "USE_MOCK_BEDROCK": "true",
+            "REQUIRE_API_KEY": "true",  # Health route must remain accessible even when auth is strictly required
+            "INDEX_CACHE_PATH": "index_cache/local_bge_small",
+        },
+    ):
+        # 1. Direct path /health
+        res = ask.handler({"rawPath": "/health"}, None)
+        assert res["statusCode"] == 200
+        body = json.loads(res["body"])
+        assert body["status"] == "healthy"
+        assert body["provider"] == "LocalFastEmbedProvider"
+        assert body["model_sha256"] == "51f1bd0addd6e859e42c2c8021a5e5461385bb676a649f4b269aa445449f2431"
+        assert body["dimension"] == 384
+        assert body["threshold"] == 0.25
+        assert body["chunks_count"] == 7207
+
+        # 2. RouteKey GET /health
+        res2 = ask.handler({"routeKey": "GET /health"}, None)
+        assert res2["statusCode"] == 200
+        body2 = json.loads(res2["body"])
+        assert body2["status"] == "healthy"
+
 

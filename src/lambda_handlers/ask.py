@@ -25,49 +25,121 @@ ALLOWED_TYPES = {"internal", "public"}
 _CACHED_CHAIN: RAGChain | None = None
 
 
+def get_expected_model_id() -> str:
+    """Returns expected model ID for vector index verification based on active provider."""
+    provider_type = os.getenv("EMBEDDING_PROVIDER", getattr(settings, "EMBEDDING_PROVIDER", "local")).lower()
+    if provider_type in ("local", "fastembed"):
+        return os.getenv(
+            "EXPECTED_EMBEDDING_MODEL_ID",
+            "fastembed:BAAI/bge-small-en-v1.5@5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+        )
+    if provider_type == "mock" or os.getenv("USE_MOCK_BEDROCK", "").lower() in ("true", "1", "yes"):
+        return os.getenv("EXPECTED_EMBEDDING_MODEL_ID", "mock")
+    return os.getenv(
+        "EXPECTED_EMBEDDING_MODEL_ID",
+        getattr(settings, "BEDROCK_EMBEDDING_MODEL_ID", "amazon.titan-embed-text-v2:0"),
+    )
+
+
 def get_cached_chain() -> RAGChain:
     global _CACHED_CHAIN
     if _CACHED_CHAIN is not None and _CACHED_CHAIN.vector_store.chunks:
         return _CACHED_CHAIN
 
     chain = RAGChain()
-    tmp_path = Path("/tmp/faiss_index")  # nosec B108
+    expected_model = get_expected_model_id()
     bucket_name = os.environ.get("S3_BUCKET_NAME", settings.S3_BUCKET_NAME)
 
-    expected_model = settings.BEDROCK_EMBEDDING_MODEL_ID if not settings.USE_MOCK_BEDROCK else "mock"
+    # 1. Resolve candidate directories in priority order:
+    # Environment override -> Bundled container path -> Local workspace path -> /tmp scratch
+    candidate_dirs: list[Path] = []
+    if os.environ.get("INDEX_CACHE_PATH"):
+        candidate_dirs.append(Path(os.environ["INDEX_CACHE_PATH"]))
 
-    # If warm cache in /tmp exists, load it
-    if (tmp_path / "chunks.json").exists():
-        chain.vector_store.load_local(tmp_path, expected_model_id=expected_model)
-    elif settings.CACHE_DIR and (settings.CACHE_DIR / "chunks.json").exists():
-        chain.vector_store.load_local(settings.CACHE_DIR, expected_model_id=expected_model)
-    elif not settings.USE_MOCK_BEDROCK and bucket_name:
-        # Download from S3 into persistent /tmp cache for warm-start reuse
-        import boto3
-        s3 = boto3.client("s3", region_name=settings.AWS_REGION)
-        chain.vector_store.load_from_s3(
-            s3_client=s3,
-            bucket=bucket_name,
-            prefix="faiss_index",
-            expected_model_id=expected_model,
-            target_dir=tmp_path,
+    candidate_dirs.append(Path("/var/task/index_cache/local_bge_small"))
+    candidate_dirs.append(Path("/var/task/index_cache"))
+
+    if hasattr(settings, "CACHE_DIR") and settings.CACHE_DIR:
+        candidate_dirs.append(settings.CACHE_DIR / "local_bge_small")
+        candidate_dirs.append(settings.CACHE_DIR)
+
+    tmp_path = Path("/tmp/faiss_index")  # nosec B108
+    candidate_dirs.append(tmp_path)
+
+    loaded = False
+    for c_dir in candidate_dirs:
+        if (c_dir / "chunks.json").exists():
+            try:
+                chain.vector_store.load_local(c_dir, expected_model_id=expected_model)
+                logger.info(f"Loaded vector store from {c_dir} with {len(chain.vector_store.chunks)} chunks.")
+                loaded = True
+                break
+            except Exception as e:
+                logger.warning(f"Could not load index from candidate {c_dir}: {e}")
+
+    # 2. Fall back to S3 download if local candidate directories not found
+    if not loaded and not settings.USE_MOCK_BEDROCK and bucket_name:
+        try:
+            import boto3
+            s3 = boto3.client("s3", region_name=settings.AWS_REGION)
+            chain.vector_store.load_from_s3(
+                s3_client=s3,
+                bucket=bucket_name,
+                prefix="faiss_index",
+                expected_model_id=expected_model,
+                target_dir=tmp_path,
+            )
+            loaded = True
+        except Exception as e:
+            logger.error(f"Failed to load vector store from S3: {e}")
+
+    # 3. Fail fast if no index could be loaded from pre-baked container paths, /tmp, or S3
+    if not loaded:
+        logger.warning(
+            "Vector index not found in pre-baked candidate paths, /tmp scratch, or S3. "
+            "Returning unpopulated chain (handler will fail fast with 503)."
         )
-    else:
-        # Decouple query path: if running in Lambda container, fail fast instead of multi-minute ingestion
-        if os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
-            logger.error("Vector index missing in /tmp, cache dir, and S3. Cold-start ingestion aborted.")
-            return chain
-
-        # Ingest local runbooks on cold start in local development environment
-        chain.ingest_directory(settings.DATA_DIR)
-        chain.vector_store.save_local(tmp_path, embedding_model_id=expected_model)
+        return chain
 
     _CACHED_CHAIN = chain
     return _CACHED_CHAIN
 
 
 def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
-    logger.info(f"Received query event: {event.get('rawPath', '')}")
+    raw_path = event.get("rawPath") or event.get("path") or ""
+    route_key = event.get("routeKey") or ""
+    logger.info(f"Received query event: rawPath={raw_path}, routeKey={route_key}")
+
+    # Health check probe (exempt from API key auth for ALB/monitoring probes)
+    if raw_path == "/health" or route_key == "GET /health" or event.get("action") == "health" or event.get("health") is True:
+        try:
+            chain = get_cached_chain()
+            emb = chain.embedding_provider
+            provider_name = type(emb).__name__
+            model_sha256 = getattr(emb, "onnx_sha256", "N/A")
+            dimension = emb.dimension
+            threshold = getattr(chain, "min_relevance_threshold", getattr(settings, "MIN_RELEVANCE_THRESHOLD", 0.0))
+            chunks_count = len(chain.vector_store.chunks) if chain.vector_store and chain.vector_store.chunks else 0
+
+            return {
+                "statusCode": 200,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({
+                    "status": "healthy" if chunks_count > 0 else "degraded",
+                    "provider": provider_name,
+                    "model_sha256": model_sha256,
+                    "dimension": dimension,
+                    "threshold": threshold,
+                    "chunks_count": chunks_count,
+                }),
+            }
+        except Exception as e:
+            logger.error(f"Health check probe failed: {e}", exc_info=True)
+            return {
+                "statusCode": 500,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({"status": "unhealthy", "error": str(e)}),
+            }
 
     try:
         # 1. API Key Authentication (fail-closed if expected key or REQUIRE_API_KEY is configured)

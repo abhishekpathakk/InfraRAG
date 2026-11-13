@@ -19,7 +19,8 @@ env/
 *.index
 *.faiss
 *.pkl
-index_cache/
+index_cache/*
+!index_cache/local_bge_small/
 faiss_index/
 data/cache/
 
