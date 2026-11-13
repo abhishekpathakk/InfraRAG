@@ -134,7 +134,7 @@ jobs:
         run: mkdir -p reports
 
       - name: Run Trivy Vulnerability Scanner (JSON Report)
-        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5 # v0.30.0
+        uses: aquasecurity/trivy-action@8f28faec26515256b6d22074d1d2a8986f4cbd87
         with:
           scan-type: 'fs'
           format: 'json'
@@ -143,21 +143,21 @@ jobs:
           ignore-unfixed: true
 
       - name: Generate CycloneDX SBOM
-        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5 # v0.30.0
+        uses: aquasecurity/trivy-action@8f28faec26515256b6d22074d1d2a8986f4cbd87
         with:
           scan-type: 'fs'
           format: 'cyclonedx'
           output: 'reports/sbom.cyclonedx.json'
 
       - name: Run Trivy Secret Scanner
-        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5 # v0.30.0
+        uses: aquasecurity/trivy-action@8f28faec26515256b6d22074d1d2a8986f4cbd87
         with:
           scan-type: 'fs'
           scanners: 'secret'
           format: 'table'
 
       - name: Run Trivy Terraform Misconfiguration Scan
-        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5 # v0.30.0
+        uses: aquasecurity/trivy-action@8f28faec26515256b6d22074d1d2a8986f4cbd87
         with:
           scan-type: 'config'
           scan-ref: 'terraform/'

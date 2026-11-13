@@ -1510,7 +1510,7 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
      - `actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830` (# v4.2.3)
      - `actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02` (# v4.6.2)
      - `actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093` (# v4.3.1)
-     - `aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5` (# v0.30.0)
+     - `aquasecurity/trivy-action@8f28faec26515256b6d22074d1d2a8986f4cbd87`
      - `SonarSource/sonarqube-scan-action@2f77a1ec69fb1d595b06f35ab27e97605bdef703` (# v5.0.0)
      - `hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd` (# v3.1.2)
 4. **Context on Security & Reporting Scanners**:
