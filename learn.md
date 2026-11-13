@@ -1712,3 +1712,48 @@ GitHub Actions CI Run [40473494328](https://github.com/abhishekpathakk/InfraRAG/
 - **Deployed Parity Delta**: $\Delta = 0.000$ across all held-out suites (v2, v3, v4) for Top-1, Top-5, and MRR.
 - **Measured Cold Start**: Init Duration = 2,409.41 ms (Lambda container); First-Query Round-Trip = 269.3 ms.
 - **Measured Cloud Costs**: $0.00/mo (within 12-month Free Tier: 359.5 MB ECR <= 500 MB; 1,000 GB-s Lambda <= 400,000 GB-s; 10k req API GW <= 1M req).
+
+
+---
+
+## Phase 25: Citation Path Sanitization, Host Filesystem Leak Prevention, and Production Re-Deployment
+
+### 1. What Was Done
+1. **Identified Host Information Leak Vulnerability**:
+   - The deployed AWS Lambda API in `ap-south-1` was leaking local developer workstation paths in the `"path"` field of JSON citation payloads: `"/Users/abhishekpathak/Desktop/Abhishek/Repos/RAG/data/internal/kubernetes_crashloopbackoff.md"`.
+   - This exposed the developer's macOS username, machine directory topology, and violated the path portability invariant.
+2. **Applied Defense-in-Depth Path Sanitization**:
+   - In [`src/chunker.py`](src/chunker.py): Relativized `path_str` at chunk generation time to always strip host prefixes and prefix with `data/`.
+   - In [`src/generator.py`](src/generator.py): Added `sanitize_citation_path` normalizing any citation path into clean `data/<relative_path>` format.
+   - In [`src/models.py`](src/models.py): Added a `@field_validator("path", mode="before")` on `Citation` (and `__post_init__` on dataclass fallback) ensuring that any absolute path containing `data/` is strictly stripped.
+   - In `index_cache/local_bge_small/chunks.json`: Sanitized all 14,414 instances of the local workstation path prefix to `data/`.
+3. **Automated Unit Test Verification**:
+   - Added unit test `test_citation_path_sanitization_prevents_host_leak` in [`tests/test_chain.py`](tests/test_chain.py) asserting that citation paths are normalized and never contain `/Users/`.
+   - 38/38 pytest tests passing cleanly.
+4. **Deployed to AWS Production & Verified Live Output**:
+   - Pushed new image with sanitized assets to Amazon ECR.
+   - Updated Lambda function `infrarag-ask` to the platform manifest digest `sha256:0ac7d74ce405701fd7001b7c1e759e3d3d43d6489f4724e33a660ed755ddbad4`.
+   - Verified via live HTTPS request: `"path"` is now cleanly returned as `"data/internal/kubernetes_crashloopbackoff.md"`.
+
+---
+
+### 2. Plain-Language Concepts & One-Line Analogies
+- **Corpus-Relative Path Canonicalization**:
+  Stripping workstation-specific path prefixes at the ingestion and serialization boundaries so that data artifacts reference internal repository roots rather than developer disks.
+  - *One-line analogy:* Printing "Aisle 4, Shelf B" on a library book slip instead of writing down the home address of the truck driver who delivered the box.
+
+---
+
+### 3. Issues Faced & Autonomous Fixes Applied
+| Issue / Friction Point | Root Cause | Fix Applied | Autonomous Prevention Rule |
+| :--- | :--- | :--- | :--- |
+| **Workstation Path Leak in Cloud API** | `Path.resolve()` was serialized during offline vector store building, preserving local laptop paths. | Implemented three-tier path sanitization in `chunker.py`, `generator.py`, and `models.py`. Sanitized committed `chunks.json`. | Never persist absolute workstation paths in pre-baked index metadata or API response schemas. |
+| **Lambda 400 on Multi-Arch OCI Image Index** | Docker Buildx pushed an OCI image index (`index.v1+json`) containing SBOM attestations; Lambda UpdateFunctionCode only accepts platform manifests. | Pinned Lambda to the specific Linux/AMD64 platform manifest digest (`sha256:0ac7d74c...`). | In serverless container environments, bind Lambda directly to the platform image manifest, bypassing OCI attestation wrapper indexes. |
+
+---
+
+### 4. Measurable Achievements
+- **Host Path Leak**: 0 occurrences of `/Users/` anywhere in `chunks.json` or API responses (down from 14,414).
+- **Test Suite**: 38/38 tests passing (`uv run pytest tests/`).
+- **Live Query Latency**: 67.05 ms round-trip on API Gateway.
+- **Citation Path Format**: Canonical corpus-relative (`data/internal/kubernetes_crashloopbackoff.md`).
