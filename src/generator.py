@@ -34,6 +34,18 @@ CRITICAL OPERATIONAL RULES:
 """
 
 
+def sanitize_citation_path(raw_path: str, source_file: str = "") -> str:
+    """Normalizes citation paths to corpus-relative format (data/...), stripping host/build directories."""
+    if not raw_path:
+        return f"data/{source_file}" if source_file else ""
+    str_p = str(raw_path)
+    if "data/" in str_p:
+        return "data/" + str_p.split("data/", 1)[1]
+    from pathlib import Path
+
+    return f"data/{Path(str_p).name}"
+
+
 def parse_citations_from_answer(
     answer: str,
     chunks: list[tuple[DocumentChunk, float]],
@@ -63,7 +75,7 @@ def parse_citations_from_answer(
                     chunk_id=c.chunk_id,
                     relevance_score=score,
                     source=getattr(c, "source", "internal"),
-                    path=getattr(c, "path", ""),
+                    path=sanitize_citation_path(getattr(c, "path", ""), c.source_file),
                     type=getattr(c, "type", "internal"),
                 )
             )

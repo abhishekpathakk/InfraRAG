@@ -40,3 +40,18 @@ def test_rag_chain_ungrounded_fallback():
     # Test an out-of-domain question that is not in any runbook
     response = chain.answer_question("What is the recipe to bake a chocolate cake?")
     assert "I don't know based on the provided runbooks." in response.answer
+
+
+def test_citation_path_sanitization_prevents_host_leak():
+    """Verify that citations never leak absolute host paths and are normalized to data/."""
+    from src.models import Citation
+
+    # Raw host absolute path
+    c = Citation(
+        source_file="kubernetes_oom_killed.md",
+        section_title="Exit Code 137",
+        chunk_id="oom-c0",
+        path="/Users/developer/Desktop/secret_workstation/data/internal/kubernetes_oom_killed.md",
+    )
+    assert c.path == "data/internal/kubernetes_oom_killed.md"
+    assert "/Users/" not in c.path

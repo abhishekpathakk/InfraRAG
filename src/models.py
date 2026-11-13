@@ -7,7 +7,7 @@ for lightweight AWS Lambda execution environments.
 from typing import Any
 
 try:
-    from pydantic import BaseModel, Field
+    from pydantic import BaseModel, Field, field_validator
 
     class DocumentChunk(BaseModel):
         chunk_id: str
@@ -28,6 +28,16 @@ try:
         source: str = "internal"
         path: str = ""
         type: str = "internal"
+
+        @field_validator("path", mode="before")
+        @classmethod
+        def sanitize_path(cls, v: Any) -> str:
+            if not v:
+                return ""
+            s = str(v)
+            if "data/" in s:
+                return "data/" + s.split("data/", 1)[1]
+            return s
 
     class RAGResponse(BaseModel):
         query: str
@@ -69,6 +79,10 @@ except ImportError:
         source: str = "internal"
         path: str = ""
         type: str = "internal"
+
+        def __post_init__(self) -> None:
+            if self.path and "data/" in str(self.path):
+                self.path = "data/" + str(self.path).split("data/", 1)[1]
 
         def model_dump(self) -> dict[str, Any]:
             return dataclasses.asdict(self)

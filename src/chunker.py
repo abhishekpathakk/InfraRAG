@@ -49,7 +49,12 @@ class MarkdownChunker:
         if not path.exists():
             raise FileNotFoundError(f"Runbook file not found: {file_path}")
 
-        path_str = str(path)
+        # Relativize path to ensure corpus portability and avoid host filesystem leaks
+        str_p = str(path)
+        if "data/" in str_p:
+            path_str = "data/" + str_p.split("data/", 1)[1]
+        else:
+            path_str = f"data/{path.name}"
         if doc_type is None:
             doc_type = "public" if "public" in path_str else "internal"
 
