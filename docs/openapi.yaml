@@ -14,7 +14,7 @@ servers:
         default: infrarag-api
       region:
         default: ap-south-1
-  - url: http://localhost:8000
+  - url: http://localhost:8000 #ignoretest
     description: Local Offline Development Server (100% Free Mock Bedrock)
 
 paths:
